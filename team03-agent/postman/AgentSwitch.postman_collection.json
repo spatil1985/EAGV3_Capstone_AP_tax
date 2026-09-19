@@ -1,0 +1,494 @@
+{
+  "info": {
+    "_postman_id": "1b0308b6-a349-4253-a5bb-60222313d65e",
+    "name": "AgentSwitch - Team 03 (AP & Tax)",
+    "description": "REST + MCP calls for the AgentSwitch Payables & Tax seat (Team 03). Safe to commit: this collection only references {{variables}} -- real credentials live in a separate, gitignored Postman Environment (see postman/AgentSwitch.postman_environment.example.json for the template, and README.md for setup). Import an environment (Suryodaya = India, Keystone = US), run 'Login' first to populate {{token}}, then everything else authenticates automatically via the collection-level Bearer auth.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://agentswitch.theschoolofai.in", "type": "string", "description": "Suryodaya (India) by default; set to https://class.agentswitch.theschoolofai.in for Keystone (US)." },
+    { "key": "email", "value": "", "type": "string" },
+    { "key": "password", "value": "", "type": "string" },
+    { "key": "token", "value": "", "type": "string", "description": "Populated automatically by the Login request's test script." },
+    { "key": "tool_name", "value": "Invoice.list", "type": "string", "description": "Used by the generic 'Tools Call (generic)' request." },
+    { "key": "tool_arguments", "value": "{}", "type": "string", "description": "JSON-encoded arguments for the generic tools/call request." }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "POST /api/auth/login -> {\"token\": \"...\"}. Run this first; the test script below saves the token into {{token}} for every other request in this collection."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login succeeded (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "let json;",
+                  "pm.test(\"Response is valid JSON\", function () {",
+                  "    json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"object\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains a token\", function () {",
+                  "    pm.expect(json.token).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "if (json && json.token) {",
+                  "    pm.environment.set(\"token\", json.token);",
+                  "    console.log(\"Saved token to environment variable 'token'\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Whoami",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "GET /api/auth/me with the Bearer token -- confirms the API is reachable and the token identifies the expected account."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Whoami succeeds (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Email matches the logged-in account\", function () {",
+                  "    pm.expect(json.email).to.eql(pm.environment.get(\"email\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unauthenticated request is rejected (control test)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Same endpoint as Whoami but with no Authorization header. Proves the API actually enforces auth rather than every endpoint just happening to return 200."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Unauthenticated request is rejected (401)\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REST API",
+      "item": [
+        {
+          "name": "Get Accounting Locale",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/accounting/locale",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounting", "locale"]
+            },
+            "description": "SKILL.md's 'Dynamic Locale' rule: the agent must inspect this before assuming GST vs. Sales Tax."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Locale endpoint reachable (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get API Schemas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/schemas",
+              "host": ["{{base_url}}"],
+              "path": ["api", "schemas"]
+            },
+            "description": "Week 1 Milestone 2 in the brief: review /api/schemas to see the closed JSON schema for tool arguments before writing playbooks against them."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Schemas endpoint reachable (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "File Bug Report (TEMPLATE - confirm shape in /api/schemas first)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"REPLACE_ME: short bug title\",\n  \"job_id\": \"REPLACE_ME\",\n  \"entity_ids\": [\"REPLACE_ME\"],\n  \"expected\": \"REPLACE_ME: what should have happened\",\n  \"actual\": \"REPLACE_ME: what actually happened\",\n  \"steps\": [\"REPLACE_ME: step 1\", \"REPLACE_ME: step 2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bug-report",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bug-report"]
+            },
+            "description": "Week 4 Milestone 2: 100 points per verified platform bug, filed with reproducible steps, expected vs. actual, job ID, and entity IDs. The exact field names here are a best guess from the brief's bug-bar description -- confirm against /api/schemas or the /docs page before relying on this, and don't send it as-is."
+          },
+          "event": []
+        }
+      ]
+    },
+    {
+      "name": "MCP",
+      "description": "JSON-RPC 2.0 over POST {{base_url}}/api/mcp. Protocol version 2025-11-25. No SSE stream (GET answers 405) and no batching.",
+      "item": [
+        {
+          "name": "GET /api/mcp (expect 405, no stream)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/mcp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mcp"]
+            },
+            "description": "The spec's way of saying there is no SSE stream here -- should always 405 with an Allow: POST header."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/mcp is 405\", function () {",
+                  "    pm.response.to.have.status(405);",
+                  "});",
+                  "",
+                  "pm.test(\"Allow header mentions POST\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Allow\") || \"\").to.include(\"POST\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "initialize",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2025-11-25\",\n    \"capabilities\": {},\n    \"clientInfo\": { \"name\": \"team03-postman\", \"version\": \"0.1\" }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mcp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mcp"]
+            },
+            "description": "MCP handshake step 1. Must be called before tools/list or tools/call."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Initialize succeeds (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test(\"jsonrpc 2.0 envelope, no error\", function () {",
+                  "    pm.expect(json.jsonrpc).to.eql(\"2.0\");",
+                  "    pm.expect(json.error).to.be.undefined;",
+                  "});",
+                  "",
+                  "pm.test(\"Protocol version echoed back\", function () {",
+                  "    pm.expect(json.result.protocolVersion).to.eql(\"2025-11-25\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "notifications/initialized",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\",\n  \"params\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mcp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mcp"]
+            },
+            "description": "MCP handshake step 2. This is a notification (no 'id'), so no response body is expected -- run it after initialize and before tools/list."
+          },
+          "event": []
+        },
+        {
+          "name": "tools/list",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\",\n  \"params\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mcp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mcp"]
+            },
+            "description": "Discovers this seat's closed tool schema. For Seat 03 this should be limited to Invoice/Payment/TaxLine/Vendor/JournalEntry and must never include SalarySlip/Contract/EsignDocument."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"tools/list succeeds (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const tools = (json.result && json.result.tools) || [];",
+                  "",
+                  "pm.test(\"Returns a non-empty tool list\", function () {",
+                  "    pm.expect(tools).to.be.an(\"array\").that.is.not.empty;",
+                  "});",
+                  "",
+                  "const names = tools.map(function (t) { return t.name; });",
+                  "const allowedPrefixes = [\"Invoice.\", \"Payment.\", \"TaxLine.\", \"Vendor.\", \"JournalEntry.\"];",
+                  "const prohibitedPrefixes = [\"SalarySlip.\", \"Contract.\", \"EsignDocument.\"];",
+                  "",
+                  "pm.test(\"Exposes at least one Seat 03 allowed entity\", function () {",
+                  "    pm.expect(names.some(function (n) { return allowedPrefixes.some(function (p) { return n.startsWith(p); }); })).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Does not expose any prohibited entity\", function () {",
+                  "    pm.expect(names.some(function (n) { return prohibitedPrefixes.some(function (p) { return n.startsWith(p); }); })).to.be.false;",
+                  "});",
+                  "",
+                  "pm.environment.set(\"last_tools_list\", JSON.stringify(names));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "tools/call (generic, uses {{tool_name}} + {{tool_arguments}})",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {{tool_arguments}}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mcp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mcp"]
+            },
+            "description": "Reusable template: set the {{tool_name}} and {{tool_arguments}} (JSON-encoded string) collection variables and send. Defaults to Invoice.list with no arguments, which is read-only and safe against the shared ledger."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"tools/call succeeds (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test(\"No JSON-RPC error\", function () {",
+                  "    pm.expect(json.error).to.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Examples (read-only, safe against shared ledger)",
+          "item": [
+            {
+              "name": "Invoice.list",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 10,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"Invoice.list\",\n    \"arguments\": { \"status\": [\"unpaid\", \"paid\"] }\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "Step 1 of the duplicate-payment playbook (playbooks/duplicate_audit.md)."
+              },
+              "event": []
+            },
+            {
+              "name": "Invoice.get",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 11,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"Invoice.get\",\n    \"arguments\": { \"id\": \"REPLACE_ME\" }\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "Fetch a single invoice by id -- replace REPLACE_ME with a real id from Invoice.list."
+              },
+              "event": []
+            },
+            {
+              "name": "TaxLine.list",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 12,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"TaxLine.list\",\n    \"arguments\": {}\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "Feeds playbooks/tax_audit.md -> scripts/tax_math.py::compute_tax_reconciliation."
+              },
+              "event": []
+            },
+            {
+              "name": "Vendor.list",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 13,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"Vendor.list\",\n    \"arguments\": {}\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "List vendors for duplicate-payment grouping by vendor_id."
+              },
+              "event": []
+            }
+          ]
+        },
+        {
+          "name": "Examples (WRITES to the shared ledger -- edit REPLACE_ME first, disabled)",
+          "item": [
+            {
+              "name": "Invoice.update (hold suspected duplicate)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 20,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"Invoice.update\",\n    \"arguments\": {\n      \"id\": \"REPLACE_ME\",\n      \"status\": \"under_review\",\n      \"hold_payment\": true\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "WARNING: mutates a real row in the ledger shared with Teams 01 and 02. Per playbooks/duplicate_audit.md step 4 -- only ever holds/flags, never cancels or force-pays. Replace REPLACE_ME with a real invoice id before sending."
+              },
+              "event": []
+            },
+            {
+              "name": "AgentMessage.create (audit note)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 21,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"AgentMessage.create\",\n    \"arguments\": {\n      \"related_id\": \"REPLACE_ME\",\n      \"message\": \"REPLACE_ME: audit note text\"\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/mcp", "host": ["{{base_url}}"], "path": ["api", "mcp"] },
+                "description": "Per playbooks/duplicate_audit.md step 4: record an audit message alongside any hold action."
+              },
+              "event": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

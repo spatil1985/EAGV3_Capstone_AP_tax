@@ -114,9 +114,23 @@ team03-agent/
 │   └── test_mcp_connectivity.py    # MCP handshake, tools/list scope check
 ├── requirements.txt
 ├── .env.example                    # Template for local credentials (gitignored .env)
+├── postman/                        # Postman collection covering every REST + MCP
+│   │                                # call (see postman/README.md); real creds live
+│   │                                # only in gitignored *.postman_environment.json
+│   ├── AgentSwitch.postman_collection.json
+│   ├── AgentSwitch.postman_environment.example.json
+│   └── README.md
 └── DESIGN.md                       # Loop architecture, shared-ledger state
                                      # tolerance, refusal handling, known limitations
 ```
+
+## Postman
+
+`team03-agent/postman/` has a full collection (login, whoami, locale, schemas,
+bug-report template, and the complete MCP handshake with read/write tool-call
+examples). The collection file itself has no secrets in it; real credentials live
+in a Postman Environment file that's gitignored. See `team03-agent/postman/README.md`
+for import/setup steps.
 
 ## Running tests
 

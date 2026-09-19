@@ -4,3 +4,8 @@ __pycache__/
 .venv/
 venv/
 .env
+
+# Real Postman environments hold plaintext credentials -- never commit these.
+# The .example.json template (blank values) is intentionally NOT matched here.
+*.postman_environment.json
+!*.postman_environment.example.json
