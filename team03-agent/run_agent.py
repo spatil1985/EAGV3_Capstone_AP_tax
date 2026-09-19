@@ -3,43 +3,24 @@
 No third-party agent frameworks (LangChain, CrewAI, AutoGen) are permitted per
 the capstone rules. This is a minimal hand-rolled loop:
 
-  1. Load SKILL.md as the system prompt.
-  2. Discover tools via MCP `tools/list`.
-  3. Loop: call the LLM, execute any requested tool via MCP `tools/call`,
+  1. Log in (POST /api/auth/login) to get a Bearer token.
+  2. Load SKILL.md as the system prompt.
+  3. Discover tools via MCP `tools/list`.
+  4. Loop: call the LLM, execute any requested tool via MCP `tools/call`,
      feed results back, repeat until the LLM returns a final answer.
 
-MCP endpoint: POST {AGENTSWITCH_BASE_URL}/api/mcp
+Auth and MCP transport live in `scripts/agentswitch_client.py`, shared with
+the live connectivity tests in `tests/integration/`.
+
+Credentials come from the environment -- never hardcode them here:
+  AGENTSWITCH_BASE_URL  (default: Suryodaya; set to the Keystone URL for US)
+  AGENTSWITCH_EMAIL
+  AGENTSWITCH_PASSWORD
 """
 
 import json
-import os
 
-import requests
-
-MCP_PROTOCOL_VERSION = "2025-11-25"
-AGENTSWITCH_BASE_URL = os.environ.get("AGENTSWITCH_BASE_URL", "https://agentswitch.theschoolofai.in")
-MCP_URL = f"{AGENTSWITCH_BASE_URL}/api/mcp"
-
-
-def _rpc(session: requests.Session, method: str, params: dict | None = None, request_id: int = 1) -> dict:
-    payload = {"jsonrpc": "2.0", "id": request_id, "method": method, "params": params or {}}
-    response = session.post(MCP_URL, json=payload, timeout=30)
-    response.raise_for_status()
-    return response.json()
-
-
-def mcp_initialize(session: requests.Session) -> dict:
-    return _rpc(session, "initialize", {"protocolVersion": MCP_PROTOCOL_VERSION})
-
-
-def get_mcp_tools(session: requests.Session) -> list:
-    result = _rpc(session, "tools/list")
-    return result.get("result", {}).get("tools", [])
-
-
-def execute_mcp_call(session: requests.Session, tool_name: str, tool_args: dict) -> dict:
-    result = _rpc(session, "tools/call", {"name": tool_name, "arguments": tool_args})
-    return result.get("result", {})
+from scripts.agentswitch_client import AgentSwitchClient
 
 
 def call_llm(messages: list, tools: list):
@@ -47,10 +28,11 @@ def call_llm(messages: list, tools: list):
     raise NotImplementedError("Wire up an LLM client (e.g. Anthropic SDK) here.")
 
 
-def run_agent_loop(user_query: str, session: requests.Session | None = None):
-    session = session or requests.Session()
-    mcp_initialize(session)
-    tools = get_mcp_tools(session)
+def run_agent_loop(user_query: str, client: AgentSwitchClient | None = None):
+    client = client or AgentSwitchClient.from_env()
+    client.mcp_initialize()
+    client.mcp_notify_initialized()
+    tools = client.mcp_tools_list()
 
     messages = [
         {"role": "system", "content": open("SKILL.md").read()},
@@ -62,10 +44,7 @@ def run_agent_loop(user_query: str, session: requests.Session | None = None):
 
         if response.get("tool_calls"):
             for tool_call in response["tool_calls"]:
-                tool_name = tool_call["name"]
-                tool_args = tool_call["arguments"]
-
-                result = execute_mcp_call(session, tool_name, tool_args)
+                result = client.mcp_tools_call(tool_call["name"], tool_call["arguments"])
 
                 messages.append(
                     {
