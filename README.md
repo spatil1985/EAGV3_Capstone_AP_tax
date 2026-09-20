@@ -120,8 +120,12 @@ team03-agent/
 │   ├── AgentSwitch.postman_collection.json
 │   ├── AgentSwitch.postman_environment.example.json
 │   └── README.md
-└── DESIGN.md                       # Loop architecture, shared-ledger state
-                                     # tolerance, refusal handling, known limitations
+├── DESIGN.md                       # Loop architecture, shared-ledger state
+│                                    # tolerance, refusal handling, known limitations
+└── CURRENT_STATUS.md               # Ground truth from real API/MCP calls against
+                                     # Suryodaya: real entity model, real tool list,
+                                     # real data volumes, and where SKILL.md/
+                                     # playbooks/postman need correcting as a result
 ```
 
 ## Postman
@@ -145,23 +149,39 @@ pytest tests/integration -v         # live connectivity checks; needs AGENTSWITC
 ## Status / what's done vs. outstanding
 
 Done:
-- `SKILL.md` charter, both playbooks, `tax_math.py`, `invoice_matcher.py`.
+- `SKILL.md` charter, both playbooks, `tax_math.py`, `invoice_matcher.py` — **but
+  see `CURRENT_STATUS.md`: these were written against the brief's illustrative
+  example, and real API calls against Suryodaya show the actual entity model,
+  permissions, and MCP tool names differ in several important ways (no `TaxLine`/
+  `Vendor` entities, no `hold_payment` field, `AgentMessage.create` doesn't exist,
+  etc.). Not yet corrected.**
 - Graded hand-written unit tests for duplicate detection and GST/ITC math (9
   passing, no network needed).
 - `agentswitch_client.py` + live integration tests for both the REST API and MCP
   handshake — verified passing against the real Suryodaya instance.
+- Full read-only exploration of the real API/MCP surface against Suryodaya
+  (`CURRENT_STATUS.md`): real entity model, full 436-tool MCP inventory, real
+  `BugReport.create` schema, live record counts, and the platform's own documented
+  list of known gaps (with ticket ids) for the gap report / bug-hunting strategy.
 
-Outstanding (see `DESIGN.md` and the Week-by-Week roadmap in the brief):
+Outstanding (see `DESIGN.md`, `CURRENT_STATUS.md` §7, and the Week-by-Week roadmap
+in the brief):
+- Apply the corrections in `CURRENT_STATUS.md` §7 to `SKILL.md`, both playbooks,
+  `scripts/*.py`, and `postman/AgentSwitch.postman_collection.json`.
 - `run_agent.py::call_llm` is a stub — no LLM provider is wired up yet, so the
   agent loop doesn't actually run end-to-end against a real query yet.
 - Week 1 gap report (comparing AgentSwitch against a competitor like Rillet,
-  Vic.ai, Mysa, CashFlo, etc. — draft companies already gathered, report not
-  finalized as a deliverable).
+  Vic.ai, Mysa, CashFlo, etc. — draft companies already gathered, and
+  `CURRENT_STATUS.md` §2 now has the platform's own documented gap list to build
+  from; report not finalized as a deliverable).
 - Keystone (US) side untested — everything so far has only been verified against
   Suryodaya (India); locale-driven branching (GST vs. Sales Tax) isn't
   implemented yet.
 - Refusal/boundary tests (forbidden entities, prompt-injection resistance) not
   yet written.
+- Open questions in `CURRENT_STATUS.md` §8 (Invoice-vs-Bill duplication, how our
+  agent's runs tie to a gradable `job_id`, the `agent_authority_unresolved`
+  scheduled-job failures) need answers before Week 2/3 work continues.
 - No platform bug reports filed yet.
 - CI/CD and AWS infra not yet set up.
 
