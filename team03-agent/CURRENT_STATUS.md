@@ -220,6 +220,57 @@ None of the above has been changed yet — this file is a record of what's true,
 diff. Next step is deciding how to re-derive SKILL.md/playbooks/scripts from this
 real model (separate task).
 
+### 7a. Tax data on this instance is not trustworthy — do not drive tax logic off it
+
+Verified 2026-09-21 while investigating an odd Tax Summary report. Three defects
+filed (§9). The practical rule for `scripts/tax_math.py`:
+
+**Use the item-level GST fields (`items[].cgst_amount`, `sgst_amount`, `igst_amount`,
+`cess_amount`) as the source of truth. Do not use document-level `taxes[]`, the
+`Tax`/`TaxJurisdiction` master, or `group_taxes`.** The item-level fields are the
+only coherent source — they're what produces the correct `SGST @ 9%` / `CGST @ 9%` /
+`IGST @ 18%` rows in the UI's own Tax Summary.
+
+Why the others can't be trusted here:
+
+- **Document-level `taxes[].tax_type` is free text and holds product names.** 0 of 68
+  populated values on Invoice/CreditNote match the `Tax.tax_type` enum; every one is a
+  product name ("V-Block Pair 7363"). The rows are also arithmetically incoherent —
+  `rate` doesn't relate to `amount` (a `rate=0` row carrying ₹1,381.05 of tax), and in
+  11 of 25 credit notes the `taxes[]` row is excluded from the document's own
+  `total_tax`.
+- **`Tax`/`TaxJurisdiction` master is US data on the India company.** All 100
+  `TaxJurisdiction` rows have `country="US"` with county/special-district levels and
+  nexus flags, even though the locale reports `sales_tax_jurisdictions=false` and
+  `sales_tax_nexus=false` for India. One row maps its liability account to
+  "Unsecured Loans".
+- **`group_taxes` contradicts its own parent.** 67 of 100 `Tax` rows have
+  `is_group=false` yet carry `group_taxes` children, and 0 of 88 child `tax_type`
+  values are valid enum members — so composite-tax expansion (GST 18% → CGST 9% +
+  SGST 9%) can't be driven off this master either.
+
+Root cause of the naming garbage is the data seeder, not application logic: the
+product number tracks the record index exactly (CN-2026-000**23** → "V-Block Pair
+**7363**", CN-000**22** → **7362**, CN-000**11** → **7351**, diff=0 across all
+sampled rows). The *product* defects are the report consuming unvalidated free text,
+the missing `is_group` invariant, and the locale/jurisdiction contradiction.
+
+## 9. Bug reports filed
+
+Filed 2026-09-21 via `POST /api/bug-report` (all returned `delivery: "local"`, i.e.
+saved in-platform for the AgentSwitch team; no external GitHub issue was opened).
+Track with `GET /api/bug-report/mine` or `BugReport.list`.
+
+| id | status | Subject |
+|---|---|---|
+| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | new | All 100 `TaxJurisdiction` rows on the India company are US sales-tax data, contradicting the locale's own `sales_tax_jurisdictions=false` / `sales_tax_nexus=false` flags |
+| `5c8b16e3-3761-4fa3-b482-9d486c977411` | new | 67 of 100 `Tax` rows have `is_group=false` while carrying `group_taxes` children; child `tax_type` is unvalidated free text (0 of 88 valid) while the parent field enforces the enum |
+| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | new | Tax Summary report renders product names as tax heads and folds non-tax amounts into the OUTPUT TAX total (shows ₹4,991.76 where the source documents' own `total_tax` is ₹62,402.95) |
+
+None of these appear in the platform's self-documented `not_yet_supported` list (§2),
+so they should be genuinely new rather than already-known. None could carry a
+`job_id` — all were found by direct REST/MCP inspection rather than an agent run.
+
 ## 8. Open questions for next session
 
 - Why do both `Invoice(direction=payable)` (165 records) and `Bill` (101 records)
