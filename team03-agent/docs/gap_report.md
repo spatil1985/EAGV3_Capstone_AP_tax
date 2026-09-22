@@ -34,12 +34,18 @@ Some absences may be plan-gating rather than product gaps.
 
 | Platform | Core strength | Key integrations | Target segment |
 |---|---|---|---|
-| Clear (ClearTax) | Market-leading GST/ITC reconciliation & e-invoicing | SAP, Oracle, Tally, NetSuite | Mid-Large enterprises & CAs |
+| **Clear (ClearTax)** *(sources verified)* | GST/ITC reconciliation & e-invoicing. **Operates GSTN-approved private IRP 4** — a regulatory moat, not just a feature set | SAP, Oracle, Tally, NetSuite, Dynamics, Zoho, Busy, JDE | Mid-Large enterprises & CAs |
 | Mysa | AI invoice scan with 22+ Indian tax checks (GST/TDS/RCM) | Zoho Books, Tally, ERPNext | Startups & SMBs |
 | CashFlo | 6-way matching, fraud prevention & supply-chain financing | SAP, Oracle, MS Dynamics | Mid-market & large enterprises |
 | **RazorpayX S2P** *(live account inspected)* | Vendor payout rails & bulk payouts. **Actively withdrawing from tax remittance** — GST, Advance Tax and manual TDS payments all discontinued | Tally, Zoho Books | Startups & growth businesses |
 | OPEN Money | Connected banking + AP automation + MSME tracking | Tally, Zoho, Dynamics, NetSuite | SMBs & mid-market |
 | Kodo / EnKash | Unified corporate cards + AP invoice workflows | Tally, QuickBooks, NetSuite | Startups & mid-market |
+
+> **Full module-by-module analysis of Clear: [`clear_gap_report.md`](clear_gap_report.md).**
+> Its claims were fetched and adversarially verified on 2026-09-22 (15 confirmed,
+> 10 refuted), so it is stronger than the unmarked vendor-text tier below — but it
+> is still marketing, never a live account. The refuted list is kept in that
+> document's §7 so those figures are not re-imported later.
 
 ---
 
