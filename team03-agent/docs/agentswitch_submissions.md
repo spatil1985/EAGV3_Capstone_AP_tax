@@ -30,13 +30,13 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 | B4 | Tax lines storable that the platform's own calculator can't produce | Bug | High | Ready — split out of B3 |
 | B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Bug | Medium | Needs reproduction |
 | F1 | No Goods Receipt Note entity — 3-way matching impossible | Feature | High | Ready |
-| F2 | No sandbox / test environment | Feature | High | Ready |
-| F3 | No reports exposed over MCP | Feature | Medium | Ready |
+| F2 | No sandbox / dry-run for ledger writes | Feature | High | Ready |
+| F3 | Reports exist over REST but not over MCP | Feature | Medium | Ready |
 | F4 | No bank account validation (penny-drop) | Feature | Medium | Ready |
-| F5 | No scoped external-accountant (CA) access | Feature | Medium | Ready |
-| F6 | `approval_status` has no named levels, routing or history | Feature | Medium | Ready |
-| F7 | No batch/payment-run concept for `PaymentMade` | Feature | Low | Ready |
-| F8 | MSME 45-day statutory tracking not automated | Feature | Medium | Ready |
+| F5 | No scoped external-accountant (CA) access | Feature | Medium | Ready — verify UI sharing first |
+| F6 | Enable `approvals` app for Seat 03 (engine exists, we're entitlement-blocked) | Access | Medium | Ready — **rewritten, was wrongly scoped as "build approvals"** |
+| F7 | No batch/payment-run identity for `PaymentMade` | Feature | Low | Ready |
+| F8 | MSME 45-day statutory tracking not automated | Feature | Medium | Ready — agent can bridge today |
 
 ---
 
@@ -208,97 +208,297 @@ platform's own ticket ids. Re-filing risks rejection as already-known.
 
 Derived from the competitor analysis in [`gap_report.md`](gap_report.md) and
 [`razorpay_gap_report.md`](razorpay_gap_report.md). These are gaps, not defects —
-submit separately from bugs, or raise with the instructor, since the bug bounty is
-for defects.
+submit separately from bugs, since the bug bounty is for defects.
 
-### F1 · Goods Receipt Note entity — enable 3-way matching · **High**
+**Each entry states how we proved the gap exists here and how we proved a
+competitor has it.** That matters: while preparing this list, two items we assumed
+were missing turned out to exist (see F6, and the note under F2). Asserting an
+absence without checking is how a feature request gets dismissed.
 
-**The single highest-value ask.** There is no goods-receipt concept anywhere in the
-425-entity schema (verified by grepping every entity name; only unrelated
-`EsignConsentReceipt` / `FormConsentReceipt` match). `Bill.purchase_order_id`
-enables two-way matching (PO ↔ Bill), but three-way (PO ↔ GRN ↔ Bill) is
-**structurally impossible**.
+**Evidence tiers for competitor claims** — **[LIVE]** = seen in a real logged-in
+account · **[DEMO]** = seen in the vendor's marketing video · **[CLAIM]** = vendor
+text only, untested.
 
-Why it matters: 3-way matching is the core AP control for verifying that what was
-billed was actually received. Mysa (3-way), CashFlo (6-way), Kodo (2-/3-way) all
-advertise it, and **RazorpayX demonstrably imports GRNs** as a first-class tab
-(verified in the live product).
+---
 
-This is the one gap an agent cannot orchestrate around — you cannot match against a
-document type that does not exist. Requires: a `GoodsReceiptNote` entity with
-line-level quantities, links to `PurchaseOrder` and `Bill`, and a matching tool.
+### F1 · Goods Receipt Note entity — enable 3-way matching · **HIGH**
 
-### F2 · Sandbox / test environment · **High**
+**What's missing:** any record of goods being *received*.
 
-There is no test mode. The Suryodaya ledger is shared live with Teams 01 and 02,
-so there is nowhere to rehearse a write before doing it for real, and any mistake is
-immediately visible to other teams.
+**Why it matters, in plain terms.** Three documents should agree before a supplier
+gets paid: the purchase order (what we ordered), the goods receipt note (what
+actually arrived at the loading dock), and the invoice (what we're being billed
+for). Checking all three is called *three-way matching*, and it's the single most
+important control in accounts payable.
 
-This is acute for agent development specifically: our seat's playbooks mutate
-records (hold duplicate bills, submit for approval), and we cannot validate that
-behaviour without touching shared production data. RazorpayX provides test balances
-and test payouts that explicitly "do not affect the actual balance."
+Concrete example: you order 100 steel plates at ₹500 each. Only 60 arrive. The
+supplier invoices you for all 100 — ₹50,000 instead of ₹30,000. With a GRN you
+catch it automatically: the receipt says 60, the invoice says 100, payment is
+blocked. Without a GRN the only defence is someone remembering what turned up at
+the dock weeks ago. This is also how invoice fraud works — bill for goods never
+delivered and hope nobody checks.
 
-Requires: a resettable per-team sandbox company, or a dry-run flag on write tools
-that validates without persisting.
+**How we verified it's missing in AgentSwitch:**
+1. Pulled all 425 entity names from `GET /api/schemas`.
+2. Searched them case-insensitively for `receipt|grn|goods`. Only two matched, both
+   unrelated: `EsignConsentReceipt`, `FormConsentReceipt`.
+3. Checked all 436 MCP tools from `tools/list` — no GRN tool of any kind.
+4. Confirmed `Bill.purchase_order_id` exists, so PO↔Bill (two-way) matching *is*
+   possible — the missing leg is specifically the receipt.
 
-### F3 · Expose reports over MCP · **Medium**
+**Who has it, and how we know:** **RazorpayX [LIVE]** — screenshot of Vendor
+Payments → Import showing three tabs: `Purchase Orders | Items | GRNs`. Also
+claimed by Mysa (3-way), CashFlo (6-way) and Kodo/EnKash (2-/3-way) **[CLAIM]**.
 
-No report is callable from MCP. P&L, Balance Sheet, Trial Balance, AR/AP Aging and
-Cash Flow exist only as REST endpoints (`/api/accounting/reports/*`), and
-`/api/reports` supports `trial_balance, profit_and_loss, balance_sheet, receivables,
-payables, stock_balance, gst_r1`. None appears among the 436 MCP tools.
+**The ask:** a `GoodsReceiptNote` entity with line-level quantities, links to
+`PurchaseOrder` and `Bill`, and a matching tool exposed over MCP.
 
-An agent therefore cannot read the financial statements it is reasoning about. For a
-platform whose premise is agent-driven accounting, this is a notable omission.
+**Why it's top priority:** this is the only gap in this list our agent
+*categorically cannot work around*. Every other item can be partially bridged by
+orchestrating existing tools. You cannot match against a document type that does
+not exist.
 
-### F4 · Bank account validation (penny-drop) · **Medium**
+---
 
-`Party` stores `vendor_bank_account_number`, `vendor_bank_name`, `vendor_bank_code`
-and `beneficiary_name`, but nothing validates that the account exists or belongs to
-the named vendor.
+### F2 · A sandbox, or a dry-run flag on write tools · **HIGH**
 
-Paying a wrong or fraudulently-altered bank account is a classic AP fraud vector,
-and it is directly in Seat 03's remit. RazorpayX ships a "Fund Account Validation
-report," implying penny-drop verification.
+**What's missing:** anywhere safe to test a write.
 
-### F5 · Scoped external-accountant (CA) access · **Medium**
+**Why it matters, in plain terms.** Our agent's job includes changing records —
+flagging a duplicate bill, putting a payment on hold, submitting something for
+approval. Right now the only place to try that is the real ledger, which Teams 01
+and 02 are also using. There is no "practice mode." If our duplicate-detection
+logic has a bug and flags 40 legitimate bills, that happens to live data that two
+other teams are working in, and there's no undo.
 
-Roles are internal (`finance_user`, `finance_admin`, `accountant`, `auditor`) with
-no shareable, report-only external grant. RazorpayX offers exactly this: *"CA can
-download reports without troubling you! No access to your RazorpayX account except"*
-reports.
+Analogy: it's like being asked to test a new autopilot by flying the actual plane
+with passengers aboard.
 
-In India the CA relationship is central to SME compliance, and the current
-alternative — sharing a login — is both friction and a security risk.
+**How we verified it's missing in AgentSwitch:**
+1. Searched all 425 entities for `Demo|Sandbox|Test`. Found `DemoPlay`,
+   `DemoPlayRun`, `DemoPlayStep` (domain `demo`) — a scripted demo-walkthrough
+   feature, not a data sandbox.
+2. Searched all 436 tools for `sandbox|demo|test`. Found exactly one:
+   `endpoint.agent_governance.skill_sandbox` — a sandbox for testing *agent skills*,
+   not for testing *transactions*.
+3. No write tool in the 436 accepts a dry-run or validate-only parameter.
 
-### F6 · Approval levels, routing and decision history · **Medium**
+**Honest note:** a skill sandbox does exist, so the platform isn't ignorant of the
+problem — it just doesn't extend to ledger writes.
 
-`approval_status` has four values (`not_required` / `pending_approval` / `approved`
-/ `rejected`) with `Bill.approval.submit` / `Invoice.approval.submit` tools. Missing:
-named approver levels, routing rules (by amount, vendor, category), and a
-per-decision audit trail.
+**Who has it, and how we know:** **RazorpayX [LIVE]** — the account runs with a
+"Test balance", an "Add test balance" action, and the banner *"These are test
+payouts and do not affect the actual balance. They are used only for the purpose of
+integrating events."*
 
-Our agent can move a bill to `pending_approval` but cannot express *who* must
-approve, and no history records who approved or rejected. RazorpayX's demo shows a
-named "Finance L2" level with the rejection recorded on a timestamped timeline.
+**The ask:** either a resettable per-team sandbox company, or (cheaper) a
+`dry_run: true` parameter on write tools that validates and returns what *would*
+change without persisting.
 
-### F7 · Batch / payment-run concept · **Low**
+---
 
-`PaymentMade` is per-payment. There is no batch identity, so a vendor payment run
-(settling many bills together) cannot be tracked, reported on, or reversed as a
-unit. RazorpayX treats bulk payouts as a first-class batch object.
+### F3 · Expose reports over MCP · **MEDIUM**
 
-### F8 · MSME 45-day statutory tracking · **Medium**
+**What's missing:** an agent cannot read the financial statements.
 
-`Party.is_msme`, `msme_type` and `msme_no` exist, and `MSMEPreferences` is an entity,
-but nothing surfaces MSME bills approaching or past the statutory 45-day payment
-window. Late payment to an MSME vendor attracts penal interest under the MSME Act,
-so this is a live compliance exposure rather than a convenience.
+**Why it matters, in plain terms.** Our agent is asked "what is our tax liability
+this period?" A human answers that by opening a report. Our agent can't open any
+report — it has to re-derive the numbers from thousands of raw ledger rows. That's
+slower, and worse, it means the agent's answer can silently disagree with what the
+finance team sees on screen, with no way to reconcile the two.
 
-Note: our agent **can** bridge this today by joining `Party.list(is_msme=true)`
-against `Bill.due_date` — so it is a good candidate for demonstrating agent value
-over the stock UI, and only needs platform support if it should be native.
+**How we verified it's missing in AgentSwitch:**
+1. The reports **do** exist over REST — confirmed in `openapi.json` (729 paths):
+   `/api/accounting/reports/{profit-and-loss,balance-sheet,trial-balance,cash-flow,
+   ap-aging,ar-aging,sales-tax-liability}`, plus `/api/reports` which accepts
+   `trial_balance, profit_and_loss, balance_sheet, receivables, payables,
+   stock_balance, gst_r1`.
+2. Searched all 436 MCP tool names — **no** `Report.*` tool and no
+   `endpoint.accounting.reports.*` entry. The capability exists; it simply isn't
+   reachable from the agent interface.
+
+**Who has it, and how we know:** **RazorpayX [LIVE]** — a Reports screen generating
+Account Statement, Payouts, Vendor Payments, Purchase Orders, Vendor Advances,
+Vendor Invoices V2 and Fund Account Validation. (Not an MCP comparison — RazorpayX
+has no published MCP server — but it shows reports treated as a first-class,
+exportable surface.)
+
+**The ask:** expose the existing report endpoints as MCP tools. This should be
+cheap — the computation already exists and is already permission-checked.
+
+---
+
+### F4 · Bank account validation (penny-drop) · **MEDIUM**
+
+**What's missing:** nothing checks that a vendor's bank account is real or theirs.
+
+**Why it matters, in plain terms.** One of the most common frauds in accounts
+payable is *bank detail substitution*: someone emails finance pretending to be a
+supplier, says "we've changed banks, here's our new account," and the next payment
+goes to the fraudster. A penny-drop check defends against this — the system deposits
+₹1 and reads back the account holder's registered name. If the account says
+"Acme Traders" and the vendor is "Bosch Rexroth India", the payment is stopped.
+
+This sits squarely in our seat's remit: we're the Payables agent, and "is this
+vendor legitimate?" is our question to ask.
+
+**How we verified it's missing in AgentSwitch:**
+1. Confirmed the fields exist on `Party`: `vendor_bank_account_number`,
+   `vendor_bank_name`, `vendor_bank_code`, `beneficiary_name`. They are stored.
+2. Searched all 436 tools for `valid|verify|penny`. Only two matched, both
+   unrelated: `endpoint.job_ledger.verify` (agent audit) and
+   `endpoint.storefront.payment.verify` (e-commerce checkout).
+3. Note `/api/accounting/tax/validate-address` exists — so the platform does do
+   external validation for *addresses*, just not bank accounts.
+
+**Who has it, and how we know:** **RazorpayX [LIVE]** — "Fund Account Validation
+report" appears in the Reports type dropdown, which implies account verification is
+performed and its results are reportable.
+
+**The ask:** a validation tool for vendor bank details, plus a flag on `Party`
+recording verification status and date.
+
+---
+
+### F5 · Scoped external-accountant (CA) access · **MEDIUM**
+
+**What's missing:** a way to give an outside accountant reports without giving them
+the whole system.
+
+**Why it matters, in plain terms.** Indian SMEs run their compliance through a
+chartered accountant who is not an employee. That CA needs the trial balance and
+GST data every month. Today the realistic options are: share a login (the CA can
+then see and change everything, and the audit trail shows your name for their
+actions), or export files by hand every month. A read-only, reports-only guest role
+solves both.
+
+**How we verified it's missing in AgentSwitch:**
+1. Collected the roles appearing across entity permission blocks in
+   `/api/schemas`: `admin`, `finance_admin`, `finance_user`, `accountant`,
+   `auditor`, `hr_admin`, `hr_user`, `operations_user`, `sales_user`,
+   `support_user`, `project_user`, `employee`, `viewer`, `student`, `instructor`.
+   `accountant` and `auditor` exist but are **internal** roles on the company, not
+   a scoped external grant.
+2. Found no share/invite mechanism scoped to reports among the 436 tools.
+
+**Caveat — lower confidence than F1–F4.** We verified no *role* exists for this; we
+did not exhaustively rule out a sharing feature in the UI. Worth a quick check
+before submitting.
+
+**Who has it, and how we know:** **RazorpayX [LIVE]** — the Reports screen states
+*"Let Your CA Download These Reports — CA can download reports without troubling
+you! No access to your RazorpayX account except"* reports. Clear also targets CAs
+as a primary segment **[CLAIM]**.
+
+---
+
+### F6 · Enable the `approvals` app for Seat 03 · **MEDIUM** *(rewritten — this is not a missing feature)*
+
+**⚠️ Correction:** an earlier draft of this document asked AgentSwitch to *build*
+multi-level approvals. That was wrong, and checking before submitting avoided an
+embarrassing request. **The approval engine already exists and is more capable than
+anything we observed in a competitor.** We simply cannot reach it.
+
+**What actually exists.** Six entities in the `approvals` domain:
+
+| Entity | Notable fields |
+|---|---|
+| `ApprovalPolicy` | `routing_type`, `approval_type`, `levels`, `conditions`, `condition_field/operator/value`, `max_escalation_levels`, `sla_enabled`, `default_sla_hours`, `escalation_enabled`, `allow_self_approval`, `require_comments_on_reject` |
+| `ApprovalRequest` | `current_level`, `total_levels`, `current_approver`, `final_decision`, `sla_deadline`, `is_overdue`, `escalation_count`, `steps`, `history` |
+| `ApprovalLog` | `action`, `actor_id`, `actor_name`, `level`, `step_index`, `comments`, `previous_status`, `new_status`, `ip_address`, `timestamp` |
+| `ApprovalGroup` | `quorum_type`, `quorum_count`, `role_filter`, `members` |
+| `ApprovalDelegation` | (delegated approval authority) |
+| `ApprovalSLAConfig` | (SLA configuration) |
+
+That is conditional routing, multi-level escalation, SLA deadlines, quorum-based
+group approval, delegation, and a full per-action audit log with IP addresses.
+RazorpayX's demo showed a single named level ("Finance L2") — **AgentSwitch's
+design is richer.**
+
+**Why we can't use it — and how we verified that:**
+1. `ApprovalRequest` permissions explicitly grant our role:
+   `"finance_user": ["read","create","write","submit"]`.
+2. But `GET /api/ApprovalRequest?limit=1` → **HTTP 403**
+   `{"detail":"App 'approvals' is not enabled for your account"}`. Same for
+   `ApprovalPolicy`, `ApprovalLog`, `ApprovalGroup`.
+3. `GET /api/auth/me` shows `allowed_apps: ["accounting", "agent", "crm"]` —
+   `approvals` is absent. So it's an **app entitlement**, not a role permission,
+   blocking us.
+4. No `Approval*` entity tool appears in our 436. All we get is the fire-and-forget
+   `Bill.approval.submit` / `Invoice.approval.submit` — we can *push* a document
+   into approval but cannot see who must approve it, what's pending, or what was
+   decided.
+
+**In plain terms:** we can put a suspicious duplicate bill into the approval queue,
+but we're then blind. We can't tell you who it's waiting on, whether it's breached
+its SLA, or whether it was approved or rejected and why — even though the platform
+records all of that.
+
+**The ask:** add `approvals` to Seat 03's `allowed_apps`, and expose
+`ApprovalRequest` and `ApprovalLog` as read-only MCP tools. Nothing needs building.
+
+---
+
+### F7 · Batch / payment-run identity · **LOW**
+
+**What's missing:** payments can only be made one at a time.
+
+**Why it matters, in plain terms.** Finance teams don't pay 200 suppliers
+individually — they do a weekly "payment run", approve it once, and release it as a
+batch. If something goes wrong, they reverse the batch. Without a batch concept you
+get 200 unrelated records with no shared identity, nothing to approve as a unit,
+and nothing to reverse as a unit.
+
+**How we verified it's missing in AgentSwitch:** `PaymentMade` has no batch/run
+field (fields include `payment_number`, `bills`, `invoices`,
+`applied_allocations`, `total_applied` — all single-payment scoped), and no batch
+tool exists among the 436.
+
+**Who has it, and how we know:** **RazorpayX [LIVE]** — a dedicated Bulk Payouts
+screen: *"A batch is the group of payouts uploaded in bulk. Once a batch is created,
+they will show up here."*
+
+**Priority note:** LOW for our seat specifically, since AgentSwitch cannot execute
+payments at all (see the main gap report) — batching matters more once there's
+something to batch.
+
+---
+
+### F8 · MSME 45-day statutory payment tracking · **MEDIUM**
+
+**What's missing:** nothing warns when an MSME vendor is about to be paid late.
+
+**Why it matters, in plain terms.** Under India's MSME Development Act, payments to
+registered micro/small enterprises must be made within 45 days. Miss it and the
+buyer owes compound penal interest at three times the RBI bank rate — and, since
+the 2023 amendment to Section 43B(h) of the Income Tax Act, the expense is
+disallowed as a deduction until actually paid. So a late MSME payment costs money
+twice: penal interest, plus a higher tax bill.
+
+Concrete example: a ₹10,00,000 bill from a small vendor sits unpaid for 60 days.
+That's 15 days overdue, penal interest accrues, and the ₹10,00,000 can't be claimed
+as an expense in that year's return. Nobody notices because no screen shows it.
+
+**How we verified it's missing in AgentSwitch:**
+1. The vendor-side data exists: `Party.is_msme`, `Party.msme_type`
+   (`micro/small/medium`), `Party.msme_no`.
+2. The locale confirms the feature is meant to be in scope for India:
+   `features.msme_45_day = true`.
+3. But `MSMEPreferences` holds only `udyam_registration_number`,
+   `enterprise_type`, `date_of_registration`, `display_on_invoices`,
+   `display_on_purchase_orders` — i.e. **our own company's** MSME registration and
+   whether to print it on documents. Nothing about tracking *vendor* payment
+   deadlines.
+4. No tool among the 436 computes or surfaces MSME ageing.
+
+**Who has it, and how we know:** **OPEN Money [CLAIM]** — "MSME 45-day payment
+tracking" stated explicitly. **Kodo/EnKash [CLAIM]** — "MSME payment rule
+compliance."
+
+**Good news — our agent can bridge this today.** Joining `Party.list(is_msme=true)`
+against `Bill.list` due dates gives the exposure report, with no platform change
+required. This is a strong candidate for demonstrating agent value over the stock
+UI, and only needs platform support if it should become a native alert.
 
 ---
 
@@ -306,13 +506,24 @@ over the stock UI, and only needs platform support if it should be native.
 
 1. **B4** first — it has a control test proving the calculator is correct before
    claiming the data is wrong, so it is the hardest to dismiss.
-2. **B5** once reproduced with a concrete `JournalEntry.id`.
-3. **F1 (GRN)** as the headline feature request — structural, competitor-verified,
-   and unblockable by orchestration.
-4. **F2 (sandbox)** — frame it as blocking safe agent development, which is the
-   platform's own stated purpose.
-5. The remaining feature requests as a single batch, referencing the competitor
-   evidence in `razorpay_gap_report.md`.
+2. **F6 (enable `approvals`)** — costs the platform team nothing to grant, unblocks
+   a capability that already exists, and is the fastest win on this list.
+3. **B5** once reproduced with a concrete `JournalEntry.id`.
+4. **F1 (GRN)** as the headline feature request — structural, competitor-verified
+   in a live product, and the only item unblockable by orchestration.
+5. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
+   is the platform's own stated purpose. The dry-run flag is the cheap version of
+   the ask.
+6. The remaining requests as a single batch, referencing the competitor evidence in
+   `razorpay_gap_report.md`.
+
+**A note on method, worth repeating to whoever reviews this:** F6 was originally
+written as "please build multi-level approvals." Verifying before submitting
+revealed the engine already exists, with conditional routing, SLA escalation,
+quorum groups and delegation — richer than the competitor feature we were citing as
+the gap. Two of the eight items changed materially once checked. Any feature
+request in this list that gets challenged should be re-verified rather than
+defended.
 
 **Before submitting anything further, confirm with the instructor** whether
 `/api/bug-report` is the channel that earns bounty credit, or whether submissions
