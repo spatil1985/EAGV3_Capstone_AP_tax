@@ -163,13 +163,39 @@ Done:
   (`CURRENT_STATUS.md`): real entity model, full 436-tool MCP inventory, real
   `BugReport.create` schema, live record counts, and the platform's own documented
   list of known gaps (with ticket ids) for the gap report / bug-hunting strategy.
+- **Week 1 gap report delivered** — `docs/gap_report.md` (all six competitors) plus
+  `docs/razorpay_gap_report.md` (RazorpayX verified first-hand, screen by screen).
+- **Platform bugs found, filed and two already fixed in production:**
+  - `N126` — all 100 `TaxJurisdiction` rows on the India company were US sales-tax
+    data → **fixed, live on server**; re-verified, those rows are now gone.
+  - `N127` — tax records carrying tool names, and the Tax Summary report counting
+    them as tax heads → **fixed, live on server**. The fix note records
+    **8,535 tool-named values across 85 fields** corrected in both apps; our sample
+    had covered ~3 fields, so the report triggered a far wider sweep.
+  - `N128` — documents can store tax lines the platform's own calculator would never
+    produce → **open**, filed with control tests.
+  - `N173` — five feature requests, bundled → Low, "Carbon upgrade", not scheduled.
+  - **`B6` (ready, not yet filed)** — re-verification found N127's fix is
+    *incomplete*: parent `Tax` records are corrected but nested
+    `group_taxes[].tax_type` still holds tool names (0 of 88 valid). See
+    `CURRENT_STATUS.md` §9a.
 
 Outstanding (see `DESIGN.md`, `CURRENT_STATUS.md` §7, and the Week-by-Week roadmap
 in the brief):
+
+> ⚠️ **Blocking the Week 1 review (instructor feedback, 2026-09-22):** *"Expected
+> bug filing is too low, and we have not received any harness-related GitHub code
+> yet."* Bug filing has since improved (five board items, two fixed in production).
+> **The harness gap is still open** — the two items below are the priority.
+
+- **`run_agent.py::call_llm` is still a stub** (`raise NotImplementedError`). The
+  MCP half works and is tested; the LLM half is not wired, so there is no running
+  agent. This is the "harness code" the review is asking for.
+- **This repository is private.** `api.github.com/repos/spatil1985/EAGV3_Capstone_AP_tax`
+  returns 404 unauthenticated, so the instructor may simply be unable to see the
+  code. Make it public or add him as a collaborator.
 - Apply the corrections in `CURRENT_STATUS.md` §7 to `SKILL.md`, both playbooks,
   `scripts/*.py`, and `postman/AgentSwitch.postman_collection.json`.
-- `run_agent.py::call_llm` is a stub — no LLM provider is wired up yet, so the
-  agent loop doesn't actually run end-to-end against a real query yet.
 - Week 1 gap report (comparing AgentSwitch against a competitor like Rillet,
   Vic.ai, Mysa, CashFlo, etc. — draft companies already gathered, and
   `CURRENT_STATUS.md` §2 now has the platform's own documented gap list to build
