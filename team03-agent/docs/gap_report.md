@@ -1,24 +1,34 @@
 # Gap Report — AgentSwitch vs. Indian AP/GST Automation Platforms
 
-**v3 — 2026-09-22: RazorpayX verified first-hand.** v1 only listed features
-competitors have that we lack. v2 added the reverse direction, a feature matrix, and
-recommendations split by who can act on them. v3 replaces RazorpayX's vendor-stated
-entries with direct observation of the live product (`x.razorpay.com`), which
-**corrected two claims this report previously got wrong** — see "RazorpayX verified"
-below.
+**v4 — 2026-09-22: RazorpayX re-examined; v3's evidence tiers were wrong.**
+v1 listed only what competitors have that we lack. v2 added the reverse direction, a
+feature matrix, and recommendations split by who can act. v3 claimed RazorpayX was
+"verified first-hand" — **that was partly wrong, and v4 corrects it.** Several v3
+screenshots were RazorpayX *marketing videos*, not the running account, and the live
+account contradicts them on tax payments. See "RazorpayX re-examined" below.
 
 AgentSwitch's capabilities are not vendor claims — they're pulled from
 `../CURRENT_STATUS.md` and `screen_api_mapping.md`, built from real logins, real
 `/api/schemas` and MCP `tools/list` calls, and real sample records against the live
 Suryodaya instance.
 
-Competitor evidence is now mixed, and the matrix marks which is which:
-- **RazorpayX — verified**, from screenshots of the running product.
-- **Clear, Mysa, CashFlo, OPEN Money, Kodo/EnKash — vendor-stated**, from public
-  product research, not independently tested.
+**Competitor evidence now has three tiers, and the matrix marks each cell:**
+
+| Tier | Meaning |
+|---|---|
+| **L** — live account | Seen working in a real logged-in RazorpayX account |
+| **D** — vendor demo | Seen in RazorpayX's own product video/marketing walkthrough. Shows a real UI, but is the vendor's chosen happy path and may not reflect current availability |
+| *(unmarked)* | Vendor-stated text claim from public research (Clear, Mysa, CashFlo, OPEN Money, Kodo/EnKash) |
+
+A **D** is weaker than an **L**: the live RazorpayX account shows three tax features
+that its own demo material still advertises have since been **withdrawn**. Treat
+vendor demos as aspirational, not current.
 
 Where a competitor's capability is unverified either way, this report says "not
 stated" rather than guessing absence.
+
+⚠️ **Tier caveat:** the RazorpayX account inspected is branded **"RazorpayX Lite"**.
+Some absences may be plan-gating rather than product gaps.
 
 ## Competitors reviewed
 
@@ -27,7 +37,7 @@ stated" rather than guessing absence.
 | Clear (ClearTax) | Market-leading GST/ITC reconciliation & e-invoicing | SAP, Oracle, Tally, NetSuite | Mid-Large enterprises & CAs |
 | Mysa | AI invoice scan with 22+ Indian tax checks (GST/TDS/RCM) | Zoho Books, Tally, ERPNext | Startups & SMBs |
 | CashFlo | 6-way matching, fraud prevention & supply-chain financing | SAP, Oracle, MS Dynamics | Mid-market & large enterprises |
-| **RazorpayX S2P** *(verified first-hand)* | Vendor payout rails, multi-level payout approval & TDS remittance | Tally, Zoho Books | Startups & growth businesses |
+| **RazorpayX S2P** *(live account inspected)* | Vendor payout rails & bulk payouts. **Actively withdrawing from tax remittance** — GST, Advance Tax and manual TDS payments all discontinued | Tally, Zoho Books | Startups & growth businesses |
 | OPEN Money | Connected banking + AP automation + MSME tracking | Tally, Zoho, Dynamics, NetSuite | SMBs & mid-market |
 | Kodo / EnKash | Unified corporate cards + AP invoice workflows | Tally, QuickBooks, NetSuite | Startups & mid-market |
 
@@ -36,90 +46,84 @@ stated" rather than guessing absence.
 ## Feature matrix — they vs. we
 
 ✅ = has it · ⚠️ = partial · ❌ = doesn't have it · "not stated" = no public claim
-found, not assumed absent. **RazorpayX entries marked ✅v are verified first-hand
-from the running product**; other competitors remain vendor-stated.
+found, not assumed absent. RazorpayX cells carry an evidence tier: **✅L** = seen in
+the live account, **✅D** = seen only in RazorpayX's demo/marketing video. Other
+competitors remain vendor-stated text claims.
 
 | Feature | Clear | Mysa | CashFlo | RazorpayX | OPEN Money | Kodo/EnKash | **AgentSwitch** |
 |---|---|---|---|---|---|---|---|
 | OCR / AI invoice extraction | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ no OCR engine in this deployment |
 | Duplicate invoice/payment detection | ✅ (detects duplicate bills) | not stated | ✅ (35+ checks incl. duplicate payments) | not stated | not stated | not stated | ❌ — **this is our Core Challenge Prompt** |
-| PO ↔ GRN ↔ Invoice matching | not stated | ✅ 3-way | ✅ 6-way | **✅v — Import tab carries Purchase Orders / Items / GRNs** | not stated | ✅ 2-/3-way | ❌ **structurally absent — no GRN entity anywhere in the 425-entity schema** |
+| PO ↔ GRN ↔ Invoice matching | not stated | ✅ 3-way | ✅ 6-way | **✅L — Import tab carries Purchase Orders / Items / GRNs** | not stated | ✅ 2-/3-way | ❌ **structurally absent — no GRN entity anywhere in the 425-entity schema** |
 | E-invoicing (IRN / signed QR / IRP) | ✅ | not stated | ✅ (IRN in its 6-way match) | not stated | not stated | not stated | ❌ not implemented at all (GST-28) |
 | GSTR-2A/2B fetch & ITC reconciliation | ✅ (MaxITC AI) | not stated | ✅ | not stated | not stated | not stated | ⚠️ `Bill.ims_status` field exists; no GSTN-fetch tool over MCP |
 | GST return filing (1/3B/9) | not stated | not stated | not stated | not stated | not stated | not stated | ❌ read-only for our role; GSTR-9 returns HTTP 501 platform-wide |
-| TDS deduction automation (by section/threshold) | not stated | ✅ (u/s 194) | not stated | ✅v (invoice flow ends in TDS Payments) | ✅ | ✅ | ⚠️ fields + GL posting done; no auto-deduction by section/threshold |
-| **TDS remittance / challan tracking** | not stated | not stated | not stated | **✅v — Tax Payments screen, per 195J section, PAID/UNPAID by month** | not stated | not stated | ❌ explicitly absent (GST-18: no challan tracking, no 26Q/27Q) |
+| TDS deduction automation (by section/threshold) | not stated | ✅ (u/s 194) | not stated | ⚠️L — "Auto TDS payments on your invoices will continue", but *manual* TDS is discontinued | ✅ | ✅ | ⚠️ fields + GL posting done; no auto-deduction by section/threshold |
+| **TDS remittance / challan tracking** | not stated | not stated | not stated | **⚠️ Shown ✅D (195J sections, PAID/UNPAID by month) but live account says "Manual TDS payments have been discontinued due to regulatory issues"** | not stated | not stated | ❌ absent (GST-18: no challan tracking, no 26Q/27Q) |
+| **GST payment / remittance** | not stated | not stated | not stated | **❌L — "GST payments via RazorpayX are no longer available, due to unavailability of automated payments APIs from our partner bank"** | not stated | not stated | ❌ no GSTPayment entity in the 425-entity schema |
+| **Advance tax payment** | not stated | not stated | not stated | **❌L — "no longer available"**, same partner-bank reason | not stated | not stated | ❌ not modelled |
 | MSME 45-day payment tracking | not stated | not stated | not stated | not stated | ✅ | ✅ | ⚠️ `is_msme`/`msme_type` fields exist; no automated 45-day alert |
 | Vendor KYC verification | not stated | not stated | not stated | ✅ | not stated | not stated | ❌ fields stored (GSTIN/PAN/TIN/W-9), never verified against a registry |
-| Bulk payout execution (IMPS/NEFT/RTGS/UPI) | not stated | ✅ (connected banking) | not stated | **✅v — Single + Bulk Payouts, batch upload** | ✅ | ✅ (cards + rails) | ❌ `PaymentMade` records a payment; no tool initiates a transfer |
-| **Payout lifecycle/stage tracking** | not stated | not stated | not stated | **✅v — "Processing within TAT" vs "Slightly delayed on bank's end"** | not stated | not stated | ❌ `PaymentMade` has a status, but no execution stages to track |
-| Multi-level configurable approval | not stated | not stated | not stated | **✅v — "Payout approval pending On Finance L2" / "Payout rejected by On Finance L2", with audit timeline** | ✅ | not stated | ⚠️ single approve/reject gate (`approval_status`), no hierarchy evidenced |
-| **Sandbox / test mode** | not stated | not stated | not stated | **✅v — test balance + test payouts that don't affect real balance** | not stated | not stated | ❌ none found; the shared live ledger is the only environment |
+| Bulk payout execution (IMPS/NEFT/RTGS/UPI) | not stated | ✅ (connected banking) | not stated | **✅L — Single + Bulk Payouts, batch upload, Payout Links** | ✅ | ✅ (cards + rails) | ❌ `PaymentMade` records a payment; no tool initiates a transfer |
+| **Payout lifecycle/stage tracking** | not stated | not stated | not stated | **✅L — "Processing within TAT" vs "Slightly delayed on bank's end"** | not stated | not stated | ❌ `PaymentMade` has a status, but no execution stages to track |
+| Multi-level configurable approval | not stated | not stated | not stated | **✅D only — "approval pending On Finance L2" / "rejected by On Finance L2" seen in the demo video, not confirmed in the live account** | ✅ | not stated | ⚠️ single approve/reject gate (`approval_status`), no hierarchy evidenced |
+| **Sandbox / test mode** | not stated | not stated | not stated | **✅L — test balance + test payouts that don't affect real balance** | not stated | not stated | ❌ none found; the shared live ledger is the only environment |
+| **Cashflow analytics (volume/trend)** | not stated | not stated | not stated | **✅L — Insights: payout & inflow volume, daily/weekly/monthly trends, export** | not stated | not stated | ⚠️ `cash_flow_scenario_sources` is forward *simulation*, not historical analytics |
+| **Accountant/CA-scoped report access** | ✅ (CA-focused product) | not stated | not stated | **✅L — "CA can download reports… no access to your RazorpayX account except" reports** | not stated | not stated | ❌ no scoped external-accountant role found |
+| **Unified beneficiary/contact master** | not stated | not stated | not stated | **✅L — Contacts filtered by Vendors / Employees / Customers** | not stated | not stated | ✅ `Party` with `contact_type` + `roles[]` — parity, not a gap either way |
 | Bank reconciliation | not stated | ✅ (auto-reconciliation) | not stated | not stated | ✅ | not stated | ✅ `BankRule`, `BankTransaction.match_voucher` — real, agent-callable |
 | Composite/group tax, broad tax-type taxonomy | not stated | not stated | not stated | not stated | not stated | not stated | ✅ `Tax`/`TaxGroup` cover IGST/CGST/SGST/UTGST/CESS/TDS/TCS/SALES_TAX/USE_TAX/EXCISE/1099 in one model |
 | Dual-jurisdiction (India **and** US) in one system | ❌ India-only | ❌ India-only | ❌ India-only | ❌ India-only | ❌ India-only | ❌ India-only | ✅ unique among these seven |
-| **Conversational AI assistant over the product** | not stated | not stated | not stated | **✅v — "How can I help you?" with payout/cash/vendor prompts** | not stated | not stated | ✅ "Ask Agent" present in the AgentSwitch UI |
+| **Conversational AI assistant over the product** | not stated | not stated | not stated | **✅L — "How can I help you?" with payout/cash/vendor prompts** | not stated | not stated | ✅ "Ask Agent" present in the AgentSwitch UI |
 | Native agent **job/escalation entities** (not just a chat assistant) | not stated | not stated | not stated | not stated | not stated | not stated | ✅ `AgentJob`/`AgentSession`/`AgentTask`/`AgentEscalation`/`AgentMemory` as first-class records |
 | Job-ledger forensics/audit replay | not stated | not stated | not stated | not stated | not stated | not stated | ✅ `AgentLedgerSeal`, `endpoint.job_ledger.{forensics,verify,replay}` |
 | Documented agent-callable API (MCP, JSON-RPC 2.0) | not stated | not stated | not stated | not stated | not stated | not stated | ✅ confirmed: 436 tools, live-tested |
 
 ---
 
-## RazorpayX verified (2026-09-22) — including two corrections to this report
+## RazorpayX re-examined (2026-09-22) — summary
 
-Observed directly in the running product at `x.razorpay.com`. This is the only
-competitor in the set we've seen first-hand, so it's the only one whose entries
-aren't marketing copy.
+> **Full screen-by-screen analysis: [`razorpay_gap_report.md`](razorpay_gap_report.md).**
+> That document explains every observed feature, what it does, and what it implies
+> for us. This is the condensed version.
 
-**What the product actually shows:**
+**Three corrections to earlier versions of this report:**
 
-- **Payouts** — `Single Payouts` and `Bulk Payouts` (batch upload) as separate
-  screens, plus `Payout Links` / `Bulk Payout Links`. Payouts carry real execution
-  stages: *"Processing within TAT"* and *"Slightly delayed on bank's end — occurs
-  during holidays or with Grameen Banks. We are actively following up with the
-  bank."* That's payment **execution**, not payment record-keeping.
-- **Vendor Payments** — a four-step flow stated as *Upload Invoice → Track Invoices
-  → Pay Invoices → TDS Payments*, with invoice statuses Unpaid / Processing /
-  Scheduled / Paid / Cancelled and a Due On column.
-- **Approval chain with audit timeline** — a vendor payment shows: Issued on →
-  Added on → Processing → *"Payout approval pending — On Finance L2"* → *"Unpaid
-  Finance L2 — Payout rejected by On Finance L2"*. A named approval level, an
-  approve/reject decision, and a timestamped trail of who did what.
-- **Tax Payments** — *"Track and manage Vendor related TDS Payments"*, itemised by
-  TDS section (195J Commission/Brokerage, Resident Contractor, Rent of Land or
-  Building, Professional Service), each PAID/UNPAID, grouped by month.
-- **Import** — tabs for **Purchase Orders | Items | GRNs**.
-- **Sandbox** — a test balance and test payouts that explicitly "do not affect the
-  actual balance… used only for the purpose of integrating events."
-- **Embedded AI assistant** — "How can I help you?" with suggested prompts
-  *"Are any of my payouts stuck in processing?"*, *"How's my cash looking?"*,
-  *"Help me pay vendors"*.
-- Also present: Account Statement, Contacts, Insights, Payroll, Reports.
+1. **Evidence tiering was wrong (v3).** v3 called RazorpayX "verified first-hand"
+   across the board. In fact several screenshots were RazorpayX's own *marketing
+   videos* (dark-themed walkthroughs with play buttons), not the live account. The
+   matrix now separates **L** (live) from **D** (demo).
+2. **Multi-level approval is D, not L (v3).** The "Finance L2 approval pending /
+   rejected" timeline came from the demo video. It is not confirmed in the live
+   account. v2 said "not stated", v3 over-corrected to verified; the truth is in
+   between — a vendor demo, which is weaker evidence than it first appeared.
+3. **The agent-framework differentiator was overstated (v2).** RazorpayX ships a
+   conversational assistant, so "no competitor has any agent capability" was wrong.
+   Narrowed to: a chat assistant is not ours alone; first-class agent
+   job/session/escalation records plus a forensic job ledger still appear to be.
 
-**Correction 1 — multi-level approval.** v2 recorded RazorpayX as "not stated" here
-and credited only OPEN Money. That was wrong: RazorpayX has a named approval level
-(Finance L2) with reject-and-record. AgentSwitch's single `approval_status` gate is
-weaker than a competitor we can actually see, not just one that claims it.
+**The biggest new finding — RazorpayX is retreating from tax remittance.** The live
+account carries three withdrawal notices:
 
-**Correction 2 — the agent-framework differentiator was overstated.** v2's matrix
-claimed a native agent framework was unique to AgentSwitch with ❌ across all six
-competitors. RazorpayX ships a conversational AI assistant over its payments data,
-so "❌ for everyone else" was wrong. The row is now split: a **chat assistant** is
-not unique to us, but **first-class agent job/session/escalation records plus a
-forensic job ledger** still appear to be. That is a narrower and more defensible
-claim — and it only counts for anything once `run_agent.py` actually uses those
-primitives, which it still doesn't.
+- *"Manual TDS payments have been discontinued due to regulatory issues. Auto TDS
+  payments on your invoices will continue as usual."*
+- *"Advance Tax payments via RazorpayX are no longer available, due to
+  unavailability of automated payments APIs from our partner bank."*
+- *"GST payments via RazorpayX are no longer available"* — same partner-bank reason.
 
-**Sharpest new contrast — GRNs.** RazorpayX imports Goods Receipt Notes as a
-first-class tab. AgentSwitch has no goods-receipt concept anywhere in its
-425-entity schema. This is the clearest example in the whole report of a gap our
-agent cannot orchestrate around: you cannot three-way match against a document type
-that does not exist.
+This reframes one of our supposed gaps. v3 listed TDS remittance as a Medium
+priority gap to close. But the best-funded payments company in this comparison set
+just **exited** GST and advance-tax remittance, citing regulation and partner-bank
+API availability — constraints that would apply to AgentSwitch equally. Statutory
+*payment* execution in India looks structurally hard for a non-bank platform.
+Tracking and computing the liability is defensible; moving the money is where
+others have retreated.
 
-**Second sharpest — TDS remittance.** RazorpayX tracks TDS payments per section code
-with paid/unpaid state by month. AgentSwitch's own gap list (GST-18) says challan
-tracking and the 26Q/27Q returns are not done. So this is a confirmed, real-world
-gap rather than an inferred one.
+**Sharpest genuine contrast — GRNs (tier L).** RazorpayX imports Goods Receipt Notes
+as a first-class tab (Import: Purchase Orders | Items | GRNs). AgentSwitch has no
+goods-receipt concept anywhere in its 425-entity schema. This remains the clearest
+gap our agent cannot orchestrate around: you cannot three-way match against a
+document type that does not exist.
 
 ---
 
@@ -151,16 +155,17 @@ gap rather than an inferred one.
   execution stages distinguishing "within TAT" from "delayed on bank's end").
   `PaymentMade` only records that a payment happened; nothing initiates one, and
   there is no execution state to track even if it did.
-- **TDS remittance and challan tracking** — **verified in RazorpayX**: a Tax
-  Payments screen itemised by TDS section (195J Commission/Brokerage, Resident
-  Contractor, Rent of Land or Building, Professional Service) with PAID/UNPAID
-  state per month. AgentSwitch's own gap list says challan tracking and the
-  quarterly 26Q/27Q/27EQ returns are not done (GST-18), so the deduction fields
-  exist but the remittance half of the workflow doesn't.
-- **Multi-level approval with an audit trail** — OPEN Money claims it, and
-  **RazorpayX verifiably has it**: "Payout approval pending — On Finance L2", then
-  "Payout rejected by On Finance L2", on a timestamped timeline. AgentSwitch has a
-  single approve/reject gate with no named level and no chain.
+- **TDS remittance and challan tracking** — *downgraded in v4.* RazorpayX's demo
+  shows per-section TDS tracking, but its live account says manual TDS payments are
+  **discontinued**, and GST/advance-tax payments are **withdrawn** over partner-bank
+  API availability. AgentSwitch lacks challan tracking and 26Q/27Q entirely
+  (GST-18), so the gap is real — but the competitor evidence suggests the
+  *remittance* half is hard for everyone, and computing/tracking the liability is
+  the more defensible target.
+- **Multi-level approval with an audit trail** — OPEN Money claims it; RazorpayX
+  shows it in its demo video (named Finance L2 level, reject recorded on a
+  timestamped timeline) though we could not confirm it in the live account.
+  AgentSwitch has a single approve/reject gate with no named level and no chain.
 - **Vendor KYC verification** — RazorpayX verifies vendor KYC; AgentSwitch stores
   GSTIN/PAN/TIN/W-9 fields on `Party` but nothing evidences verification against
   an external registry.
@@ -221,8 +226,8 @@ Split by who can actually act on it — conflating "AgentSwitch platform gaps" w
 | High | Sandbox / test mode | *Raised in v3.* RazorpayX has test balances and non-affecting test payouts. We have one shared live ledger with Teams 01/02 and nowhere to rehearse a write — a real risk for an agent that mutates records |
 | Medium | Reports API over MCP | Nothing agent-callable backs P&L/Balance Sheet/Cash Flow Statement — an agent can't even read these, let alone act on them |
 | Medium | Bulk payout execution tool | `PaymentMade` is bookkeeping, not payment initiation — matters if the agent is ever asked to *pay*, not just *flag* |
-| Medium | TDS remittance / challan tracking | *Raised in v3.* Deduction fields post to the GL, but the remittance half is absent (GST-18). RazorpayX tracks TDS payments per section code with paid/unpaid state |
-| Medium | Multi-level approval hierarchy | *Raised from Low in v3.* Verified in RazorpayX (named Finance L2 level, reject recorded on an audit timeline), so this is a confirmed gap against a real product rather than a marketing claim |
+| Medium | TDS/GST liability **tracking** (not remittance) | *Rescoped in v4.* Deduction fields post to the GL but challan/liability tracking is absent (GST-18). Note RazorpayX **withdrew** GST and advance-tax remittance over partner-bank API availability — so target tracking and computation, not moving money |
+| Medium | Multi-level approval hierarchy | *v3 called this verified; v4 downgrades to vendor-demo evidence.* Still a real gap — our single `approval_status` gate has no named levels and no chain |
 | Low | Automated vendor KYC verification | Fields exist; verification logic doesn't |
 
 Note: several of these (GST-28, GST-39, and others in `CURRENT_STATUS.md` §2) are
@@ -268,20 +273,22 @@ Ranked by how directly each maps to the Core Challenge Prompt:
 
 ## Caveats
 
-- **Evidence quality is now uneven, deliberately so.** RazorpayX was verified
-  first-hand from the running product. Clear, Mysa, CashFlo, OPEN Money and
-  Kodo/EnKash remain vendor-stated from public research. The matrix marks
-  RazorpayX's verified cells with ✅v so the two aren't conflated.
-- **Verifying one competitor moved the numbers against us, which is worth
-  noting.** Before seeing RazorpayX directly, this report had it as "not stated"
-  on multi-level approval and ❌ on any agent capability. Both were wrong. The
-  other five have not had that scrutiny, so the remaining "not stated" cells
-  should be read as *unexamined*, not as points in our favour. Expect our gap to
-  widen, not narrow, as more of them are checked.
-- "Not stated" for a competitor means no public claim was found, not that the
-  feature is confirmed absent.
-- RazorpayX was seen from the outside only — its UI tells us what it does, not
-  how, and not what its AI assistant records underneath.
+- **Evidence quality is uneven, and the matrix says so.** RazorpayX cells are
+  tagged **L** (live account) or **D** (vendor demo video). Clear, Mysa, CashFlo,
+  OPEN Money and Kodo/EnKash remain vendor-stated text claims with no tag.
+- **A vendor demo is not proof of current availability.** v3 learned this the hard
+  way: RazorpayX's demo material still showcases TDS payment tracking that the live
+  account says has been discontinued. Any competitor capability sourced from
+  marketing — which is *all five* of the others — may be aspirational, deprecated,
+  or plan-gated.
+- **The RazorpayX account inspected is "RazorpayX Lite."** Some absences may be
+  plan-gating rather than product gaps.
+- **Scrutiny has moved the comparison in both directions.** Looking closely cost us
+  two claimed advantages (agent capability, approval parity) but also revealed a
+  competitor retreating from tax remittance. The remaining "not stated" cells are
+  *unexamined*, not points in our favour.
+- RazorpayX was seen from the outside only — its UI tells us what it does, not how,
+  and not what its AI assistant records underneath.
 - Several AgentSwitch gaps here are platform-documented as unimplemented (not
   this report guessing) — see `CURRENT_STATUS.md` §2 for exact ticket ids
   (GST-18/28/29/32/39). The GRN-entity absence and missing reports API were
