@@ -27,6 +27,13 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 > after). Full reconciliation in §0 below. Nothing to undo, but worth knowing before
 > filing anything else, and worth a word to the instructor so triage isn't wasted.
 
+> 🆕 **B7, B8 and B9 (added 2026-09-22) are the first findings from the Keystone
+> (US) instance** — `class.agentswitch.theschoolofai.in`, company
+> `c1e47d8d-b849-4187-9a32-4103d3dece4a`. Everything above them is Suryodaya/India.
+> `CURRENT_STATUS.md` does not describe the US instance at all, so these were found
+> against an environment the rest of this repo has not documented. **B7 is the
+> strongest unfiled candidate we have** and should go first.
+
 ## 0. Filed-report reconciliation (`GET /api/bug-report/mine`, 2026-09-22)
 
 | Platform id | Filed | Content | Board | Note |
@@ -319,6 +326,239 @@ should be present.
 `tools/call JournalEntry.get` whether `lines` is populated in the API response. If
 populated → UI rendering bug (strong). If empty while `total_debit` is non-zero →
 data-integrity bug (stronger). Capture the id either way.
+
+---
+
+### B7 · Recurring bills regenerate **every day** — `next_bill_date` never advances
+
+**Severity:** High · **Area:** Accounts Payable / Recurring Bills · **Instance: Keystone (US)** · **Verified 2026-09-22**
+
+> **File this one first.** It is the strongest candidate we have: a live,
+> self-demonstrating duplicate-payables generator, and it is *literally* the
+> Core Challenge Prompt ("is any vendor being paid twice?") occurring for real
+> on the platform. It also has a clean internal control group (see below).
+
+```
+Active monthly RecurringBill templates generate a new draft Bill on EVERY run,
+not once per month. next_bill_date never advances and last_generated_date is
+never stamped, so the scheduler re-fires the same template indefinitely.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a)
+Instance: https://class.agentswitch.theschoolofai.in  (US locale, us_gaap,
+sales_use_tax, base_currency USD)
+Vendor: Apex Metals Supply LLC (bfb5a381-ec65-46bb-a7c8-60f0fbadf205)
+
+SUMMARY
+RecurringBill.list returns 4 active templates, all frequency "monthly",
+all start_date 2026-04-01. Three have repeat_every 1.0 and a next_bill_date of
+2026-08-01 -- a date in the PAST. Those three have each produced one Bill per
+day on 2026-09-20, 2026-09-21 and 2026-09-22 and are still producing them.
+
+THE CONTROL GROUP (this is what makes it conclusive)
+The fourth template is identical in every respect except that its next_bill_date
+is in the FUTURE, and it fired exactly once:
+
+  5d45e8e8-a423-486e-858e-aeb8a20f0c94  "Quarterly pest control"
+    frequency monthly, repeat_every 3.0, next_bill_date 2026-10-01 (future)
+    -> 1 bill total:  BILL-2026-00085  2026-09-20  4,500.00  draft
+
+Same company, same vendor, same start_date, same active status. The only
+differing variable is whether next_bill_date is in the past. That isolates the
+defect to the scheduler's date-advance step.
+
+REPRODUCTION
+1. tools/call RecurringBill.list {"limit": 100}
+   -> 4 templates; note next_bill_date and last_generated_date on each.
+2. tools/call Bill.list {"limit": 100}  (page through; total was 91 on 09-22)
+3. Group the returned bills by recurring_bill_id.
+
+ACTUAL -- one bill per template per DAY:
+
+  4493ae01-2a36-41d3-ae59-5d8ddd94e0ce  "Monthly internet & bandwidth"
+    next_bill_date 2026-08-01, last_generated_date null
+      BILL-2026-00082  2026-09-20   8,500.00  draft
+      BILL-2026-00086  2026-09-21   8,500.00  draft
+      BILL-2026-00089  2026-09-22   8,500.00  draft
+
+  d6e80764-c95e-459d-9c2c-aaa53b7c7bad  "Office cleaning services"
+    next_bill_date 2026-08-01, last_generated_date null
+      BILL-2026-00083  2026-09-20  18,000.00  draft
+      BILL-2026-00087  2026-09-21  18,000.00  draft
+      BILL-2026-00090  2026-09-22  18,000.00  draft
+
+  95155c69-5fc6-4c2b-92a8-10e16076d689  "SaaS - CRM & helpdesk"
+    next_bill_date 2026-08-01, last_generated_date null
+      BILL-2026-00084  2026-09-20  12,000.00  draft
+      BILL-2026-00088  2026-09-21  12,000.00  draft  (id a72bfc54-e6ab-46fd-97d9-f4728ddf3a15)
+      BILL-2026-00091  2026-09-22  12,000.00  draft
+
+EXPECTED
+One Bill per template per month. After generating, the scheduler should advance
+next_bill_date by (frequency x repeat_every) and stamp last_generated_date.
+
+TWO SYMPTOMS, LIKELY ONE ROOT CAUSE
+  (a) next_bill_date is not advanced after generation, so a past due-date stays
+      permanently due and re-fires on every scheduler pass.
+  (b) last_generated_date is null on all four templates despite 10 bills having
+      been generated from them -- so even a "have I already run today?" guard
+      has nothing to read.
+
+IMPACT
+Unbounded growth of duplicate draft payables against a single vendor. Three new
+duplicates per day, accumulating since at least 2026-09-20. Any AP process or
+agent that approves drafts in bulk would pay this vendor three times over for
+the same month of services. This is a duplicate-payment defect, which is the
+exact failure class Seat 03 exists to detect.
+
+NOTE ON SEVERITY
+Currently contained only because every generated bill is stuck in status
+"draft". If anything advances drafts automatically, this becomes a live
+double-payment incident rather than a data-hygiene one.
+```
+
+**Why this is not already covered:** `not_yet_supported` names GST-18/28/29/32/39,
+`period_close`, `depreciation_posting` and `inventory_costing`. Recurring-bill
+scheduling appears nowhere in that list, and nothing in §3 covers it.
+
+---
+
+### B8 · India seed data on the US company — INR bills and GST fields on a USD/sales-tax entity
+
+**Severity:** Medium · **Area:** Data integrity / Locale · **Instance: Keystone (US)** · **Verified 2026-09-22**
+
+```
+Bills on the US company are denominated in INR and carry the full India GST
+field set, contradicting the company's own locale.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a)
+Instance: https://class.agentswitch.theschoolofai.in
+GET /api/accounting/locale -> locale.country "US", accounting_standard
+"us_gaap", tax_regime "sales_use_tax", base_currency "USD", currency_symbol "$",
+features.gst_returns false.
+
+ACTUAL
+Of 91 Bills, 10 carry currency_code "INR" on a company whose base_currency is
+USD. All 10 belong to vendor Apex Metals Supply LLC
+(bfb5a381-ec65-46bb-a7c8-60f0fbadf205) and all are recurring-generated (see B7):
+
+  BILL-2026-00082 .. BILL-2026-00091   currency_code "INR"
+
+Sample: BILL-2026-00088 (a72bfc54-e6ab-46fd-97d9-f4728ddf3a15) returns
+  currency_code   "INR"        <- company base_currency is USD
+  gst_treatment   null         <- India-only field, present on a US document
+  place_of_supply null         <- India-only
+  source_of_supply / destination_of_supply  null   <- India-only
+  gst_no          null         <- India-only
+  ims_status      "pending"    <- India GST IMS, meaningless under sales_use_tax
+  itc_eligibility "input"      <- India Input Tax Credit, no US equivalent
+  is_reverse_charge 0          <- India RCM
+  tds_amount / tds_section / tds_percentage / tcs_*  null  <- India TDS/TCS
+  items[].cgst_amount / sgst_amount / igst_amount / utgst_amount / cess_amount
+                               <- India GST components on every line item
+  use_tax_accrued null         <- the ONE field that is actually relevant to
+                                  this locale, and it is the one left unset
+
+EXPECTED
+Either (a) documents on a US company should be created in the company's base
+currency unless a deliberate multi-currency workflow set otherwise, and (b) the
+India-only GST/TDS field group should not be populated or surfaced under
+tax_regime "sales_use_tax" -- or, if the schema is intentionally shared across
+jurisdictions, the locale-irrelevant fields should be consistently null/absent
+rather than carrying India semantics (ims_status "pending", itc_eligibility
+"input") on a US document.
+
+WHY THIS MATTERS BEYOND COSMETICS
+An agent that follows the platform's own locale contract -- read
+/api/accounting/locale, branch on tax_regime -- computes US sales tax for this
+company. But the purchase-side tax signal is entirely in India GST fields that
+are all zero, while the genuinely relevant field (use_tax_accrued) is null on
+all 91 bills. The result is a US company with USD 226,488.27 of output tax
+across 127 receivable invoices and no representable input-tax position at all.
+
+RELATED
+Compare filed report 2a655790-2b05-4528-ade1-cff6d9c5ce15 (B1), which is the
+mirror image on the India instance: 100 TaxJurisdiction rows of US sales-tax
+data sitting on Suryodaya. Same class of defect -- seed data landing on the
+wrong-jurisdiction company -- in both directions.
+```
+
+---
+
+### B9 · Locale feature flags contradict MCP tool exposure in three places
+
+**Severity:** Low-Medium · **Area:** Locale / API surface · **Instance: Keystone (US)** · **Verified 2026-09-22**
+
+```
+GET /api/accounting/locale advertises a feature set that does not match the
+tools actually exposed to the caller.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a)
+Instance: https://class.agentswitch.theschoolofai.in
+Role: finance_user; roles [finance_user, user, agent_user, sales_viewer]
+MCP tools/list returned 447 tools on 2026-09-22.
+
+METHOD
+Cross-check each locale.features flag against the presence of matching tools in
+tools/list.
+
+THREE MISMATCHES
+
+  features.gst_returns = false
+    but exposed: GSTReturn.get, GSTReturn.list
+    (read-only, so low impact -- but the flag says the capability is off)
+
+  features.eway_bill = false
+    but exposed: EWayBill.activate, EWayBill.create, EWayBill.generate,
+                 EWayBill.get, EWayBill.list, EWayBill.update   (6 tools)
+    This is the material one: WRITE and GENERATE tools for an India-only
+    statutory document are callable on a US company whose locale declares the
+    feature disabled. An agent enumerating tools/list has no way to know these
+    should not be used here.
+
+  features.form_1099 = true
+    but exposed: nothing. No Form1099 entity, no 1099-named tool anywhere in
+    the 447. The flag advertises a US compliance capability with no API behind
+    it.
+
+CORRECTLY ALIGNED (control cases -- the flags are not uniformly wrong)
+  features.einvoicing             = false -> 0 matching tools   consistent
+  features.sales_tax_nexus        = true  -> TaxNexus.get/list   consistent
+  features.exemption_certificates = true  -> ExemptionCertificate.get/list,
+                                             TaxExemption.get/list  consistent
+  features.sales_tax_jurisdictions= true  -> TaxJurisdiction.get/list consistent
+
+EXPECTED
+locale.features should gate tool exposure, or at minimum agree with it. A flag
+of false should mean the corresponding tools are not offered (the platform
+already does exactly this for prohibited entities -- SalarySlip, Contract and
+EsignDocument are absent from tools/list rather than returning 403). A flag of
+true should mean an API exists.
+
+IMPACT
+locale.features is the platform's own documented contract for how an agent
+adapts to jurisdiction -- our SKILL.md Hard Rule 2 depends on it. If the flags
+do not predict tool availability, a locale-driven agent must probe tools/list
+instead, which makes the endpoint advisory rather than authoritative.
+```
+
+---
+
+### Not fileable — tool-count delta between instances
+
+`tools/list` returned **436** on Suryodaya (per `../CURRENT_STATUS.md` §4,
+2026-09-20) and **446–447** on Keystone (2026-09-22, count drifted by one within
+the same session). A diff would be interesting — a US company exposing India-only
+tools is exactly what B9 documents.
+
+**We cannot produce that diff.** The team credentials authenticate against
+Keystone only; the Suryodaya login returns `HTTP 401 Invalid credentials`, and
+`CURRENT_STATUS.md` records the India tool names in prose rather than storing the
+raw `tools/list` response. Two different counts taken on two different days from
+two different companies is not evidence of anything. **Do not file this** —
+B9 already captures the defensible part with direct flag-vs-tool evidence.
 
 ---
 
@@ -640,18 +880,31 @@ UI, and only needs platform support if it should become a native alert.
 
 ## 5. Suggested submission order
 
-1. **B4** first — it has a control test proving the calculator is correct before
-   claiming the data is wrong, so it is the hardest to dismiss.
-2. **F6 (enable `approvals`)** — costs the platform team nothing to grant, unblocks
+1. **B7 (recurring bills regenerate daily)** first. Same reason B4 used to hold
+   this slot — it carries a control group, the "Quarterly pest control" template,
+   identical in every respect except a future `next_bill_date`, which fired once
+   while its three siblings fire daily. That isolates the defect to one step and
+   makes it hard to dismiss. It is also live and still accruing, and it *is* the
+   Core Challenge Prompt happening for real on the platform.
+2. **B4** — it has a control test proving the calculator is correct before
+   claiming the data is wrong, so it is likewise hard to dismiss.
+3. **F6 (enable `approvals`)** — costs the platform team nothing to grant, unblocks
    a capability that already exists, and is the fastest win on this list.
-3. **B5** once reproduced with a concrete `JournalEntry.id`.
-4. **F1 (GRN)** as the headline feature request — structural, competitor-verified
+4. **B8 (India seed data on the US company)** — pairs naturally with the already-filed
+   B1, which is the same defect in the opposite direction. Worth submitting together
+   or cross-referencing, since one root cause probably explains both.
+5. **B9 (feature flags vs tool exposure)** — weakest of the three new ones, but it
+   carries four correctly-aligned control cases, so it cannot be waved away as a
+   misunderstanding of how the flags work.
+6. **B5** once reproduced with a concrete `JournalEntry.id`.
+7. **F1 (GRN)** as the headline feature request — structural, competitor-verified
    in a live product, and the only item unblockable by orchestration.
-5. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
+8. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
    is the platform's own stated purpose. The dry-run flag is the cheap version of
-   the ask.
-6. The remaining requests as a single batch, referencing the competitor evidence in
-   `razorpay_gap_report.md`.
+   the ask. B7 is a good argument for it: a scheduler defect accrued ten unwanted
+   records against a shared live ledger with no non-production place to catch it.
+9. The remaining requests as a single batch, referencing the competitor evidence in
+   `razorpay_gap_report.md` and `clear_gap_report.md`.
 
 **A note on method, worth repeating to whoever reviews this:** F6 was originally
 written as "please build multi-level approvals." Verifying before submitting
