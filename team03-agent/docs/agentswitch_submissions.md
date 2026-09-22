@@ -31,6 +31,7 @@ triaged. Board IDs are the instructor's; our internal ids are in brackets.
 | **N127** | B2+B3 | Tax records carry tool names and contradict themselves, and Tax Summary counts them | High | ✅ **Live on server — FIXED** |
 | **N128** | B4 | Documents can store tax lines the tax calculator would never produce | Medium | 🔴 Open |
 | **N173** | F1–F5 | Accounting feature requests (goods receipts, write sandbox, reports over MCP, bank checks, accountant access) | Low | ⚪ To do · Carbon upgrade · *not scheduled* |
+| — | **B6** | **N127's fix is incomplete — `group_taxes[].tax_type` still holds tool names** | Medium | **Ready — verified 22 Sep, strongest next filing** |
 | — | B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Medium | Not filed — needs reproduction |
 | — | F6 | Enable `approvals` app for Seat 03 | — | Not filed |
 | — | F7, F8 | Batch payment-run identity · MSME 45-day tracking | Low/Med | Not filed |
@@ -206,6 +207,73 @@ ENTITY IDS
 CreditNote: 08749498-9898-423a-a4ab-6bac6b679c7d, f7aa6705-2703-4403-ba36-926197945859
 Company: 5cbe5a55-af74-4363-a436-f5350593114c
 No job_id — found by direct REST/MCP inspection.
+```
+
+---
+
+### B6 · N127's fix is incomplete — `group_taxes[].tax_type` still holds tool names
+
+**Severity:** Medium · **Area:** Tax / Settings · **Follow-up to N127**
+
+```
+The fix shipped for N127 corrected the parent Tax records but did not reach the
+nested group_taxes child rows, which still hold tool names.
+
+ENVIRONMENT
+Company: Suryodaya Precision Works Pvt. Ltd. (5cbe5a55-af74-4363-a436-f5350593114c),
+India locale. Re-verified 2026-09-22, after N127 was marked "Live on server".
+
+WHAT THE FIX DID CORRECT (confirmed working)
+  Tax.tax_name          was "Scriber 5169"  ->  now "Tax — Machining", "Tax — Inspection"
+  Tax.is_group          was 67 of 100 contradicting their group_taxes children
+                        ->  now 0 of 100 contradictory
+  TaxJurisdiction       was 100 rows all country="US" on an India company
+                        ->  now total = 0, correctly empty for a GST regime
+
+WHAT IT MISSED
+  group_taxes[].tax_type is still 0 of 88 valid against the Tax.tax_type enum
+  (IGST / CGST / SGST / UTGST / CESS / TDS / TCS / SALES_TAX / USE_TAX / EXCISE /
+  WITHHOLDING_1099 / other). Current values include:
+      "Angle Plate 5091", "Scriber 5162", "Punch Set 5158", "Punch Set 5130",
+      "Punch Set 5115", "Surface Plate 5107", "Pipe Wrench 5134", "Pipe Wrench 5112"
+
+  So a Tax record now reads sensibly at the top level -- tax_name "Tax — Machining",
+  tax_type "SALES_TAX", is_group true -- while its component rows underneath are
+  still named after hand tools.
+
+REPRODUCTION
+1. POST /api/mcp -> tools/call Tax.list {"limit": 100}
+2. Read Tax.tax_name on any row: corrected.
+3. Read group_taxes[].tax_type on the same row: still a tool name.
+4. Compare every populated group_taxes[].tax_type against the Tax.tax_type enum
+   published in /api/schemas: 0 of 88 match.
+
+WHY IT WAS MISSED (probable)
+The N127 fix note reports "8,535 tool-named values found in 85 fields, all corrected
+in a rehearsal on copies of the live data." This nested child field appears not to
+have been among those 85 fields, or the sweep did not descend into child tables.
+Worth checking whether other "children"-typed fields were skipped for the same
+reason -- Invoice.taxes, Bill.taxes, CreditNote.taxes and Party.roles are all the
+same shape, and CreditNote.taxes[].tax_type is confirmed still corrupt (see N128).
+
+EXPECTED
+group_taxes[].tax_type should hold a recognised tax head, like the parent
+Tax.tax_type field already does on the same record.
+
+ACTUAL
+It holds product names, unchanged since before the fix.
+
+IMPACT
+Composite-tax expansion (GST 18% -> CGST 9% + SGST 9%) still cannot be driven off
+the tax master: the component rows carry no usable classification. The parent-level
+fix makes this harder to notice, because the record now looks correct until you
+open its children.
+
+ENTITY IDS
+Company: 5cbe5a55-af74-4363-a436-f5350593114c
+Affects every Tax row with group_taxes children (88 populated child values sampled
+across 100 Tax records).
+No job_id -- found by direct REST/MCP inspection.
 ```
 
 ---

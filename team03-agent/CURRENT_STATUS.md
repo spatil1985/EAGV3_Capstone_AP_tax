@@ -222,6 +222,13 @@ real model (separate task).
 
 ### 7a. Tax data on this instance is not trustworthy — do not drive tax logic off it
 
+> **UPDATE 2026-09-22 — partially fixed upstream. The rule below still stands.**
+> Two of the three defects were fixed and shipped (§9). Re-verified against live
+> data: `TaxJurisdiction` is now clean, and `Tax` master names and the `is_group`
+> flag are corrected. **But `group_taxes[].tax_type` and `CreditNote.taxes[]` are
+> still corrupt**, so item-level GST fields remain the only safe source. See §9 for
+> the field-by-field post-fix verification.
+
 Verified 2026-09-21 while investigating an odd Tax Summary report. Three defects
 filed (§9). The practical rule for `scripts/tax_math.py`:
 
@@ -261,15 +268,50 @@ Filed 2026-09-21 via `POST /api/bug-report` (all returned `delivery: "local"`, i
 saved in-platform for the AgentSwitch team; no external GitHub issue was opened).
 Track with `GET /api/bug-report/mine` or `BugReport.list`.
 
-| id | status | Subject |
-|---|---|---|
-| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | new | All 100 `TaxJurisdiction` rows on the India company are US sales-tax data, contradicting the locale's own `sales_tax_jurisdictions=false` / `sales_tax_nexus=false` flags |
-| `5c8b16e3-3761-4fa3-b482-9d486c977411` | new | 67 of 100 `Tax` rows have `is_group=false` while carrying `group_taxes` children; child `tax_type` is unvalidated free text (0 of 88 valid) while the parent field enforces the enum |
-| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | new | Tax Summary report renders product names as tax heads and folds non-tax amounts into the OUTPUT TAX total (shows ₹4,991.76 where the source documents' own `total_tax` is ₹62,402.95) |
+| id | Board | Subject | Board status |
+|---|---|---|---|
+| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | **N126** | All 100 `TaxJurisdiction` rows on the India company are US sales-tax data, contradicting the locale's own `sales_tax_jurisdictions=false` / `sales_tax_nexus=false` flags | ✅ **Live on server** (`c3986d40e`) |
+| `5c8b16e3-3761-4fa3-b482-9d486c977411` | **N127** | 67 of 100 `Tax` rows have `is_group=false` while carrying `group_taxes` children; child `tax_type` unvalidated (0 of 88 valid) while the parent enforces the enum | ✅ **Live on server** (`92682d0a3`, `4c812eb0f`) |
+| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | **N127** | Tax Summary renders product names as tax heads and folds non-tax amounts into the OUTPUT TAX total | ✅ merged into N127 |
+| *(filed by hand)* | **N128** | Documents can store tax lines the tax calculator would never produce | 🔴 **Open** (Medium) |
+| *(filed by hand)* | **N173** | Feature requests F1–F5 bundled | ⚪ Low · Carbon upgrade · not scheduled |
 
-None of these appear in the platform's self-documented `not_yet_supported` list (§2),
-so they should be genuinely new rather than already-known. None could carry a
-`job_id` — all were found by direct REST/MCP inspection rather than an agent run.
+None appeared in the platform's self-documented `not_yet_supported` list (§2), so
+they were genuinely new. None carries a `job_id` — all were found by direct REST/MCP
+inspection rather than an agent run.
+
+### 9a. Post-fix verification (re-run against live data 2026-09-22)
+
+The board says "Live on server," but N126's note reads *"existing records are
+corrected when the next release goes out"* and N127's says the sweep was rehearsed
+*"on copies of the live data."* Neither phrasing guarantees our instance is clean,
+so every claim was re-checked:
+
+| Check | Before | Now | Verdict |
+|---|---|---|---|
+| `TaxJurisdiction` rows on India co. | 100, all `country="US"` | **total = 0** | ✅ Fixed — bogus US jurisdictions removed entirely, correct for a GST regime |
+| `Tax.tax_name` | `"Scriber 5169"` (tool names) | `"Tax — Machining"`, `"Tax — Inspection"` | ✅ Fixed |
+| `Tax.is_group` vs `group_taxes` children | 67 of 100 contradictory | **0 of 100** | ✅ Fixed |
+| **`group_taxes[].tax_type`** | 0 of 88 valid enum values | **still 0 of 88** — `"Angle Plate 5091"`, `"Punch Set 5158"`, `"Scriber 5162"` | ❌ **NOT fixed** |
+| `CreditNote.taxes[].tax_type` | product names | **still 26 product names** | ❌ Not fixed (consistent with N128 Open) |
+| `CreditNote.taxes[]` rate=0 carrying tax | present | **still 5 rows** | ❌ Not fixed (N128 Open) |
+
+**The N127 fix is incomplete.** The sweep corrected *parent* `Tax` records — names
+and the `is_group` flag — but the nested `group_taxes[].tax_type` child field still
+holds tool names on every populated row. The fix note claimed "8,535 tool-named
+values across 85 fields, all corrected"; this nested child field was evidently not
+among those 85, or the correction did not descend into child tables.
+
+This is precisely the parent-validated / child-unvalidated asymmetry the original
+report called out, and it survived the fix. **Worth reporting back as a follow-up
+(tracked as B6 in `docs/agentswitch_submissions.md`)** — reporting that a shipped
+fix is incomplete is cheap to verify and demonstrates the verification discipline
+the bug bar asks for.
+
+**Net effect on our agent:** the §7a rule is unchanged. Compute tax from item-level
+`items[].cgst_amount` / `sgst_amount` / `igst_amount` only. `TaxJurisdiction` is now
+clean but empty, `Tax` master is usable for names/flags but not for
+`group_taxes[].tax_type`, and `CreditNote.taxes[]` remains unusable.
 
 ## 8. Open questions for next session
 
