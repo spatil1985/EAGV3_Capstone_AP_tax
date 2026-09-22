@@ -31,8 +31,19 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 > (US) instance** — `class.agentswitch.theschoolofai.in`, company
 > `c1e47d8d-b849-4187-9a32-4103d3dece4a`. Everything above them is Suryodaya/India.
 > `CURRENT_STATUS.md` does not describe the US instance at all, so these were found
-> against an environment the rest of this repo has not documented. **B7 is the
-> strongest unfiled candidate we have** and should go first.
+> against an environment the rest of this repo has not documented.
+>
+> **All three were re-evaluated adversarially the same day, and two changed:**
+>
+> | | Verdict | What changed |
+> |---|---|---|
+> | **B7** | ✅ **Confirmed, stronger** | Ruled out the "it's just seed data" counter-argument. All 81 non-recurring Bills and all 158 Invoices were created 2026-09-16; the only post-seed writes in the entire company are these 10 generated Bills. A scheduler really is running. **File first.** |
+> | **B8** | ⚠️ **Scope halved** | The "India GST fields on US documents" half was **wrong** and is retracted — those values are on all 81 seed Bills too. The currency half survives and is sharper: 10/10 non-USD Bills are recurring-generated, 0/10 recurring Bills are USD. |
+> | **B9** | 🛑 **Do not file as-is** | The platform's own `initialize` contract scopes tools by *roles, app entitlements and row scope* — **not locale**. So "GST tools on a US company" is documented behaviour. Only the `form_1099` flag-with-no-API part survives. |
+>
+> The re-evaluation is itself the point: two of three claims weakened under a
+> second look. Same discipline as the F6 finding in §5 — verify before submitting,
+> because a rejected report costs more than an unfiled one.
 
 ## 0. Filed-report reconciliation (`GET /api/bug-report/mine`, 2026-09-22)
 
@@ -355,6 +366,26 @@ all start_date 2026-04-01. Three have repeat_every 1.0 and a next_bill_date of
 2026-08-01 -- a date in the PAST. Those three have each produced one Bill per
 day on 2026-09-20, 2026-09-21 and 2026-09-22 and are still producing them.
 
+PROOF THIS IS A RUNNING SCHEDULER, NOT SEED DATA (re-verified 2026-09-22)
+The obvious counter-argument is that a seeder wrote these in one pass with
+back-dated timestamps. It did not. created_at across all 91 Bills:
+
+  2026-09-16 -> 81 bills   <- the seed. Every non-recurring Bill.
+  2026-09-20 ->  4 bills   \
+  2026-09-21 ->  3 bills    >  all 10 carry a recurring_bill_id
+  2026-09-22 ->  3 bills   /
+
+All 158 receivable Invoices are also created_at 2026-09-16. So the company was
+seeded once on 09-16, and **the only records written to it since are these ten
+recurring-generated Bills**. The environment is not being reseeded; a generator
+is running. Each batch is milliseconds wide (e.g. .006996 / .014273 / .019178 on
+09-22), consistent with one loop over the active templates, and every bill's
+document date equals its created_at date.
+
+  Run times: 09-20 13:12:22 | 09-21 13:12:22 | 09-22 04:30:17
+  (the shift on the third run suggests a scheduler restart, not a reseed --
+  a reseed would have rewritten the 81 seed bills' timestamps too)
+
 THE CONTROL GROUP (this is what makes it conclusive)
 The fourth template is identical in every respect except that its next_bill_date
 is in the FUTURE, and it fired exactly once:
@@ -423,72 +454,112 @@ scheduling appears nowhere in that list, and nothing in §3 covers it.
 
 ---
 
-### B8 · India seed data on the US company — INR bills and GST fields on a USD/sales-tax entity
+### B8 · The recurring-bill generator writes INR on a USD company
 
-**Severity:** Medium · **Area:** Data integrity / Locale · **Instance: Keystone (US)** · **Verified 2026-09-22**
+**Severity:** Medium · **Area:** Recurring Bills / Currency · **Instance: Keystone (US)** · **Verified 2026-09-22**
+
+> ⚠️ **Scope narrowed after re-verification.** An earlier draft of this entry also
+> claimed "India GST fields on US documents" as part of the defect. **That half
+> was wrong and has been withdrawn — see the retraction note below.** What
+> survives is the currency defect, which is narrower but much better evidenced.
 
 ```
-Bills on the US company are denominated in INR and carry the full India GST
-field set, contradicting the company's own locale.
+Every Bill produced by the recurring-bill generator is denominated in INR on a
+company whose base_currency is USD. No other Bill in the company is non-USD.
 
 ENVIRONMENT
 Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a)
 Instance: https://class.agentswitch.theschoolofai.in
 GET /api/accounting/locale -> locale.country "US", accounting_standard
-"us_gaap", tax_regime "sales_use_tax", base_currency "USD", currency_symbol "$",
-features.gst_returns false.
+"us_gaap", tax_regime "sales_use_tax", base_currency "USD", currency_symbol "$".
 
-ACTUAL
-Of 91 Bills, 10 carry currency_code "INR" on a company whose base_currency is
-USD. All 10 belong to vendor Apex Metals Supply LLC
-(bfb5a381-ec65-46bb-a7c8-60f0fbadf205) and all are recurring-generated (see B7):
+ACTUAL -- the correlation is exact
+  Bills in the company:                              91
+  Bills with currency_code != "USD":                 10
+  Of those 10, how many are recurring-generated:     10   (100%)
+  Recurring-generated bills that are USD:             0   (0%)
 
-  BILL-2026-00082 .. BILL-2026-00091   currency_code "INR"
+  BILL-2026-00082 .. BILL-2026-00091   all currency_code "INR"
+  All 10 belong to vendor Apex Metals Supply LLC
+  (bfb5a381-ec65-46bb-a7c8-60f0fbadf205), from the four RecurringBill templates
+  listed in B7.
 
-Sample: BILL-2026-00088 (a72bfc54-e6ab-46fd-97d9-f4728ddf3a15) returns
-  currency_code   "INR"        <- company base_currency is USD
-  gst_treatment   null         <- India-only field, present on a US document
-  place_of_supply null         <- India-only
-  source_of_supply / destination_of_supply  null   <- India-only
-  gst_no          null         <- India-only
-  ims_status      "pending"    <- India GST IMS, meaningless under sales_use_tax
-  itc_eligibility "input"      <- India Input Tax Credit, no US equivalent
-  is_reverse_charge 0          <- India RCM
-  tds_amount / tds_section / tds_percentage / tcs_*  null  <- India TDS/TCS
-  items[].cgst_amount / sgst_amount / igst_amount / utgst_amount / cess_amount
-                               <- India GST components on every line item
-  use_tax_accrued null         <- the ONE field that is actually relevant to
-                                  this locale, and it is the one left unset
+Currency is therefore perfectly predicted by "was this row written by the
+recurring generator", which points at the generator's own currency defaulting
+rather than at the seed data.
+
+Sample: BILL-2026-00088 (a72bfc54-e6ab-46fd-97d9-f4728ddf3a15)
+  currency_code   "INR"     <- company base_currency is USD
+  grand_total     12000.0   <- no exchange_rate field is set alongside it
 
 EXPECTED
-Either (a) documents on a US company should be created in the company's base
-currency unless a deliberate multi-currency workflow set otherwise, and (b) the
-India-only GST/TDS field group should not be populated or surfaced under
-tax_regime "sales_use_tax" -- or, if the schema is intentionally shared across
-jurisdictions, the locale-irrelevant fields should be consistently null/absent
-rather than carrying India semantics (ims_status "pending", itc_eligibility
-"input") on a US document.
+A Bill generated for a US company should carry currency_code "USD", or, if
+multi-currency is intentional, should carry an exchange rate so the amount can
+be translated into the base currency for reporting.
 
-WHY THIS MATTERS BEYOND COSMETICS
-An agent that follows the platform's own locale contract -- read
-/api/accounting/locale, branch on tax_regime -- computes US sales tax for this
-company. But the purchase-side tax signal is entirely in India GST fields that
-are all zero, while the genuinely relevant field (use_tax_accrued) is null on
-all 91 bills. The result is a US company with USD 226,488.27 of output tax
-across 127 receivable invoices and no representable input-tax position at all.
+IMPACT
+Ten payables of unstated real value. 12,000 INR and 12,000 USD are both stored
+as "12000.0" with only currency_code to tell them apart, and no rate to convert
+by. Any total over Bill.grand_total silently mixes the two.
+
+RELATIONSHIP TO B7
+Same ten rows, same generator, but the two defects are independent: B7 is about
+how OFTEN the generator fires, B8 is about WHAT it writes. Fixing the schedule
+would not fix the currency, and vice versa. They can be filed together, but the
+distinction should be stated so a fix for one is not read as closing the other.
 
 RELATED
-Compare filed report 2a655790-2b05-4528-ade1-cff6d9c5ce15 (B1), which is the
-mirror image on the India instance: 100 TaxJurisdiction rows of US sales-tax
-data sitting on Suryodaya. Same class of defect -- seed data landing on the
-wrong-jurisdiction company -- in both directions.
+Filed report 2a655790-2b05-4528-ade1-cff6d9c5ce15 (B1) reported the converse on
+Suryodaya: 100 TaxJurisdiction rows of US sales-tax data on the India company.
+Cross-referencing is still worthwhile -- wrong-jurisdiction values in both
+directions -- but note B8 is now a generator defect, not a seeding defect, so
+they may well have different root causes.
 ```
+
+**Retraction — why the GST-field claim was dropped.** The earlier draft argued
+that `ims_status: "pending"`, `itc_eligibility: "input"`, `is_reverse_charge`
+and the `items[].cgst/sgst/igst/utgst/cess_amount` group had no business on a
+US document. Re-verification killed it: **all 81 non-recurring (seed) Bills carry
+exactly the same values** — `ims_status "pending"` 81/81, `itc_eligibility
+"input"` 81/81 — and `gst_treatment` / `place_of_supply` are null everywhere,
+including on the INR rows. So this is not something specific to these bills; it
+is the platform's single cross-jurisdiction Bill schema with its defaults
+showing through.
+
+Filing it would also have contradicted our own position: `gap_report.md` §2
+lists the unified `Tax`/`TaxGroup` taxonomy covering GST **and** US tax types in
+one model as an **AgentSwitch advantage** over all six competitors. We cannot
+claim a shared cross-jurisdiction schema as an edge in one document and file it
+as a defect in another. The legitimate complaint is narrower and belongs in a
+feature request, not a bug: under `tax_regime: "sales_use_tax"` the API gives an
+agent no populated purchase-side tax signal at all (`use_tax_accrued` is null on
+all 91 Bills), so a locale-driven agent has nothing to compute input tax from.
 
 ---
 
-### B9 · Locale feature flags contradict MCP tool exposure in three places
+### B9 · Locale feature flags contradict MCP tool exposure — ⚠️ DO NOT FILE AS-IS
 
-**Severity:** Low-Medium · **Area:** Locale / API surface · **Instance: Keystone (US)** · **Verified 2026-09-22**
+**Severity:** Low · **Area:** Locale / API surface · **Instance: Keystone (US)** · **Re-evaluated 2026-09-22**
+
+> 🛑 **Re-evaluation verdict: most of this is working as documented. Do not submit
+> the flag-vs-tool-exposure argument as a bug.**
+>
+> The `initialize.result` instruction string states tools are scoped to *"your
+> roles, app entitlements and row scope"* (`../CURRENT_STATUS.md` §4). **Locale is
+> not in that list.** The platform never promised `locale.features` would gate
+> `tools/list`, so "GST tools visible on a US company" is the documented behaviour,
+> not a defect. Filing it invites a `wont_fix` and burns triage goodwill — exactly
+> the failure mode §"Scoring lesson" already warns about, where F6 turned out to be
+> a capability that already existed.
+>
+> **One part does survive**, and it is not a scoping question at all: `form_1099:
+> true` advertises a capability with **no API behind it anywhere** in the 447
+> tools. That is a flag making a promise the platform cannot keep, and it is worth
+> raising — as a low-severity report or a feature request, not as part of a
+> flag-gating argument.
+>
+> The evidence below is kept because it is accurate and worth having on file. Only
+> the conclusion changed.
 
 ```
 GET /api/accounting/locale advertises a feature set that does not match the
@@ -530,18 +601,31 @@ CORRECTLY ALIGNED (control cases -- the flags are not uniformly wrong)
                                              TaxExemption.get/list  consistent
   features.sales_tax_jurisdictions= true  -> TaxJurisdiction.get/list consistent
 
-EXPECTED
-locale.features should gate tool exposure, or at minimum agree with it. A flag
-of false should mean the corresponding tools are not offered (the platform
-already does exactly this for prohibited entities -- SalarySlip, Contract and
-EsignDocument are absent from tools/list rather than returning 403). A flag of
-true should mean an API exists.
+COUNTER-ARGUMENT (why the first two are NOT bugs)
+initialize.result states: "Tools are scoped to the authenticated caller: you see
+only what your roles, app entitlements and row scope permit." Locale is not a
+scoping dimension in that contract. gst_returns=false and eway_bill=false
+describe what the COMPANY does, not what the CALLER may call. A US company
+exposing GSTReturn.list to a finance_user with the accounting app entitlement is
+consistent with the documented rule. The SalarySlip/Contract/EsignDocument
+precedent does not transfer either -- those are excluded by entitlement, which
+IS a documented scoping dimension.
 
-IMPACT
-locale.features is the platform's own documented contract for how an agent
-adapts to jurisdiction -- our SKILL.md Hard Rule 2 depends on it. If the flags
-do not predict tool availability, a locale-driven agent must probe tools/list
-instead, which makes the endpoint advisory rather than authoritative.
+WHAT ACTUALLY SURVIVES
+  features.form_1099 = true, and there is no Form1099 entity, no 1099-named tool,
+  nothing in the 447. This is not about scoping: no role or entitlement could
+  reveal an API that does not exist. The flag advertises a capability the
+  platform does not have.
+
+RESIDUAL CONCERN, worth stating but not worth filing as a defect
+SKILL.md Hard Rule 2 makes our agent branch on locale. Given the above, the
+correct reading is that locale.features describes JURISDICTION APPLICABILITY,
+not API availability, and an agent must probe tools/list for the latter. That is
+a documentation gap at most. The eway_bill case is the sharpest illustration --
+six write-capable tools (create/generate/activate/update) for an India-only
+statutory document are callable against a US company -- but "callable" is not
+"should be called", and the guard belongs in our agent, not necessarily in the
+platform.
 ```
 
 ---
@@ -890,13 +974,14 @@ UI, and only needs platform support if it should become a native alert.
    claiming the data is wrong, so it is likewise hard to dismiss.
 3. **F6 (enable `approvals`)** — costs the platform team nothing to grant, unblocks
    a capability that already exists, and is the fastest win on this list.
-4. **B8 (India seed data on the US company)** — pairs naturally with the already-filed
-   B1, which is the same defect in the opposite direction. Worth submitting together
-   or cross-referencing, since one root cause probably explains both.
-5. **B9 (feature flags vs tool exposure)** — weakest of the three new ones, but it
-   carries four correctly-aligned control cases, so it cannot be waved away as a
-   misunderstanding of how the flags work.
-6. **B5** once reproduced with a concrete `JournalEntry.id`.
+4. **B8 (recurring generator writes INR on a USD company)** — send it alongside B7,
+   since it is the same ten rows, but state plainly that the two defects are
+   independent so a schedule fix is not read as closing the currency one.
+5. **B5** once reproduced with a concrete `JournalEntry.id`.
+6. **B9 — do not submit the flag-gating argument.** Re-evaluation found the platform
+   documents tools as role-scoped, not locale-scoped. If anything goes in, it is
+   only the `form_1099: true` flag with no backing API, and that belongs with the
+   feature requests rather than the bugs.
 7. **F1 (GRN)** as the headline feature request — structural, competitor-verified
    in a live product, and the only item unblockable by orchestration.
 8. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
