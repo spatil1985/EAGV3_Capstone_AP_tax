@@ -22,6 +22,34 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 
 ## Status summary
 
+> ⚠️ **17 reports are on the account for ~6 distinct issues — 4 are duplicates.**
+> B1, B2, B3 and B4 were each filed twice (once via the API, once by hand shortly
+> after). Full reconciliation in §0 below. Nothing to undo, but worth knowing before
+> filing anything else, and worth a word to the instructor so triage isn't wasted.
+
+## 0. Filed-report reconciliation (`GET /api/bug-report/mine`, 2026-09-22)
+
+| Platform id | Filed | Content | Board | Note |
+|---|---|---|---|---|
+| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | 21 Sep 05:41 | B1 TaxJurisdiction US | **N126** ✅ fixed | original |
+| `8399b310-96df-4a5d-b02a-66ea5aab4bc1` | 21 Sep 05:51 | B1 again | — | ⚠️ **duplicate** |
+| `5c8b16e3-3761-4fa3-b482-9d486c977411` | 21 Sep 05:41 | B2 `is_group` | **N127** ✅ fixed | original |
+| `c8024248-b974-4b1e-81fd-c90cbe9c5286` | 21 Sep 05:54 | B2 again | — | ⚠️ **duplicate** |
+| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | 21 Sep 05:41 | B3 Tax Summary | merged **N127** | original |
+| `ca9ec4bf-d7c3-4a60-b24c-2c0c21fc4daf` | 21 Sep 05:59 | B3 again | — | ⚠️ **duplicate** |
+| `834f1301-e829-4a31-acbe-956b6c4b0871` | 21 Sep 06:01 | B4 calculator | **N128** 🔴 open | original |
+| `b98e4e6f-7c43-4d61-bbf5-b59c29b1653e` | 22 Sep 05:05 | B4 again | — | ⚠️ **duplicate** — B4 was already N128 |
+| `f9e0c388-af06-4482-8949-88aec69848dd` | 22 Sep 05:07 | **B6 incomplete N127 fix** | pending | ✅ **new, the valuable one** |
+| `03bc068c…` `b21745e1…` `ea21ee35…` `a0caffaa…` `df0dae41…` `3cbfdc17…` `d90a94ad…` `b3737f0e…` | 22 Sep 04:37–04:40 | F1–F8, eight separate reports | collapsed to **N173** | 8 filings → 1 Low, unscheduled card |
+
+**Two lessons from this table.** Eight individually-argued feature requests
+collapsed into a single Low card that isn't scheduled — so they cost eight filings
+and returned one low-value item. And four duplicate defect filings add triage load
+without adding board items. Distinct, verified defects are the only thing that has
+actually moved: three filings produced N126, N127 and N128, two of which are fixed.
+
+---
+
 **Board outcomes as of 2026-09-22** — all items reached the class bug board and were
 triaged. Board IDs are the instructor's; our internal ids are in brackets.
 
@@ -31,7 +59,7 @@ triaged. Board IDs are the instructor's; our internal ids are in brackets.
 | **N127** | B2+B3 | Tax records carry tool names and contradict themselves, and Tax Summary counts them | High | ✅ **Live on server — FIXED** |
 | **N128** | B4 | Documents can store tax lines the tax calculator would never produce | Medium | 🔴 Open |
 | **N173** | F1–F5 | Accounting feature requests (goods receipts, write sandbox, reports over MCP, bank checks, accountant access) | Low | ⚪ To do · Carbon upgrade · *not scheduled* |
-| — | **B6** | **N127's fix is incomplete — `group_taxes[].tax_type` still holds tool names** | Medium | **Ready — verified 22 Sep, strongest next filing** |
+| pending | **B6** | **N127's fix is incomplete — `group_taxes[].tax_type` still holds tool names** | Medium | ✅ **Filed 22 Sep** `f9e0c388-af06-4482-8949-88aec69848dd` — awaiting board triage |
 | — | B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Medium | Not filed — needs reproduction |
 | — | F6 | Enable `approvals` app for Seat 03 | — | Not filed |
 | — | F7, F8 | Batch payment-run identity · MSME 45-day tracking | Low/Med | Not filed |
