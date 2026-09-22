@@ -22,13 +22,53 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 
 ## Status summary
 
-| # | Title | Type | Severity | Status |
+**Board outcomes as of 2026-09-22** — all items reached the class bug board and were
+triaged. Board IDs are the instructor's; our internal ids are in brackets.
+
+| Board | # | Title | Severity | Board status |
 |---|---|---|---|---|
-| B1 | US tax jurisdictions on an India-locale company | Bug | High | **Filed** `2a655790-2b05-4528-ade1-cff6d9c5ce15` |
-| B2 | `is_group=false` with `group_taxes` children (67/100) | Bug | Medium | **Filed** `5c8b16e3-3761-4fa3-b482-9d486c977411` |
-| B3 | Tax Summary renders product names as tax heads | Bug | High | **Filed** `84955e11-7f36-4fc5-bb85-7bba1d7a3257` |
-| B4 | Tax lines storable that the platform's own calculator can't produce | Bug | High | Ready — split out of B3 |
-| B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Bug | Medium | Needs reproduction |
+| **N126** | B1 | The India company's tax jurisdictions are all American | High | ✅ **Live on server — FIXED** |
+| **N127** | B2+B3 | Tax records carry tool names and contradict themselves, and Tax Summary counts them | High | ✅ **Live on server — FIXED** |
+| **N128** | B4 | Documents can store tax lines the tax calculator would never produce | Medium | 🔴 Open |
+| **N173** | F1–F5 | Accounting feature requests (goods receipts, write sandbox, reports over MCP, bank checks, accountant access) | Low | ⚪ To do · Carbon upgrade · *not scheduled* |
+| — | B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Medium | Not filed — needs reproduction |
+| — | F6 | Enable `approvals` app for Seat 03 | — | Not filed |
+| — | F7, F8 | Batch payment-run identity · MSME 45-day tracking | Low/Med | Not filed |
+
+### What the fixes tell us
+
+**N126** — fixed by commit `c3986d40e`: *"the India company now uses Indian GST
+states and union territories · existing records are corrected when the next release
+goes out."*
+
+**N127** — fixed by two commits. `92682d0a3` fixes the data at source, and
+`4c812eb0f` *"makes the Tax Summary show an unclassifiable row as Unclassified and
+leave it out of the total."* **That is precisely the fix this report recommended** —
+that the report should refuse to present a row it cannot classify as a tax head,
+rather than summing it into output tax.
+
+**The blast radius was far larger than we found.** The fix note records
+**8,535 tool-named values across 85 fields, in both apps**, all corrected in a
+rehearsal on copies of live data. We identified the pattern in roughly three fields
+on two entities. The report triggered a sweep ~28× wider than our own sample.
+
+**N127 shares a root cause with pre-existing bug N116** (*"the demo data wrote
+product names into unrelated records"*). So the data half overlapped a known issue;
+the report-layer half — Tax Summary presenting and totalling unclassifiable rows —
+appears to be our distinct contribution, and is what the second commit addresses.
+
+### Scoring lesson — features are not bugs
+
+All five feature requests (F1–F5) were collapsed into **one** board card, **N173**,
+tagged *Carbon upgrade* — which the board defines as *"separate product features
+being added (not defects)"* — at **Low** severity and **not scheduled**.
+
+The bounty is 100 points per **verified bug**. Feature requests appear to earn
+nothing toward it. Five carefully argued requests produced one unscheduled Low card.
+
+**Implication: to move the score, file defects, not feature requests.** F6–F8 should
+be raised for product value, not bounty value, and time is better spent on the
+schema-invariant sweep that produced N126–N128.
 | F1 | No Goods Receipt Note entity — 3-way matching impossible | Feature | High | Ready |
 | F2 | No sandbox / dry-run for ledger writes | Feature | High | Ready |
 | F3 | Reports exist over REST but not over MCP | Feature | Medium | Ready |
