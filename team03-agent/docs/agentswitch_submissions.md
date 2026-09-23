@@ -53,6 +53,10 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 | N7 | TDS independent of base → negative `grand_total` | India | 23 Sep | pending | ⏳ Awaiting triage |
 | N8 | `is_overdue` false negatives 74%, bulk-resolve cluster | India | 23 Sep | pending | ⏳ Awaiting triage |
 
+*"Instance" = the company the defect is **about**. Every one of the 25 filings sits
+on the **India** account's `bug-report/mine` — the Keystone-company findings
+(N1–N4) were filed from there too, which is why the Keystone account reads 0.*
+
 **Feature requests** — all eight filed 22 Sep, **collapsed into one board card**
 
 | # | Title | Board |
@@ -825,6 +829,13 @@ as a primary segment **[CLAIM]**.
 ---
 
 ### F6 · Enable the `approvals` app for Seat 03 · **MEDIUM** *(rewritten — this is not a missing feature)*
+
+> ✅ **Half-resolved, 23 Sep.** `allowed_apps` on the Keystone account now includes
+> `approvals` — the entitlement half of this ask has been granted (recorded in N1's
+> own filed text, which is how we found out; no board card or fix note references
+> F6). The second half is **still open**: no `Approval*` entity tool appears in
+> `tools/list`, so the data is reachable over REST but not over MCP. N1, N5 and N8
+> were all found through that newly-opened REST access.
 
 **⚠️ Correction:** an earlier draft of this document asked AgentSwitch to *build*
 multi-level approvals. That was wrong, and checking before submitting avoided an
