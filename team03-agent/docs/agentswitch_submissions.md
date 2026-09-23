@@ -22,54 +22,115 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 
 ## Status summary
 
-> ⚠️ **17 reports are on the account for ~6 distinct issues — 4 are duplicates.**
-> B1, B2, B3 and B4 were each filed twice (once via the API, once by hand shortly
-> after). Full reconciliation in §0 below. Nothing to undo, but worth knowing before
-> filing anything else, and worth a word to the instructor so triage isn't wasted.
+**Verified against `GET /api/bug-report/mine` on both instances, 2026-09-23:**
+**25 reports on India, 0 on Keystone.**
 
-> 🆕 **B7, B8 and B9 (added 2026-09-22) are the first findings from the Keystone
-> (US) instance** — `class.agentswitch.theschoolofai.in`, company
-> `c1e47d8d-b849-4187-9a32-4103d3dece4a`. Everything above them is Suryodaya/India.
-> `CURRENT_STATUS.md` does not describe the US instance at all, so these were found
-> against an environment the rest of this repo has not documented. **B7 is the
-> strongest unfiled candidate we have** and should go first.
-
-## 0. Filed-report reconciliation (`GET /api/bug-report/mine`, 2026-09-22)
-
-| Platform id | Filed | Content | Board | Note |
-|---|---|---|---|---|
-| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | 21 Sep 05:41 | B1 TaxJurisdiction US | **N126** ✅ fixed | original |
-| `8399b310-96df-4a5d-b02a-66ea5aab4bc1` | 21 Sep 05:51 | B1 again | — | ⚠️ **duplicate** |
-| `5c8b16e3-3761-4fa3-b482-9d486c977411` | 21 Sep 05:41 | B2 `is_group` | **N127** ✅ fixed | original |
-| `c8024248-b974-4b1e-81fd-c90cbe9c5286` | 21 Sep 05:54 | B2 again | — | ⚠️ **duplicate** |
-| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | 21 Sep 05:41 | B3 Tax Summary | merged **N127** | original |
-| `ca9ec4bf-d7c3-4a60-b24c-2c0c21fc4daf` | 21 Sep 05:59 | B3 again | — | ⚠️ **duplicate** |
-| `834f1301-e829-4a31-acbe-956b6c4b0871` | 21 Sep 06:01 | B4 calculator | **N128** 🔴 open | original |
-| `b98e4e6f-7c43-4d61-bbf5-b59c29b1653e` | 22 Sep 05:05 | B4 again | — | ⚠️ **duplicate** — B4 was already N128 |
-| `f9e0c388-af06-4482-8949-88aec69848dd` | 22 Sep 05:07 | **B6 incomplete N127 fix** | pending | ✅ **new, the valuable one** |
-| `03bc068c…` `b21745e1…` `ea21ee35…` `a0caffaa…` `df0dae41…` `3cbfdc17…` `d90a94ad…` `b3737f0e…` | 22 Sep 04:37–04:40 | F1–F8, eight separate reports | collapsed to **N173** | 8 filings → 1 Low, unscheduled card |
-
-**Two lessons from this table.** Eight individually-argued feature requests
-collapsed into a single Low card that isn't scheduled — so they cost eight filings
-and returned one low-value item. And four duplicate defect filings add triage load
-without adding board items. Distinct, verified defects are the only thing that has
-actually moved: three filings produced N126, N127 and N128, two of which are fixed.
+> 🚨 **B7, B8 and B9 have never been filed — on either instance.** They are written
+> up in §2 below and were assumed filed, but neither account holds them. Worse,
+> **N6's text opens with *"B7 (filed against Keystone/US only)…"* — that reference
+> is wrong** and points triage at a report that does not exist. Either file B7 or
+> correct N6. See §C.
 
 ---
 
-**Board outcomes as of 2026-09-22** — all items reached the class bug board and were
-triaged. Board IDs are the instructor's; our internal ids are in brackets.
+### A · FILED (21 filings → 13 distinct issues)
 
-| Board | # | Title | Severity | Board status |
+**Defects**
+
+| # | Title | Instance | Filed | Board | Status |
+|---|---|---|---|---|---|
+| B1 | US tax jurisdictions on the India company | India | 21 Sep | **N126** | ✅ **Fixed, live on server** |
+| B2 | `is_group=false` with `group_taxes` children | India | 21 Sep | **N127** | ✅ **Fixed, live on server** |
+| B3 | Tax Summary renders product names as tax heads | India | 21 Sep | merged **N127** | ✅ **Fixed** |
+| B4 | Tax lines storable that the calculator can't produce | India | 21 Sep | **N128** | 🔴 Open (Medium) |
+| B6 | N127's fix is incomplete — `group_taxes[].tax_type` | India | 22 Sep | pending | ⏳ Awaiting triage |
+| N1 | `is_overdue` wrong on resolved requests (8.6%) | US | 23 Sep | pending | ⏳ Awaiting triage |
+| N2 | 3-way match computed but never persisted to Bill | US | 23 Sep | pending | ⏳ Awaiting triage |
+| N3 | `bill_match` metadata contradicts its description | US | 23 Sep | pending | ⏳ Awaiting triage |
+| N4 | Economic-nexus YTD counters stuck at zero | US | 23 Sep | pending | ⏳ Awaiting triage |
+| N5 | Tool names in `ApprovalRequest.steps[]`/`history[]` | India | 23 Sep | pending | ⏳ Awaiting triage |
+| N6 | Recurring-bill duplication + expired template firing | India | 23 Sep | pending | ⏳ Awaiting triage |
+| N7 | TDS independent of base → negative `grand_total` | India | 23 Sep | pending | ⏳ Awaiting triage |
+| N8 | `is_overdue` false negatives 74%, bulk-resolve cluster | India | 23 Sep | pending | ⏳ Awaiting triage |
+
+**Feature requests** — all eight filed 22 Sep, **collapsed into one board card**
+
+| # | Title | Board |
+|---|---|---|
+| F1–F8 | GRN · sandbox · reports over MCP · bank validation · CA access · approvals entitlement · batch payment-run · MSME 45-day | **N173** ⚪ Low · *Carbon upgrade* · not scheduled |
+
+---
+
+### B · DUPLICATES — already on the platform twice, do not re-file
+
+| Platform id | Filed | Duplicate of |
+|---|---|---|
+| `8399b310-96df-4a5d-b02a-66ea5aab4bc1` | 21 Sep 05:51 | B1 (`2a655790…`, already N126) |
+| `c8024248-b974-4b1e-81fd-c90cbe9c5286` | 21 Sep 05:54 | B2 (`5c8b16e3…`, already N127) |
+| `ca9ec4bf-d7c3-4a60-b24c-2c0c21fc4daf` | 21 Sep 05:59 | B3 (`84955e11…`, merged N127) |
+| `b98e4e6f-7c43-4d61-bbf5-b59c29b1653e` | 22 Sep 05:05 | B4 (`834f1301…`, already N128) |
+
+Each was filed once via the API and again by hand ten to twenty minutes later.
+Nothing to undo — but worth telling the instructor so triage doesn't process them
+twice.
+
+**Merge risk, not duplicates:** **N1 and N8** are the same defect class on different
+instances, filed two minutes apart. Expect one board card. Both are still worth
+having — N1 carries the `check_sla` oracle proving the live logic is *correct*
+before showing where it breaks; N8 carries the volume (74%) and the bulk-resolve
+timestamp cluster pointing at a root cause.
+
+---
+
+### C · YET TO FILE — written up, verified, ready
+
+Re-verified against live data 2026-09-23. **B7 and B8 have got worse since they
+were written.**
+
+| # | Title | Instance | Severity | Re-verification |
 |---|---|---|---|---|
-| **N126** | B1 | The India company's tax jurisdictions are all American | High | ✅ **Live on server — FIXED** |
-| **N127** | B2+B3 | Tax records carry tool names and contradict themselves, and Tax Summary counts them | High | ✅ **Live on server — FIXED** |
-| **N128** | B4 | Documents can store tax lines the tax calculator would never produce | Medium | 🔴 Open |
-| **N173** | F1–F5 | Accounting feature requests (goods receipts, write sandbox, reports over MCP, bank checks, accountant access) | Low | ⚪ To do · Carbon upgrade · *not scheduled* |
-| pending | **B6** | **N127's fix is incomplete — `group_taxes[].tax_type` still holds tool names** | Medium | ✅ **Filed 22 Sep** `f9e0c388-af06-4482-8949-88aec69848dd` — awaiting board triage |
-| — | B5 | Journal voucher shows ₹0.00 with no lines despite non-zero Total Debit | Medium | Not filed — needs reproduction |
-| — | F6 | Enable `approvals` app for Seat 03 | — | Not filed |
-| — | F7, F8 | Batch payment-run identity · MSME 45-day tracking | Low/Med | Not filed |
+| **B7** | Recurring bills regenerate every day | US | **High** | 🔺 **Now 4 days** (20–23 Sep), was 3. Control template `5d45e8e8` (future `next_bill_date`) still fired exactly **once** — 3×4 vs 1×1 |
+| **B8** | INR bills + GST fields on the USD company | US | Medium | 🔺 **Now 13 INR bills**, was 10 — growing because B7 keeps generating them |
+| **B9** | Locale flags contradict MCP tool exposure | US | Low-Med | Still exact: `eway_bill=false` → **8** EWayBill tools (was 6); `form_1099=true` → 0 tools; 490 tools visible |
+| B5 | Journal voucher ₹0.00 with no lines | India | Medium | ❗ Still needs reproduction against a concrete `JournalEntry.id` before filing |
+
+**File B7 first.** It is the strongest item we hold: a live, self-demonstrating
+duplicate-payables generator with a clean internal control group, still accruing,
+and it *is* the Core Challenge Prompt ("is any vendor being paid twice?") happening
+for real on the platform.
+
+---
+
+### D · NEW — competitor gaps identified but not yet written up
+
+From `razorpay_gap_report.md`, `clear_gap_report.md` and `gap_report_mysa.md`,
+cross-checked against F1–F8. **None of these is covered by an existing request.**
+Numbered F9+ to continue the series; full write-ups not yet drafted.
+
+| # | Gap | Priority | Who has it | Note |
+|---|---|---|---|---|
+| **F9** | **OCR / AI invoice extraction** | **HIGH** | All six — Mysa #1 ("99% accuracy"), Clear ("OCR ingestion"), RazorpayX | **Biggest omission in the whole list.** AgentSwitch has no OCR engine; this is the entry point to the entire AP automation pipeline |
+| **F10** | **Payment initiation / execution rail** | **HIGH** | Mysa (#2 of its own top-5), RazorpayX **[LIVE]** | F7 covers only batch *identity* and explicitly notes we "cannot execute payments at all" — the underlying gap was observed but never filed |
+| F11 | Vendor identity validation (PAN / GSTIN / Udyam registry) | Medium | Mysa #4, Clear | Distinct from F4, which is **bank-account** validation only |
+| F12 | ERP / Tally connectors | Medium | RazorpayX **[LIVE]** Tally Payouts, Clear (8 named), Mysa | `gap_report_mysa.md` calls this "category, not a gap" — worth a deliberate decision rather than silent omission |
+| F13 | Bill intake via email / Slack / WhatsApp | Low | Mysa #10 | |
+| F14 | Historical cashflow analytics | Low | RazorpayX **[LIVE]** Insights | F3 is reports-over-MCP; this is backward-looking trend analytics. Ours is forward *simulation* only |
+| F15 | Payout lifecycle / stage tracking | Low | RazorpayX **[LIVE]** | Only meaningful once F10 exists |
+| F16 | Spend caps / budget controls on approvals | Medium | Mysa #6 | ⚠️ **Verify before filing** — `ApprovalPolicy.condition_field/operator/value` may already express these. Exactly the trap F6 fell into |
+| F17 | Supply-chain finance / early-payment discounting | Low | Clear §5.1 | Clear's genuine differentiator; out of Seat 03 scope |
+
+**Not a platform request — belongs in our own code backlog.** `clear_gap_report.md`
+§9.1: Clear keys duplicate detection on *document number + FY + vendor/buyer GSTIN*
+(a document identity), while `scripts/invoice_matcher.py` uses amount-proximity
+within ±3 days (a heuristic) — which **already produced three false positives** on
+Keystone against recurring templates. Fix the matcher; don't file it.
+
+**Already covered, do not re-file:** GRN→F1 · sandbox→F2 · reports→F3 · bank
+validation→F4 · CA access→F5 · approvals→F6 · batch run→F7 · MSME→F8.
+**Already in §3 (platform self-documented):** e-invoicing GST-28 · GSTN fetch
+GST-39 · TDS automation GST-18.
+
+---
 
 ### What the fixes tell us
 
@@ -102,17 +163,12 @@ being added (not defects)"* — at **Low** severity and **not scheduled**.
 The bounty is 100 points per **verified bug**. Feature requests appear to earn
 nothing toward it. Five carefully argued requests produced one unscheduled Low card.
 
-**Implication: to move the score, file defects, not feature requests.** F6–F8 should
-be raised for product value, not bounty value, and time is better spent on the
-schema-invariant sweep that produced N126–N128.
-| F1 | No Goods Receipt Note entity — 3-way matching impossible | Feature | High | Ready |
-| F2 | No sandbox / dry-run for ledger writes | Feature | High | Ready |
-| F3 | Reports exist over REST but not over MCP | Feature | Medium | Ready |
-| F4 | No bank account validation (penny-drop) | Feature | Medium | Ready |
-| F5 | No scoped external-accountant (CA) access | Feature | Medium | Ready — verify UI sharing first |
-| F6 | Enable `approvals` app for Seat 03 (engine exists, we're entitlement-blocked) | Access | Medium | Ready — **rewritten, was wrongly scoped as "build approvals"** |
-| F7 | No batch/payment-run identity for `PaymentMade` | Feature | Low | Ready |
-| F8 | MSME 45-day statutory tracking not automated | Feature | Medium | Ready — agent can bridge today |
+**Implication: to move the score, file defects, not feature requests.** The nine new
+gaps in §D should be raised for product value, not bounty value. Time is better
+spent on the schema-invariant sweep that produced N126–N128 and, now, N1–N8.
+
+**Evidence so far:** 13 distinct defects filed → 3 board cards, 2 already fixed in
+production. 8 feature requests filed → 1 unscheduled Low card.
 
 ---
 
@@ -880,31 +936,34 @@ UI, and only needs platform support if it should become a native alert.
 
 ## 5. Suggested submission order
 
-1. **B7 (recurring bills regenerate daily)** first. Same reason B4 used to hold
-   this slot — it carries a control group, the "Quarterly pest control" template,
-   identical in every respect except a future `next_bill_date`, which fired once
-   while its three siblings fire daily. That isolates the defect to one step and
-   makes it hard to dismiss. It is also live and still accruing, and it *is* the
+**Everything in §A is already filed. This order covers §C and §D only.**
+
+1. **B7 (recurring bills regenerate daily)** — file today. It carries a control
+   group, the "Quarterly pest control" template, identical in every respect except
+   a future `next_bill_date`, which has fired **once** while its three siblings have
+   now fired on **four** consecutive days. That isolates the defect to a single
+   step and makes it hard to dismiss. It is live, still accruing, and it *is* the
    Core Challenge Prompt happening for real on the platform.
-2. **B4** — it has a control test proving the calculator is correct before
-   claiming the data is wrong, so it is likewise hard to dismiss.
-3. **F6 (enable `approvals`)** — costs the platform team nothing to grant, unblocks
-   a capability that already exists, and is the fastest win on this list.
-4. **B8 (India seed data on the US company)** — pairs naturally with the already-filed
-   B1, which is the same defect in the opposite direction. Worth submitting together
-   or cross-referencing, since one root cause probably explains both.
-5. **B9 (feature flags vs tool exposure)** — weakest of the three new ones, but it
-   carries four correctly-aligned control cases, so it cannot be waved away as a
+2. **Fix the B7 reference in N6** (or file B7 first so the reference becomes true).
+   N6 is already on the board saying *"B7 (filed against Keystone/US only)"* — but
+   B7 was never filed on either instance, so that cross-reference currently points
+   nowhere.
+3. **B8 (India seed data on the US company)** — pairs naturally with the fixed B1,
+   the same defect in the opposite direction, and is now at 13 bills and growing
+   because B7 keeps generating them. Cross-reference both.
+4. **B9 (feature flags vs tool exposure)** — weakest of the three, but it carries
+   four correctly-aligned control cases, so it cannot be waved away as a
    misunderstanding of how the flags work.
-6. **B5** once reproduced with a concrete `JournalEntry.id`.
-7. **F1 (GRN)** as the headline feature request — structural, competitor-verified
-   in a live product, and the only item unblockable by orchestration.
-8. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
-   is the platform's own stated purpose. The dry-run flag is the cheap version of
-   the ask. B7 is a good argument for it: a scheduler defect accrued ten unwanted
-   records against a shared live ledger with no non-production place to catch it.
-9. The remaining requests as a single batch, referencing the competitor evidence in
-   `razorpay_gap_report.md` and `clear_gap_report.md`.
+5. **B5** once reproduced with a concrete `JournalEntry.id`.
+6. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from
+   the original feature list. Write up and file together; both are High, both are
+   capabilities every competitor in the set has.
+7. **F16 (spend caps)** — **verify first** against `ApprovalPolicy.condition_*`
+   before writing it up. F6 was originally wrong in exactly this way.
+8. The remaining §D items as a single batch, referencing the competitor evidence in
+   `razorpay_gap_report.md`, `clear_gap_report.md` and `gap_report_mysa.md`.
+   Given N173's outcome, expect one low-priority card — file them for product value,
+   not for score.
 
 **A note on method, worth repeating to whoever reviews this:** F6 was originally
 written as "please build multi-level approvals." Verifying before submitting
