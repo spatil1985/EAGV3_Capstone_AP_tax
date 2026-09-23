@@ -68,15 +68,18 @@ position and got one item wrong.
 | N7 | TDS independent of base → negative `grand_total` | India | 23 Sep | pending | ⏳ Awaiting triage |
 | N8 | `is_overdue` false negatives 74%, bulk-resolve cluster | India | 23 Sep | pending | ⏳ Awaiting triage |
 
-*"Instance" = the company the defect is **about**. Every one of the 25 filings sits
+*"Instance" = the company the defect is **about**. Every one of the 28 filings sits
 on the **India** account's `bug-report/mine` — the Keystone-company findings
 (N1–N4) were filed from there too, which is why the Keystone account reads 0.*
 
-**Feature requests** — all eight filed 22 Sep, **collapsed into one board card**
+**Feature requests** — F1–F8 filed 22 Sep, collapsed into one board card. F18 filed
+separately 23 Sep, **on its own** per its own priority recommendation (see §5) —
+not yet triaged onto the board.
 
-| # | Title | Board |
-|---|---|---|
-| F1–F8 | GRN · sandbox · reports over MCP · bank validation · CA access · approvals entitlement · batch payment-run · MSME 45-day | **N173** ⚪ Low · *Carbon upgrade* · not scheduled |
+| # | Title | Filed | Board |
+|---|---|---|---|
+| F1–F8 | GRN · sandbox · reports over MCP · bank validation · CA access · approvals entitlement · batch payment-run · MSME 45-day | 22 Sep | **N173** ⚪ Low · *Carbon upgrade* · not scheduled |
+| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | 23 Sep, `a9f1888f…` | pending — not yet triaged |
 
 ---
 
@@ -174,16 +177,19 @@ a feature a rival happens to ship.
 
 | # | Gap (spec.md ref) | Priority | Verticals blocked | Why it cannot be orchestrated around |
 |---|---|---|---|---|
-| **F18** | **ITC apportionment, Rule 42/43** (GAP-1) | **HIGH** | **School, clinic** (2 of 5) | No exempt-turnover aggregate and no apportionment engine. `itc_eligibility` is a per-document enum, not a proportion. The agent can compute and *report* the ratio, but **`JournalEntry` is read-only for `finance_user`**, so it cannot post the reversal — reporting without posting leaves the books wrong. **This is the capability Clear monetises separately as MaxITC** |
+| **F18** ✅ **FILED** `a9f1888f…` (23 Sep) | **ITC apportionment, Rule 42/43** (GAP-1) | **HIGH** | **School, clinic** (2 of 5) | No exempt-turnover aggregate and no apportionment engine. `itc_eligibility` is a per-document enum, not a proportion. The agent can compute and *report* the ratio, but **`JournalEntry` is read-only for `finance_user`**, so it cannot post the reversal — reporting without posting leaves the books wrong. **This is the capability Clear monetises separately as MaxITC** |
 | **F19** | **Job work, s.143 / ITC-04** (GAP-2) | Medium | Manufacturing | No `job_work` concept anywhere in the 468 tools or the schema. `DeliveryChallan` is the right document type but has no job-work subtype or return-tracking. Goods not returned in 1 year (inputs) / 3 years (capital goods) become a **deemed supply** — timing that cannot be tracked against a document type that does not exist |
 | **F20** | **Composition-scheme mode, s.10** (GAP-3) | Medium | Retail (small traders) | `business_composition` exists only as a *counterparty* attribute on `gst_treatment`. The organisation's **own** tax mode is not representable, so threshold monitoring and breach detection are impossible |
 | **F21** | **LUT / export-declaration registry** (GAP-5) | Low-Med | Agency | No entity models a Letter of Undertaking or its validity period. Exporting services without a valid LUT means IGST must be paid and reclaimed. Closest workaround is abusing `TaxExemption.exemption_reason` |
 | **F22** | **s.52 e-commerce TCS** (GAP-6) | Low | Retail (marketplace sellers) | No TCS-collected-by-operator concept; a marketplace seller cannot reconcile operator-collected TCS against their own returns |
 
-**F18 is the strongest feature ask in this entire document.** It blocks two of five
+**F18 is the strongest feature ask in this entire document, and it is now filed** —
+`a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`, 23 Sep 2026 16:02, filed on its own rather
+than batched with F19–F22, per §5's own recommendation. It blocks two of five
 verticals outright, the computation is *already possible* from data we hold — only
 the posting is not — and it is the one capability in `spec.md` §3 that no competitor
-in our set (RazorpayX, Clear, Mysa) names as shipped.
+in our set (RazorpayX, Clear, Mysa) names as shipped. Full submitted text is in §4
+below.
 
 **Buildable today — agent backlog, not submissions.** `spec.md` identifies fourteen
 use cases needing **no platform change**, notably UC-01 (Rule 37 — ITC reversal when
@@ -1622,6 +1628,69 @@ UI, and only needs platform support if it should become a native alert.
 
 ---
 
+### F18 · ITC apportionment under Rule 42/43 · **HIGH** · **[FILED `a9f1888f…`, 23 Sep]**
+
+**What's missing:** three things, in order of how hard each is to fix.
+1. No field or aggregate anywhere that sums "exempt-supply turnover this period" vs
+   "taxable-supply turnover this period" for a company. `itc_eligibility` on
+   `Bill`/`Invoice` is a per-document enum (`input`/`input_services`/
+   `capital_goods`/`ineligible`), not a proportion, and nothing aggregates it into a
+   period ratio.
+2. No apportionment engine applying the Rule 42 (inputs/services) or Rule 43
+   (capital goods) exempt:taxable ratio to common input credit.
+3. No write path to post the reversal even once an agent computes it by hand —
+   `JournalEntry` is read-only for `finance_user`, and there is no dedicated
+   ITC-reversal entity/tool.
+
+**Why it matters, in plain terms — worked example.** A GST-registered school has
+two kinds of income in a month: tuition fees ₹8,00,000 (GST-**exempt** — education
+is an exempt supply) and coaching/uniforms/hall-rental ₹2,00,000 (taxable). Exempt
+share = 80%, taxable share = 20%. The school also pays ₹90,000 of GST on common
+inputs that serve both activities — electricity, stationery, security, a shared
+accountant, software. Under Rule 42, only the taxable-proportion share of that input
+GST is claimable: ₹90,000 × 20% = ₹18,000. The remaining ₹90,000 × 80% = ₹72,000
+must be reversed, with interest. If nobody computes this ratio, the school claims
+the full ₹90,000 and that ₹72,000 becomes a liability GST assessment catches later —
+one of the commonest GST errors in the education sector (`spec.md` UC-08). A clinic
+hits the identical mechanics with a larger common-input pool (rent, staff,
+equipment), since pharmacy sales are taxable but consultations/procedures are
+exempt (UC-15).
+
+**How we verified it's missing:**
+1. `itc_eligibility` confirmed to be a fixed enum on `Bill`/`Invoice`, not a
+   computed proportion or aggregate.
+2. No apportionment-related entity or field (`ExemptTurnover`, `ApportionmentRatio`,
+   `Rule42`, or similar) found anywhere in the schema.
+3. No MCP tool computes or exposes an exempt:taxable turnover ratio.
+4. `JournalEntry` permissions confirmed read-only for `finance_user` (`list`/`get`
+   only, no `create`/`update`) — so even a correctly-computed reversal has nowhere
+   to post.
+
+**Who has it, and how we know:** **Clear [CLAIM]** sells this capability separately
+as a paid product ("MaxITC") rather than bundling it — evidence it is both hard to
+build and independently monetizable, not a corner case. RazorpayX and Mysa do not
+claim it either; none of the three competitors in our set is confirmed to ship this
+as a standard feature.
+
+**The ask:**
+1. A period-level exempt-turnover / taxable-turnover aggregate per company
+   (derivable today by summing `Invoice.items[]` joined to `Item.tax_preference`,
+   so this is mostly a rollup, not new source data).
+2. A Rule 42 (inputs/services) and Rule 43 (capital goods) apportionment
+   computation over that aggregate and the period's common-input GST.
+3. A write path for the resulting reversal — either `finance_user` write access to
+   `JournalEntry` scoped to this posting, or a dedicated `ITCReversal` entity/tool
+   an agent can call.
+
+**Why it's top priority.** Blocks 2 of 5 verticals (school, clinic) outright — not
+a nice-to-have, a hard wall for those business types. Half of the capability is
+already agent-buildable today (the compute/report half, over existing read-only
+data, the same shape as N7's TDS-recompute verification and F8's MSME bridge
+above); only the write half is a structural platform blocker no orchestration can
+route around.
+
+---
+
 ## 5. Suggested submission order
 
 **Everything in §A is already filed. Only three defects remain (§C).**
@@ -1633,11 +1702,11 @@ UI, and only needs platform support if it should become a native alert.
    correctly-aligned control cases, so it cannot be dismissed as a misunderstanding
    of how the flags work.
 3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
-4. **F18 (ITC apportionment, Rule 42/43)** — the strongest feature ask we hold. File
-   it **on its own, not in a batch**, because it is the one item whose argument is
-   statutory rather than competitive: it blocks two of five verticals, the
-   computation already works, and only the *posting* is missing. Batching it with
-   low-priority items is how it ends up as another unscheduled N173 row.
+4. ~~**F18 (ITC apportionment, Rule 42/43)**~~ — ✅ **Filed** `a9f1888f…`, 23 Sep,
+   **on its own, not in a batch**, exactly as recommended here: the one item whose
+   argument is statutory rather than competitive, blocking two of five verticals,
+   with the computation already working and only the *posting* missing. Full text
+   in §4 above.
 5. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from the
    original feature list. Write up and file together; both are High, both are
    capabilities every competitor in the set has.

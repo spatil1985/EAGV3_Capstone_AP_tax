@@ -8,11 +8,15 @@ may lag) and not any other doc's summary table, which have been wrong before (se
 
 **Last verified:** 2026-09-23, via `BugReport.list {"limit": 200}` on the India
 account (the only account that can file — Keystone login returns 401 on
-`/api/bug-report`). **27 reports** exist on the platform: 15 distinct bugs (4 filed
-twice), 8 feature requests (1 board card). Full write-ups for every filed item live
-in [`agentswitch_submissions.md`](agentswitch_submissions.md); this document tracks
+`/api/bug-report`). **28 reports** exist on the platform: 15 distinct bugs (4 filed
+twice), 9 feature requests (F1–F8 in one board card, F18 filed standalone). Full
+write-ups for every filed item live in
+[`agentswitch_submissions.md`](agentswitch_submissions.md); this document tracks
 **status only** — refresh it by re-running `BugReport.list` and diffing against the
 tables below, not by re-reading prose.
+
+**Latest action (this session):** F18 filed — `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`,
+23 Sep 2026 16:02, `status: "new"`. See §2 below.
 
 **To refresh:** log in (`scripts/agentswitch_client.py`), `tools/call BugReport.list
 {"limit": 200}`, fingerprint each returned `description` against the "Fingerprint"
@@ -63,11 +67,12 @@ Board: 🟢 Fixed/live · 🟡 Open/awaiting triage · ⚪ Low, not scheduled ·
 
 ---
 
-## 2. Feature requests — filed batch (F1–F8)
+## 2. Feature requests — filed (9)
 
-All 8 filed 22 Sep, all collapsed into **one** board card. Feature requests are not
-bounty-eligible (100 pts/bug is for defects only) — tracked here for completeness,
-not score.
+Feature requests are not bounty-eligible (100 pts/bug is for defects only) —
+tracked here for completeness, not score.
+
+**F1–F8** — all filed 22 Sep, all collapsed into **one** board card.
 
 | # | Title | Priority | Filed | Platform ID | Board |
 |---|---|---|---|---|---|
@@ -80,12 +85,21 @@ not score.
 | F7 | Batch / payment-run identity | Low | ✅ 22 Sep 04:40 | `d90a94ad…` | N173 |
 | F8 | MSME 45-day statutory payment tracking | Medium | ✅ 22 Sep 04:40 | `b3737f0e…` | N173 |
 
+**F18** — filed **standalone, 23 Sep**, deliberately *not* batched with F19–F22 (per
+its own priority recommendation — batching is how F1–F8 ended up as one
+unscheduled Low card despite two High items in the batch).
+
+| # | Title | Priority | Filed | Platform ID | Board |
+|---|---|---|---|---|---|
+| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | **High** | ✅ 23 Sep 16:02 | `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` | pending — not yet triaged (`status: "new"`) |
+
 ---
 
-## 3. Feature requests — identified, **not yet written up or filed**
+## 3. Feature requests — identified, **not yet filed** (13 remaining)
 
 From competitor analysis (D.1) and `spec.md`'s multi-vertical requirements (D.2).
 Not on the platform in any form — no `BugReport` record matches any of these.
+(F18 was in this list; filed 23 Sep — moved to §2.)
 
 ### D.1 — competitor gaps (F9–F17)
 
@@ -101,11 +115,12 @@ Not on the platform in any form — no `BugReport` record matches any of these.
 | F16 | Spend caps / budget controls on approvals | Medium | 🔴 Not filed — **verify against `ApprovalPolicy.condition_*` first** (F6 was wrong this way once already) |
 | F17 | Supply-chain finance / early-payment discounting | Low | 🔴 Not filed |
 
-### D.2 — multi-vertical statutory gaps (F18–F22, from `spec.md`)
+### D.2 — multi-vertical statutory gaps (F19–F22, from `spec.md`)
+
+F18 filed — see §2. Four remain:
 
 | # | Title | Priority | Verticals blocked | Filed? |
 |---|---|---|---|---|
-| **F18** | **ITC apportionment, Rule 42/43** | **High** | School, clinic | 🔴 Not filed — **strongest unfiled item in this document; file on its own, not batched** |
 | F19 | Job work, s.143 / ITC-04 | Medium | Manufacturing | 🔴 Not filed |
 | F20 | Composition-scheme mode, s.10 | Medium | Retail | 🔴 Not filed |
 | F21 | LUT / export-declaration registry | Low-Med | Agency | 🔴 Not filed |
@@ -130,9 +145,11 @@ Not on the platform in any form — no `BugReport` record matches any of these.
 | Bugs (distinct) | 17 (incl. B7, B5) | 13 | 2 (B5 blocked, B7 excluded) | 2 (B1, B2/B3) |
 | Duplicate bug filings | — | 4 | — | — |
 | Feature requests (F1–F8) | 8 | 8 | 0 | — (1 unscheduled card) |
-| Feature requests (F9–F22) | 14 | 0 | 14 | — |
-| **Total platform filings** | | **27** | | |
+| Feature requests (F18) | 1 | 1 | 0 | — (pending triage) |
+| Feature requests (F9–F17, F19–F22) | 13 | 0 | 13 | — |
+| **Total platform filings** | | **28** | | |
 
-**Biggest gaps between "identified" and "filed": F9–F22 (14 feature requests fully
-written up in `agentswitch_submissions.md` §D but never submitted) and F18
-specifically, which the team's own analysis calls its strongest unfiled ask.**
+**Biggest remaining gap between "identified" and "filed": F9–F17 and F19–F22 (13
+feature requests fully written up in `agentswitch_submissions.md` §D but never
+submitted). F18 — the strongest of the lot — was filed this session,
+`a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`, standalone rather than batched.**
