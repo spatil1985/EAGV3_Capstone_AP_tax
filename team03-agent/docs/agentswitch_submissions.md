@@ -1,8 +1,10 @@
 # AgentSwitch — Bug Reports & Feature Requests (Team 03, Seat 03 Payables & Tax)
 
 Consolidated, submission-ready list of everything we've found on the AgentSwitch
-platform: confirmed defects, and feature gaps identified by comparing against real
-competitor products.
+platform: confirmed defects, plus feature gaps from two sources — comparison against
+real competitor products, and the multi-vertical requirements in
+[`spec.md`](spec.md) (school, manufacturing, clinic, retail, agency under Indian tax
+law).
 
 **Submission channel:** `POST /api/bug-report` (per the brief, §Week 4 Milestone 2 —
 100 points per *verified* bug). Body fields: `description` (required), `page`,
@@ -122,7 +124,19 @@ obvious precedent to attach it to.
 
 ---
 
-### D · NEW — competitor gaps identified but not yet written up
+### D · NEW — gaps identified but not yet written up
+
+**Two sources, kept separate because they argue differently:**
+
+- **D.1 — competitor gaps (F9–F17).** "A competitor ships this and we don't."
+- **D.2 — multi-vertical gaps (F18–F22).** From [`spec.md`](spec.md): "Indian tax
+  law requires this and we cannot represent it." These are **statutory**, not
+  competitive — the argument is compliance exposure, not feature parity, which is a
+  stronger case to make to a platform team.
+
+---
+
+#### D.1 · Competitor gaps
 
 From `razorpay_gap_report.md`, `clear_gap_report.md` and `gap_report_mysa.md`,
 cross-checked against F1–F8. **None of these is covered by an existing request.**
@@ -146,10 +160,45 @@ Numbered F9+ to continue the series; full write-ups not yet drafted.
 within ±3 days (a heuristic) — which **already produced three false positives** on
 Keystone against recurring templates. Fix the matcher; don't file it.
 
-**Already covered, do not re-file:** GRN→F1 · sandbox→F2 · reports→F3 · bank
-validation→F4 · CA access→F5 · approvals→F6 · batch run→F7 · MSME→F8.
+---
+
+#### D.2 · Multi-vertical statutory gaps (from `spec.md`)
+
+`spec.md` specifies the agent across five Indian organisation types — school,
+manufacturing, clinic, retail, agency — and identifies six platform gaps. **One is
+already filed (GAP-4 = F1, the GRN entity), so five are new.**
+
+These are worth filing separately from D.1 because the argument is different: each
+blocks a *statutory obligation* that the platform's data model cannot represent, not
+a feature a rival happens to ship.
+
+| # | Gap (spec.md ref) | Priority | Verticals blocked | Why it cannot be orchestrated around |
+|---|---|---|---|---|
+| **F18** | **ITC apportionment, Rule 42/43** (GAP-1) | **HIGH** | **School, clinic** (2 of 5) | No exempt-turnover aggregate and no apportionment engine. `itc_eligibility` is a per-document enum, not a proportion. The agent can compute and *report* the ratio, but **`JournalEntry` is read-only for `finance_user`**, so it cannot post the reversal — reporting without posting leaves the books wrong. **This is the capability Clear monetises separately as MaxITC** |
+| **F19** | **Job work, s.143 / ITC-04** (GAP-2) | Medium | Manufacturing | No `job_work` concept anywhere in the 468 tools or the schema. `DeliveryChallan` is the right document type but has no job-work subtype or return-tracking. Goods not returned in 1 year (inputs) / 3 years (capital goods) become a **deemed supply** — timing that cannot be tracked against a document type that does not exist |
+| **F20** | **Composition-scheme mode, s.10** (GAP-3) | Medium | Retail (small traders) | `business_composition` exists only as a *counterparty* attribute on `gst_treatment`. The organisation's **own** tax mode is not representable, so threshold monitoring and breach detection are impossible |
+| **F21** | **LUT / export-declaration registry** (GAP-5) | Low-Med | Agency | No entity models a Letter of Undertaking or its validity period. Exporting services without a valid LUT means IGST must be paid and reclaimed. Closest workaround is abusing `TaxExemption.exemption_reason` |
+| **F22** | **s.52 e-commerce TCS** (GAP-6) | Low | Retail (marketplace sellers) | No TCS-collected-by-operator concept; a marketplace seller cannot reconcile operator-collected TCS against their own returns |
+
+**F18 is the strongest feature ask in this entire document.** It blocks two of five
+verticals outright, the computation is *already possible* from data we hold — only
+the posting is not — and it is the one capability in `spec.md` §3 that no competitor
+in our set (RazorpayX, Clear, Mysa) names as shipped.
+
+**Buildable today — agent backlog, not submissions.** `spec.md` identifies fourteen
+use cases needing **no platform change**, notably UC-01 (Rule 37 — ITC reversal when
+a supplier goes unpaid past 180 days), UC-03/UC-21 (RCM exposure), UC-16 (expiry →
+blocked credit under s.17(5)(h)) and UC-06 (approval audit). **Do not file these** —
+they are ours to build. UC-01 in particular is the highest-value cross-vertical
+capability found and no competitor names it.
+
+---
+
+**Already covered, do not re-file:** GRN→F1 *(= spec.md GAP-4)* · sandbox→F2 ·
+reports→F3 · bank validation→F4 · CA access→F5 · approvals→F6 · batch run→F7 ·
+MSME→F8 *(= spec.md UC-04)*.
 **Already in §3 (platform self-documented):** e-invoicing GST-28 · GSTN fetch
-GST-39 · TDS automation GST-18.
+GST-39 · TDS automation GST-18 *(covers spec.md UC-09/UC-13's filing half)*.
 
 ---
 
@@ -973,15 +1022,27 @@ UI, and only needs platform support if it should become a native alert.
    correctly-aligned control cases, so it cannot be dismissed as a misunderstanding
    of how the flags work.
 3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
-4. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from the
+4. **F18 (ITC apportionment, Rule 42/43)** — the strongest feature ask we hold. File
+   it **on its own, not in a batch**, because it is the one item whose argument is
+   statutory rather than competitive: it blocks two of five verticals, the
+   computation already works, and only the *posting* is missing. Batching it with
+   low-priority items is how it ends up as another unscheduled N173 row.
+5. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from the
    original feature list. Write up and file together; both are High, both are
    capabilities every competitor in the set has.
-5. **F16 (spend caps)** — **verify first** against `ApprovalPolicy.condition_*`
+6. **F19–F22** (job work · composition mode · LUT registry · s.52 TCS) as one
+   vertical-expansion batch, citing `spec.md`. Each names the statute it blocks.
+7. **F16 (spend caps)** — **verify first** against `ApprovalPolicy.condition_*`
    before writing it up. F6 was originally wrong in exactly this way.
-6. The remaining §D items as a single batch, referencing the competitor evidence in
+8. The remaining D.1 items as a single batch, referencing the competitor evidence in
    `razorpay_gap_report.md`, `clear_gap_report.md` and `gap_report_mysa.md`.
    Given N173's outcome, expect one low-priority card — file them for product value,
    not for score.
+
+**Do not file `spec.md`'s buildable use cases.** UC-01 (Rule 37), UC-03/UC-21 (RCM),
+UC-16 (expiry → blocked credit) and UC-06 (approval audit) need no platform change.
+They are agent backlog. Filing them as requests would misrepresent work we can
+already do.
 
 **Do not file B7** — see §C. Its defect is already on the board as N6.
 
