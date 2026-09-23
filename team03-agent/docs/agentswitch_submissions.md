@@ -45,6 +45,21 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 > second look. Same discipline as the F6 finding in §5 — verify before submitting,
 > because a rejected report costs more than an unfiled one.
 
+> 🔑 **India access obtained 2026-09-23 — the two instances take DIFFERENT
+> passwords for the same email `team03@theschoolofai.in`.** The earlier `401` on
+> Suryodaya was a wrong-credential error, not a lockout. That unblocked three
+> items that had been parked as untestable:
+>
+> | Item | Outcome |
+> |---|---|
+> | **B5** | **Resolved → UI rendering bug.** 1,119 India journals + 296 US, zero data anomalies. `lines` populated everywhere, on the UI's own REST route too. |
+> | **B9** | **Settled → do not file.** Both instances expose an *identical* 490-tool set; each "mismatch" is just the other jurisdiction's features. Only `form_1099` survives. |
+> | Tool-count delta | **No delta exists.** 490 = 490, zero difference either way. Every earlier count was a snapshot of a growing surface. |
+>
+> And it produced one genuinely new defect: **B10**, `lines[].account` holding
+> UUIDs and display names interchangeably within one company — which is also the
+> first concrete mechanism anyone has offered for B5.
+
 ## 0. Filed-report reconciliation (`GET /api/bug-report/mine`, 2026-09-22)
 
 | Platform id | Filed | Content | Board | Note |
@@ -326,7 +341,7 @@ No job_id -- found by direct REST/MCP inspection.
 
 ### B5 · Journal voucher renders ₹0.00 with no lines despite non-zero Total Debit
 
-**Severity:** Medium · **Area:** Accountant / Manual Journals · **Needs reproduction**
+**Severity:** Medium · **Area:** Accountant / Manual Journals · **RESOLVED 2026-09-23 → UI rendering bug, not data integrity. Both instances tested.**
 
 Observed in the UI inventory (`UI.MD` SCR-041): the Manual Journals **list** shows a
 non-zero `Total Debit`, but opening the journal renders a voucher with no line items
@@ -337,6 +352,165 @@ should be present.
 `tools/call JournalEntry.get` whether `lines` is populated in the API response. If
 populated → UI rendering bug (strong). If empty while `total_debit` is non-zero →
 data-integrity bug (stronger). Capture the id either way.
+
+#### Reproduction attempt — 2026-09-23, Keystone (US): **NOT REPRODUCIBLE**
+
+Full population tested, not a sample: **all 296 `JournalEntry` records** on Keystone
+(`class.agentswitch.theschoolofai.in`, company `c1e47d8d-b849-4187-9a32-4103d3dece4a`).
+
+| Check | Anomalous | Population |
+|---|---|---|
+| `total_debit != 0` and `lines` empty/absent (`.list`) | **0** | 296 |
+| `total_debit != 0` and `lines` empty/absent (`.get`) | **0** | 296 |
+| `lines` length differs between `.list` and `.get` | **0** | 296 |
+| `total_debit != total_credit` | **0** | 296 |
+| Sum of line debits/credits != header totals | **0** | 296 |
+| Submitted journals with no posted `GLEntry` rows | **0** | 294 |
+| Submitted journals where GL sums != header totals | **0** | 294 |
+
+`total_debit` ranges 183.40 – 5,132,000.00; **no** entry has `total_debit == 0`.
+`lines` length is never below 2 (2×269, 3×12, 4×6, 10×1, 14×8). The only two
+journals without GL rows are the only two in `draft` — correct, not an anomaly.
+
+Ids captured as requested (these are **negative** evidence):
+
+| JournalEntry id | number | total_debit | total_credit | `len(lines)` |
+|---|---|---|---|---|
+| `6104b911-cfc9-4a88-a9f6-085d1ae185cd` | JV-2026-00001 | 5,132,000.00 | 5,132,000.00 | 14 |
+| `19308127-a5ae-45db-b06a-5a6df83d3360` | JV-2026-00296 | 10,800.00 | 10,800.00 | 2 (draft) |
+
+**The UI's own data path was checked too**, pre-empting the obvious objection that
+MCP might use a different serializer: `GET /api/JournalEntry/{id}` — the entity REST
+route the web UI calls — returns the same populated `lines` and the same totals.
+`.get` is byte-identical to the `.list` row plus `_transitions`, so the list/detail
+split cannot itself produce a discrepancy.
+
+`JournalEntry.get` field names, for whoever writes this up:
+`book_id, company_id, created_at, created_by, date, docstatus, entry_type, id,`
+`journal_entity_type, journal_type, lines[], narration, number, reference_number,`
+`reporting_method, source_entity, source_id, status, total_credit, total_debit,`
+`updated_at, updated_by` (+ `_display`, `_permissions`, `_transitions`).
+
+#### Reproduction on Suryodaya (India) — the instance SCR-041 was actually seen on
+
+India credentials were obtained 2026-09-23 (the instance takes a **different
+password** from Keystone; the earlier `401` was a wrong-credential error, not a
+lockout). Re-tested on the correct instance:
+
+Company `5cbe5a55-af74-4363-a436-f5350593114c`, locale `IN / gst / INR`.
+**All 1,119 `JournalEntry` records** examined — not a sample.
+
+| Check | Anomalous | Population |
+|---|---|---|
+| `total_debit != 0` and `lines` empty | **0** | 1,119 |
+| `total_debit == 0` | **0** | 1,119 |
+| `total_debit != total_credit` | **0** | 1,119 |
+| `lines` length differs `.list` vs `.get` | **0** | sampled |
+
+`lines` length distribution: 2×1,089 · 3×12 · 4×13 · 7×3 · 11×1 · 22×1. Never empty.
+1,118 `submitted`, 1 `draft`.
+
+The UI's own route confirms it: `GET /api/JournalEntry/384a7e4c-256d-4771-ba2a-06bee2f2acbc`
+→ HTTP 200, `JV-2026-00643`, `lines` = 2, `total_debit` = `total_credit` = 284,312.41.
+
+#### Verdict: **UI rendering bug** — per the decision rule, `lines` is populated
+
+The data is correct on **both** instances (1,119 India + 296 US = 1,415 journals,
+zero anomalies). The backend serves populated, balanced lines to the same REST
+route the browser calls. **If SCR-041 rendered ₹0.00 with no line items against
+that payload, the defect is in the front end.**
+
+**File it as a UI-only report.** Do not file it as data integrity — the API
+contradicts that on both instances.
+
+**Honest gap before submitting:** `UI.MD` SCR-041 does not record *which* journal
+the screenshot showed, so we cannot prove the specific payload behind that render
+was populated — only that every journal in the company is. Whoever submits should
+either re-open one Manual Journal in the UI and capture its number alongside the
+screenshot, or state plainly that the specific document was not identified.
+
+**And there is now a concrete mechanism** — see **B10** below, which was found while
+chasing this. `lines[].account` holds a UUID on some rows and a display name on
+others *within the same company*. A voucher renderer that resolves `account` one way
+would fail on the rows written the other way. That is a plausible cause of SCR-041
+requiring no data corruption at all, and B10 is filable on its own evidence.
+
+*Incidental, not worth filing:* `GLEntry.list` **silently ignores** `source_id` /
+`voucher_no` filter params rather than rejecting them. The GL cross-check was done
+by paging all 2,771 rows and joining on `voucher_id` client-side. Don't rely on
+those filter args elsewhere.
+
+---
+
+### B10 · `JournalEntry.lines[].account` holds two incompatible value types, mixed within one company
+
+**Severity:** Medium-High · **Area:** Accounting / Data model · **Both instances** · **Verified 2026-09-23**
+
+> Found while reproducing B5. This is the stronger of the two — it stands on its own
+> evidence and does not depend on any screenshot.
+
+```
+The account field on journal lines is sometimes an Account UUID and sometimes a
+plain display name. Both forms occur in the SAME company, and the split differs
+between instances. Nothing in the schema distinguishes them.
+
+ENVIRONMENT
+Suryodaya Precision Works Pvt. Ltd. (5cbe5a55-af74-4363-a436-f5350593114c), IN/gst
+Keystone Precision Works LLC     (c1e47d8d-b849-4187-9a32-4103d3dece4a), US/sales_use_tax
+Both on build serving 490 MCP tools as of 2026-09-23.
+
+/api/schemas declares:  lines -> type "children", account -> type "text", required.
+Declared as free text, NOT as a link to Account. So nothing validates it and
+nothing tells a consumer which form to expect.
+
+ACTUAL -- 300 journals sampled per instance
+
+  Suryodaya (618 lines):   498 UUID  (80.6%)  +  120 plain text  (19.4%)   <- MIXED
+  Keystone  (720 lines):     0 UUID  ( 0.0%)  +  720 plain text (100.0%)
+
+  Suryodaya UUID sample:
+    account "bcaeac7d-047b-4a17-8459-47bdf4a94035"
+    remark  "Repairs & Maintenance: Maintenance: MNT-2026-00100"
+    -> Account.get("bcaeac7d-047b-4a17-8459-47bdf4a94035") resolves to
+       "Repairs & Maintenance", confirming it IS a real account reference
+       stored in a field typed as text.
+
+  Suryodaya text sample:
+    account "Work In Progress"      remark null
+
+  Keystone text sample:
+    account "Legal & Professional Fees"   remark "6140"   <- and here the account
+                                          CODE is in remark, a third convention
+
+Concrete ids: JV-2026-00643 (384a7e4c-256d-4771-ba2a-06bee2f2acbc) on Suryodaya
+carries the UUID form.
+
+EXPECTED
+One representation. Either type the field as a link to Account and store ids
+consistently, or store display text consistently and expose the id in a separate
+account_id field -- which is what every other link field on this platform does
+(Bill.vendor_id + _vendor_id_display, lines[].party_id + _party_id_display). The
+account field is the only reference on JournalEntry.lines that does neither.
+
+IMPACT
+1. Any consumer -- the platform's own voucher renderer included -- must regex-sniff
+   each value to know whether to resolve it or print it. Resolve-by-id fails on
+   19.4% of Suryodaya lines and 100% of Keystone lines; print-as-label shows a raw
+   UUID on 80.6% of Suryodaya lines.
+2. This is a plausible mechanism for the SCR-041 voucher rendering 0.00 with no
+   line items (B5), which is otherwise unexplained given the API data is correct.
+3. Grouping or summing journal lines by account -- a basic trial-balance operation,
+   and something our agent would need for any GL question -- silently splits one
+   account into two buckets when both forms are present for it.
+4. remark carries a narration on Suryodaya and an account CODE on Keystone, so it
+   cannot be used to disambiguate either.
+
+NOT A LOCALE ISSUE
+The two instances expose an identical 490-tool surface with zero difference in
+tool names, so this is not jurisdiction-driven behaviour. It looks like two
+different write paths persisting the field differently, with the older/seeded rows
+on one convention.
+```
 
 ---
 
@@ -541,8 +715,33 @@ all 91 Bills), so a locale-driven agent has nothing to compute input tax from.
 
 **Severity:** Low · **Area:** Locale / API surface · **Instance: Keystone (US)** · **Re-evaluated 2026-09-22**
 
-> 🛑 **Re-evaluation verdict: most of this is working as documented. Do not submit
-> the flag-vs-tool-exposure argument as a bug.**
+> 🛑 **SETTLED 2026-09-23 with India access — the flag-gating argument is dead.
+> Do not submit it.**
+>
+> Both instances were dumped and diffed on 2026-09-23. **They expose an identical
+> 490-tool surface: 0 US-only tools, 0 India-only tools, 490 shared.** Each
+> instance therefore shows "mismatches" for precisely the *other* jurisdiction's
+> features, which is the signature of a tool surface that is jurisdiction-agnostic
+> by design, exactly as the `initialize` contract says:
+>
+> | Flag | Suryodaya (IN) | Keystone (US) |
+> |---|---|---|
+> | `gst_returns` | `true` + 2 tools ✅ | `false` + 2 tools ⚠️ |
+> | `eway_bill` | `true` + 6 tools ✅ | `false` + 6 tools ⚠️ |
+> | `sales_tax_jurisdictions` | `false` + 2 tools ⚠️ | `true` + 2 tools ✅ |
+> | `sales_tax_nexus` | `false` + 2 tools ⚠️ | `true` + 2 tools ✅ |
+> | `exemption_certificates` | `false` + 4 tools ⚠️ | `true` + 4 tools ✅ |
+> | `einvoicing` | `false` + 0 tools ✅ | `false` + 0 tools ✅ |
+> | `form_1099` | `false` + 0 tools ✅ | **`true` + 0 tools** ❌ |
+>
+> The mirror symmetry is the proof. Filing "GST tools on a US company" would be
+> filing the same platform behaviour that gives Suryodaya its sales-tax tools.
+>
+> **`form_1099: true` on Keystone is the one genuine defect in the table** — the
+> only cell where a flag is `true` with no API anywhere in the identical 490.
+>
+> The original reasoning below reached the right conclusion from weaker evidence.
+> It is kept for the record.
 >
 > The `initialize.result` instruction string states tools are scoped to *"your
 > roles, app entitlements and row scope"* (`../CURRENT_STATUS.md` §4). **Locale is
@@ -630,19 +829,37 @@ platform.
 
 ---
 
-### Not fileable — tool-count delta between instances
+### Not fileable — tool-count delta between instances · **RESOLVED 2026-09-23: there is no delta**
 
-`tools/list` returned **436** on Suryodaya (per `../CURRENT_STATUS.md` §4,
-2026-09-20) and **446–447** on Keystone (2026-09-22, count drifted by one within
-the same session). A diff would be interesting — a US company exposing India-only
-tools is exactly what B9 documents.
+Earlier counts suggested a difference: **436** on Suryodaya (`../CURRENT_STATUS.md`
+§4, 2026-09-20) vs **446**, then **447**, on Keystone (2026-09-22, drifting within
+a single session). This was marked unfileable because the Suryodaya login appeared
+to be barred.
 
-**We cannot produce that diff.** The team credentials authenticate against
-Keystone only; the Suryodaya login returns `HTTP 401 Invalid credentials`, and
-`CURRENT_STATUS.md` records the India tool names in prose rather than storing the
-raw `tools/list` response. Two different counts taken on two different days from
-two different companies is not evidence of anything. **Do not file this** —
-B9 already captures the defensible part with direct flag-vs-tool evidence.
+**It was a wrong password, not a lockout.** The two instances take different
+passwords for the same email. With India access, both were dumped and diffed on
+2026-09-23:
+
+```
+INDIA: 490 tools | IN gst INR
+US:    490 tools | US sales_use_tax USD
+
+US-only tools:    0
+India-only tools: 0
+shared:         490
+```
+
+**The tool surface is byte-identical across instances.** Every earlier number —
+436, 446, 447, now 490 — was a snapshot of a surface that is *growing while we
+watch it*: +54 tools on India in three days, +43 on Keystone in one. The platform
+is under active development, which also explains the 446→447 drift inside one
+session.
+
+**Still not fileable, now for a better reason:** there is nothing to file. The
+original instinct to hold it back was right, and it is now proven rather than
+merely unverifiable. Worth recording as a caution: **do not treat any tool count
+in this repo as stable**, including the 436 in `CURRENT_STATUS.md` and the 447
+quoted in B9's evidence block.
 
 ---
 
@@ -977,19 +1194,28 @@ UI, and only needs platform support if it should become a native alert.
 4. **B8 (recurring generator writes INR on a USD company)** — send it alongside B7,
    since it is the same ten rows, but state plainly that the two defects are
    independent so a schedule fix is not read as closing the currency one.
-5. **B5** once reproduced with a concrete `JournalEntry.id`.
-6. **B9 — do not submit the flag-gating argument.** Re-evaluation found the platform
-   documents tools as role-scoped, not locale-scoped. If anything goes in, it is
+5. **B10 (`lines[].account` type inconsistency)** — ready now, and arguably should
+   go higher. Both instances, 1,338 lines sampled, an exact split, and a UUID that
+   demonstrably resolves via `Account.get`. It needs no screenshot and no UI
+   access to defend.
+6. **B5 — file as a UI-only report, or hold.** Resolved as a rendering bug: the
+   data is correct across all 1,415 journals on both instances. The remaining gap
+   is that `UI.MD` never recorded which journal the SCR-041 screenshot showed, so
+   re-capture that first if we want the report to be airtight. Submitting B10
+   instead may be the better use of the slot.
+7. **B9 — do not submit the flag-gating argument.** Settled 2026-09-23 with India
+   access: both instances expose an identical 490-tool set, so each apparent
+   mismatch is just the other jurisdiction's features. If anything goes in, it is
    only the `form_1099: true` flag with no backing API, and that belongs with the
    feature requests rather than the bugs.
-7. **F1 (GRN)** as the headline feature request — structural, competitor-verified
+8. **F1 (GRN)** as the headline feature request — structural, competitor-verified
    in a live product, and the only item unblockable by orchestration.
-8. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
+9. **F2 (sandbox / dry-run)** — frame it as blocking safe agent development, which
    is the platform's own stated purpose. The dry-run flag is the cheap version of
    the ask. B7 is a good argument for it: a scheduler defect accrued ten unwanted
    records against a shared live ledger with no non-production place to catch it.
-9. The remaining requests as a single batch, referencing the competitor evidence in
-   `razorpay_gap_report.md` and `clear_gap_report.md`.
+10. The remaining requests as a single batch, referencing the competitor evidence in
+    `razorpay_gap_report.md` and `clear_gap_report.md`.
 
 **A note on method, worth repeating to whoever reviews this:** F6 was originally
 written as "please build multi-level approvals." Verifying before submitting
