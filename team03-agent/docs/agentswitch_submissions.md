@@ -22,14 +22,27 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 
 ## Status summary
 
-**Verified against `GET /api/bug-report/mine` on both instances, 2026-09-23:**
-**25 reports on India, 0 on Keystone.**
+**Verified against `GET /api/bug-report/mine`, 2026-09-23:** 25 reports on the India
+account, 0 on Keystone. Every report was **fingerprinted by description content**,
+not by assumed order — an earlier revision of this table mapped the 09-23 batch by
+position and got one item wrong.
 
-> 🚨 **B7, B8 and B9 have never been filed — on either instance.** They are written
-> up in §2 below and were assumed filed, but neither account holds them. Worse,
-> **N6's text opens with *"B7 (filed against Keystone/US only)…"* — that reference
-> is wrong** and points triage at a report that does not exist. Either file B7 or
-> correct N6. See §C.
+> ⚠️ **Correction (supersedes the previous revision).** This document previously
+> listed **B7 as unfiled and "file it first."** That was wrong.
+> **B7's defect is already reported — as N6.** N6 (filed 23 Sep,
+> `5d6a7f61-fed9-4ad7-b430-31b52595f15c`) describes the same scheduler defect
+> (`next_bill_date` never advancing), covers the India instance, *and* explicitly
+> names Keystone. **Filing B7 separately would create a duplicate** — precisely the
+> mistake §B exists to prevent.
+>
+> Only **B8, B9 and B5** remain genuinely unfiled. See §C.
+
+> 📋 **What this document can and cannot see.** `GET /api/bug-report/mine` is
+> authoritative for *what we submitted*. The class bug board is **not machine-
+> readable** — its rows load dynamically, so a fetch returns only the template.
+> Board IDs and statuses below were transcribed from screenshots and may lag.
+> **N1–N8 were filed on 23 Sep and will have been triaged onto the board with new
+> board IDs that are not recorded here yet.**
 
 ---
 
@@ -86,22 +99,26 @@ timestamp cluster pointing at a root cause.
 
 ---
 
-### C · YET TO FILE — written up, verified, ready
+### C · NOT FILED — the complete list
 
-Re-verified against live data 2026-09-23. **B7 and B8 have got worse since they
-were written.**
+**Three items. Everything else in this document is already on the platform.**
 
-| # | Title | Instance | Severity | Re-verification |
+| # | Title | Instance | Severity | Status / re-verification 2026-09-23 |
 |---|---|---|---|---|
-| **B7** | Recurring bills regenerate every day | US | **High** | 🔺 **Now 4 days** (20–23 Sep), was 3. Control template `5d45e8e8` (future `next_bill_date`) still fired exactly **once** — 3×4 vs 1×1 |
-| **B8** | INR bills + GST fields on the USD company | US | Medium | 🔺 **Now 13 INR bills**, was 10 — growing because B7 keeps generating them |
-| **B9** | Locale flags contradict MCP tool exposure | US | Low-Med | Still exact: `eway_bill=false` → **8** EWayBill tools (was 6); `form_1099=true` → 0 tools; 490 tools visible |
-| B5 | Journal voucher ₹0.00 with no lines | India | Medium | ❗ Still needs reproduction against a concrete `JournalEntry.id` before filing |
+| **B8** | INR-denominated bills + India GST fields on the USD company | US | **Medium** | ✅ **Not filed** — 0 content matches across all 25 reports. 🔺 **Now 13 INR bills**, was 10 — growing, because the N6 scheduler defect keeps generating them |
+| **B9** | Locale feature flags contradict MCP tool exposure | US | **Low-Med** | ✅ **Not filed.** Still reproduces exactly: `eway_bill=false` → **8** EWayBill tools (was 6); `form_1099=true` → **0** tools; 490 tools visible |
+| **B5** | Journal voucher renders ₹0.00 with no line items | India | Medium | ✅ Not filed — ❗**needs reproduction** against a concrete `JournalEntry.id` first. Do not file until `JournalEntry.get` confirms whether `lines` is populated |
 
-**File B7 first.** It is the strongest item we hold: a live, self-demonstrating
-duplicate-payables generator with a clean internal control group, still accruing,
-and it *is* the Core Challenge Prompt ("is any vendor being paid twice?") happening
-for real on the platform.
+#### Reclassified — do NOT file
+
+| # | Why not |
+|---|---|
+| ~~**B7**~~ Recurring bills regenerate daily | **Already reported as N6** (`5d6a7f61…`, 23 Sep). N6 covers the same `next_bill_date` defect, on India, and explicitly names Keystone. Filing B7 would duplicate it. If the board wants the US instance called out separately, **add it as a comment on N6's card** rather than as a new report |
+
+**File B8 first** of the remaining three. It is verified-still-live, actively
+worsening, and pairs naturally with the already-fixed B1/N126 — the same
+wrong-jurisdiction seed-data defect in the opposite direction, which gives triage an
+obvious precedent to attach it to.
 
 ---
 
@@ -947,34 +964,30 @@ UI, and only needs platform support if it should become a native alert.
 
 ## 5. Suggested submission order
 
-**Everything in §A is already filed. This order covers §C and §D only.**
+**Everything in §A is already filed. Only three defects remain (§C).**
 
-1. **B7 (recurring bills regenerate daily)** — file today. It carries a control
-   group, the "Quarterly pest control" template, identical in every respect except
-   a future `next_bill_date`, which has fired **once** while its three siblings have
-   now fired on **four** consecutive days. That isolates the defect to a single
-   step and makes it hard to dismiss. It is live, still accruing, and it *is* the
-   Core Challenge Prompt happening for real on the platform.
-2. **Fix the B7 reference in N6** (or file B7 first so the reference becomes true).
-   N6 is already on the board saying *"B7 (filed against Keystone/US only)"* — but
-   B7 was never filed on either instance, so that cross-reference currently points
-   nowhere.
-3. **B8 (India seed data on the US company)** — pairs naturally with the fixed B1,
-   the same defect in the opposite direction, and is now at 13 bills and growing
-   because B7 keeps generating them. Cross-reference both.
-4. **B9 (feature flags vs tool exposure)** — weakest of the three, but it carries
-   four correctly-aligned control cases, so it cannot be waved away as a
-   misunderstanding of how the flags work.
-5. **B5** once reproduced with a concrete `JournalEntry.id`.
-6. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from
-   the original feature list. Write up and file together; both are High, both are
+1. **B8 (INR bills on the USD company)** — verified still live and worsening (13,
+   was 10). Pairs with the already-fixed B1/N126 as the same wrong-jurisdiction
+   seed-data defect in the opposite direction, which gives triage a precedent.
+2. **B9 (feature flags vs tool exposure)** — weaker, but carries four
+   correctly-aligned control cases, so it cannot be dismissed as a misunderstanding
+   of how the flags work.
+3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
+4. **F9 (OCR) and F10 (payment execution)** — the two significant omissions from the
+   original feature list. Write up and file together; both are High, both are
    capabilities every competitor in the set has.
-7. **F16 (spend caps)** — **verify first** against `ApprovalPolicy.condition_*`
+5. **F16 (spend caps)** — **verify first** against `ApprovalPolicy.condition_*`
    before writing it up. F6 was originally wrong in exactly this way.
-8. The remaining §D items as a single batch, referencing the competitor evidence in
+6. The remaining §D items as a single batch, referencing the competitor evidence in
    `razorpay_gap_report.md`, `clear_gap_report.md` and `gap_report_mysa.md`.
    Given N173's outcome, expect one low-priority card — file them for product value,
    not for score.
+
+**Do not file B7** — see §C. Its defect is already on the board as N6.
+
+**Before the next filing round, re-read the board.** Its rows are not
+machine-readable from here, so board IDs and statuses in this document are
+transcribed by hand and lag reality. N1–N8's board IDs are not yet recorded.
 
 **A note on method, worth repeating to whoever reviews this:** F6 was originally
 written as "please build multi-level approvals." Verifying before submitting
