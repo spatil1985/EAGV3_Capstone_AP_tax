@@ -133,6 +133,31 @@ unclaimed?"* is *"none, and here is what you wrongly claimed."*
 | UC-02 | Blocked credit (s.17(5)) audit | 🟢 | The HSN-prefix → blocked-category mapping table. Motor vehicles, F&B, club membership, works contract, goods written off |
 | UC-16 | Drug expiry → blocked credit under s.17(5)(h) | 🟢 | The cross-domain link: expiry is a stock event **and** a credit reversal. Reuses UC-02's blocking logic and UC-01's reversal row |
 
+### 5a. Detailed breakdown — question, agent work, trigger, platform need
+
+Expands each row above into what the spec (§3) has to nail on sections 1, 4–5, 3 and
+10 respectively. **Every use case must also answer on-request** (§3's baseline) — the
+trigger column below is the *primary* mode, i.e. what makes the agent proactive rather
+than purely reactive; it is additive to on-request, not a replacement for it.
+
+| UC | What it answers | What the agent should do | Trigger mode(s) | Platform changes needed |
+|---|---|---|---|---|
+| **UC-07** | *"Which of our income streams are actually taxable, and are we treating them correctly?"* | Join `Invoice(direction=receivable).items[]` to `Item.tax_preference`/`hsn_or_sac`/`product_type`; classify each revenue stream exempt vs taxable, applying the known exceptions (books nil-rated but stationery taxable; in-house transport exempt but third-party isn't). | **Event-triggered** (re-run on every new `Invoice` post, so the split stays current) + on-request. Not scheduled — classification is a running state, not a periodic deadline. | **None.** Fields already exist. |
+| **UC-14** | *"Which parts of what we do are taxable, and are we charging GST on the right ones?"* | Same classification join as UC-07, plus the ₹5,000/day non-ICU room-rent rule (5%, no ITC, post-18-Jul-2022) carried as a playbook constant. | **Event-triggered** (on new `Invoice`) + on-request. Same reasoning as UC-07. | **None.** |
+| **UC-02** | *"Have we claimed credit on anything the law blocks?"* | HSN-prefix → blocked-category lookup (motor vehicles, F&B, club membership, works contract, goods written off); flag bills where `itc_eligibility` ≠ `ineligible` but the item class says it should be. | **Scheduled** (periodic sweep, e.g. weekly — a wrongly-claimed credit sits undetected until someone looks) + on-request. Not event-triggered off one field, since the check spans the whole blocked-category table. | **None.** |
+| **UC-16** | *"What stock is about to expire, and what credit do we lose when it does?"* | Read `shelf_life_days`/`batch_tracked`/`serial_tracked` to find stock approaching/past expiry; compute the reversal on the written-off portion, reusing UC-02's blocking logic and UC-01's reversal row schema. | **Scheduled** (must run *before* expiry to be useful — daily/weekly watch, not after the fact) + on-request. A missed schedule here is a missed reversal, since expiry doesn't wait to be asked about. | **None.** |
+| **UC-08** | *"How much of our input credit are we actually entitled to keep?"* | Compute the monthly exempt:taxable ratio from UC-07, apply to common-input GST, compute the reversal, true up annually. **Report only — never post.** | **Scheduled, mandatory.** Rule 42 is itself a monthly computation with an annual true-up — the cadence is dictated by statute, not convenience. On-request also available for a mid-period estimate. | **Yes — F18.** Exempt-turnover aggregate, apportionment engine, and a write path (`JournalEntry` access or a dedicated `ITCReversal` tool) so the scheduled computation can eventually post, not just report. |
+| **UC-15** | *"Of all the GST we paid on purchases, how much can we actually keep?"* | Same computation as UC-08, larger common-input pool (pharmacy), also covers Rule 43 (capital goods). **Report only — never post.** | **Scheduled**, same statute-driven cadence as UC-08 (monthly + annual true-up) + on-request. | **Same as UC-08 — F18** covers both in one fix. |
+
+**Pattern:** the two use cases with a hard statutory cadence (UC-08, UC-15) *must* be
+scheduled — running them only on-request would mean silently missing the
+monthly/annual deadline the rule itself sets. UC-16 is scheduled because expiry is a
+ticking clock and checking after the fact defeats the point. UC-02 is a standing audit
+sweep. UC-07/UC-14 are event-driven, since classification is continuously-current
+state rather than a periodic deadline. 4 of 6 rows need **zero** platform change —
+only the two apportionment use cases hit the wall, and it's the same wall (F18) for
+both.
+
 **Sequence:** UC-07 → UC-14 → UC-02 → UC-16 → UC-08 → UC-15.
 Classification before apportionment: UC-08 cannot be specified until UC-07 defines how
 exempt turnover is derived.
