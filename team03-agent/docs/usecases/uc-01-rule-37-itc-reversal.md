@@ -267,3 +267,54 @@ Validation strategy given that constraint:
 - **No live breach case exists to validate against yet** (§9) — this spec is
   implementable today, but its first real-data validation will happen later in the
   capstone timeline, not now.
+
+---
+
+## 11. Live evidence — actual calls, 2026-09-28
+
+*Added after the spec was written. §1–§10 are unchanged; where the live data corrects
+them, the correction is stated here, not edited in place.*
+
+**Postman folder:** `UC-01 Rule 37 180-day reversal`.
+
+**Call 1 — `Bill.list {"limit":1000}`** → 227 bills, dated **2026-06-07 … 2026-09-27**.
+
+| Measure | Live value |
+|---|---|
+| `itc_eligibility`: input / input_services / capital_goods / ineligible | 198 / 11 / 9 / 9 |
+| In scope (ITC-eligible and `balance_due > 0`) | 101 |
+| …aged > 180 days | **0** |
+| Oldest bill | BILL-2026-00001, 113 days |
+| In-scope bills with **zero** item-level tax | 65 |
+
+**This confirms §9's statement that no breach exists, and adds when the first one
+arrives:**
+
+| Bill | Date | Crosses day 180 on | Item-level ITC |
+|---|---|---|---|
+| BILL-2026-00001 `60f30f05-df43-4a1c-9e6e-7409d0a86083` (Jindal Steel Depot, balance ₹5,85,162) | 2026-06-07 | **2026-12-05** | **₹0.00** |
+| BILL-2026-00002 | 2026-06-26 | 2026-12-24 | ₹0.00 |
+| BILL-2026-00003 | 2026-07-11 | 2027-01-08 | ₹0.00 |
+| BILL-2026-00004 | 2026-07-22 | 2027-01-19 | ₹0.00 |
+| BILL-2026-00018 | 2026-08-02 | 2027-01-30 | ₹0.00 |
+
+**Corrections §1–§10 need, from the live data:**
+
+1. **§4 filter syntax is invalid.** `Bill.list(filters={"itc_eligibility": [...]})`
+   does not exist. The tool takes flat, single-valued arguments. Sending an array
+   returns `-32602 "/itc_eligibility must be string"`. Use three calls
+   (`"input"`, `"input_services"`, `"capital_goods"`), or one unfiltered call with a
+   client-side filter. See README Rule 6.
+2. **§5 must suppress zero-ITC rows.** The first five bills to cross 180 days all carry
+   ₹0 item-level tax (their line `tax_percentage` is empty). Without a
+   `itc_to_reverse > 0` guard, the first real run on 2026-12-05 emits a ₹0.00
+   "reversal". Add: *step 5a — drop rows where `itc_to_reverse = 0`, and count them in
+   the summary as "aged but no credit claimed"*.
+3. **§6 needs README Rule 0.** Item-level tax is internally consistent on only 59 of 96
+   taxed bill lines. Sum only valid lines; report invalid ones as `data_quality`.
+4. **§4 pagination is answered:** `inputSchema` gives `limit` max **1000**, default 20.
+5. **§7's shared schema is used unchanged** by UC-08, UC-15, UC-16 and UC-17 (their
+   §7s).
+
+**Earliest real validation date: 2026-12-05.** A scheduled run that day must emit
+nothing for BILL-2026-00001 (₹0 ITC) unless its item-level tax has changed.

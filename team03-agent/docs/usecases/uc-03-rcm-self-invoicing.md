@@ -330,3 +330,53 @@ for this reason.
   carry a `rate`/`quantity`/line total when `cgst_amount` etc. are zero, or does the
   whole tax block go empty together?) before the derivation in §5 step 6 can be
   implemented as written.
+
+---
+
+## 11. Live evidence — actual calls, 2026-09-28
+
+*Added after the spec was written. §1–§10 are unchanged; where the live data corrects
+them, the correction is stated here, not edited in place.*
+
+**Postman folder:** `UC-03 RCM self-invoicing`.
+
+**§9 said no live case of an undeclared GTA/legal RCM bill had been found. One has.**
+
+**Call 1 — `Bill.list {"vendor_id":"cc5b21fc-1c43-474c-ad1d-3a0cbafebb9d","limit":1000}`**
+(Chakan Transport Lines — MSME micro, `Party.gst_treatment: business_gst`) → 5 bills,
+every line **SAC 996511** (road transport of goods, i.e. GTA), `is_reverse_charge = 0`,
+**all tax fields 0**:
+
+| Bill | id | Date | Taxable | RCM @5% (not declared) | `grand_total` |
+|---|---|---|---|---|---|
+| BILL-2026-00016 | `351c0540-f895-4f4a-85f0-6a1a4bfe681f` | 2026-08-08 | ₹30,800 | ₹1,540 | ₹36,344 |
+| BILL-2026-00021 | `e428ba92-a831-41b3-a542-9b14d5c4b921` | 2026-09-12 | ₹50,400 | ₹2,520 | ₹59,472 |
+| BILL-2026-00034 | `48a2edf8-1d2c-4497-a974-83c367737074` | 2026-09-12 | ₹28,000 | ₹1,400 | ₹33,040 |
+| BILL-2026-00057 | `6d0eac58-1ee1-416f-afce-39390a82fb77` | 2026-09-12 | ₹25,200 | ₹1,260 | ₹29,736 |
+| BILL-2026-00083 | `605e2298-c343-4c8b-8fc3-a79296baa521` | 2026-09-12 | ₹30,800 | ₹1,540 | ₹36,344 |
+| **Total** | | | **₹1,65,200** | **₹8,260** | |
+
+GTA under reverse charge at 5% (no ITC to the GTA) is the default. **Answering §10's own
+open question:** yes, `taxable_amount` is populated when every tax field is zero, so the
+base is readable. It is ₹1,65,200 here. (`grand_total` exceeds taxable by 18%, e.g.
+₹30,800 → ₹36,344, yet no tax field carries it. The difference sits nowhere in
+`items[]`, which is a Rule 0-class inconsistency.)
+
+**Call 2 — `Bill.list {"is_reverse_charge":true,"limit":1000}`** → 8 bills with RCM set:
+BILL-2026-00101, 00095, 00090, 00074, 00072, 00049, 00038, 00022. **None is a GTA,
+legal or sponsorship bill.** Every one is a goods HSN (82055900, 82041100) or blank,
+tagged `overseas`, `unregistered_business`, `business_composition` or `deemed_export`.
+RCM is set where it cannot apply, and missing where it must.
+
+**Corrections §1–§10 need, from the live data:**
+
+1. **§4 filter syntax:** `is_reverse_charge` must be sent as **boolean `true`**, although
+   records return `0`/`1`. `1` returns `-32602 "/is_reverse_charge must be boolean"`.
+   `filters={...}` does not exist (README Rule 6).
+2. **§9's "no live case"** is superseded. The Chakan bills are the positive control.
+3. **Add a reverse check:** `is_reverse_charge = 1` on a goods HSN with no RCM-notified
+   category → `rcm_flag_spurious`. 8 live cases.
+4. **Rate caveat:** the GTA forward-charge option rate may have changed under the
+   Sep-2025 rationalisation (README caveat). The 5% RCM figure is not affected.
+5. **Open:** whether Chakan Transport Lines issues consignment notes (the GTA test) is
+   not in the data. Confirm before telling the user the liability is certain.

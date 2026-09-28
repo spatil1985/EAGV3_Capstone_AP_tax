@@ -311,3 +311,43 @@ vertical.
   keeps it in the table only for completeness of the s.17(5) category list;
   whether that is confusing or helpful for a reader implementing both UC-02 and
   UC-16 together is worth a second opinion in review.
+
+---
+
+## 11. Live evidence — actual calls, 2026-09-28
+
+*Added after the spec was written. §1–§10 are unchanged; where the live data corrects
+them, the correction is stated here, not edited in place.*
+
+**Postman folder:** `UC-02 Blocked credit audit`.
+
+**Call 1 — `Bill.list {"limit":1000}`** → 227 bills, **250 lines**.
+
+| Measure | Live value |
+|---|---|
+| Lines with a blocked-category HSN/SAC prefix (8703, 8711, 2106, 2201, 2202, 9963, 9972, 9954, 9997) | **0** |
+| Lines whose description matches car / vehicle / canteen / food / club / gift / catering / hotel | **0** |
+| Lines with **empty `hsn_or_sac`** | **54 (22%)** — unclassifiable |
+| Bills already `itc_eligibility = ineligible` | 9 |
+
+Most frequent codes: blank ×54 · 84831099 ×26 · 82055900 ×25 · 73269099 ×25 ·
+84669390 ×20 · 82041100 ×19 · 998873 ×11 · 72283090 ×11 · 32041990 ×10 — all
+manufacturing inputs or job-work SACs, none blocked.
+
+**Call 2 — `Bill.list {"itc_eligibility":"ineligible","limit":1000}`** → 9 bills, e.g.
+BILL-2026-00094 (`1f782b5e…`, HSN 82055900, *Kirloskar — Pump Mounting Bracket
+Family*), BILL-2026-00054 (`e0d8c508…`, HSN 84669390). **Why these are ineligible is not
+recorded.** Their HSNs are ordinary production inputs, so this is the reverse
+finding: credit *under*-claimed. Worth adding as `itc_possibly_under_claimed`.
+
+**What the live data changed:**
+
+1. **A clean negative result, and the right one.** This tenant is a precision-parts
+   manufacturer with no vehicles, canteen or club spend in the ledger, so 0 findings is
+   correct, not a failure. Validation needs a fixture (§9).
+2. **§4 filter syntax is invalid** — `Bill.list(filters={...})` does not exist. Flat,
+   single-valued arguments only (README Rule 6).
+3. **Empty HSN on 22% of lines** means the HSN-prefix table cannot see a fifth of the
+   ledger. Add `missing_required_field` rows for them, so "0 blocked" is reported as
+   "0 blocked among 196 classifiable lines".
+4. **The reverse direction is live:** 9 ineligible bills with ordinary input HSNs.

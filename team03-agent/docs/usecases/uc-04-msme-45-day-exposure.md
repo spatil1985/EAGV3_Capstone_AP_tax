@@ -314,3 +314,60 @@ arguing the gap case).
 - **Interaction with N6 duplicate bills** (§6) is named but not resolved — this spec
   assumes UC-05 runs first and its output is available to gate against; the exact
   sequencing/data-sharing mechanism between the two use cases is not specified here.
+
+---
+
+## 11. Live evidence — actual calls, 2026-09-28
+
+*Added after the spec was written. §1–§10 are unchanged; where the live data corrects
+them, the correction is stated here, not edited in place.*
+
+**Postman folder:** `UC-04 MSME 45-day exposure`.
+
+**§9 said no live breach had been confirmed. Seven are live.**
+
+**Call 1 — `Party.list {"limit":1000}`** → 195 parties; `is_msme = 1` on **8** (micro 6,
+small 2). **`msme_no` (Udyam number) is blank on all 8.**
+
+**Call 2 — `Bill.list {"limit":1000}`** → bills from those 8 vendors with non-zero
+`balance_due`: 55. Aged past 45 days from `Bill.date`: **7**.
+
+| Bill | id | Vendor (type) | Date | Age | Days over 45 | `balance_due` |
+|---|---|---|---|---|---|---|
+| BILL-2026-00001 | `60f30f05-df43-4a1c-9e6e-7409d0a86083` | Jindal Steel Depot (small) | 2026-06-07 | 113 | **68** | ₹5,85,162.00 |
+| BILL-2026-00002 | `617f53e8-7a6d-4949-b79d-8d8bd25c9355` | Shreeji Powder Coating (micro) | 2026-06-26 | 94 | 49 | ₹3,34,176.00 |
+| BILL-2026-00003 | `2cb525f2-c4d1-4299-b01c-3973192ea047` | Precision Fasteners Co (micro) | 2026-07-11 | 79 | 34 | ₹1,78,133.00 |
+| BILL-2026-00004 | `5537c642-7df5-4b85-b9f1-98ac7535b354` | Nashik Heat Treaters (micro) | 2026-07-22 | 68 | 23 | ₹2,19,008.00 |
+| BILL-2026-00018 | `493e0627-3489-4ca0-bc1c-e8bb568110df` | Pune Industrial Consumables (micro) | 2026-08-02 | 57 | 12 | ₹64,664.00 |
+| BILL-2026-00017 | `a0ef8c0f-34de-4156-9897-df2c31c9139c` | Jindal Steel Depot (small) | 2026-08-05 | 54 | 9 | ₹98,554.00 |
+| BILL-2026-00016 | `351c0540-f895-4f4a-85f0-6a1a4bfe681f` | Chakan Transport Lines (micro) | 2026-08-08 | 51 | 6 | ₹36,344.00 |
+| **Total** | | | | | | **₹15,16,041.00** |
+
+`Bill.due_date` on these is exactly `date + 45` (e.g. BILL-2026-00001: due 2026-07-22).
+The platform already encodes the 45-day term, and the agent can read `due_date` directly.
+
+**Two cross-use-case conflicts the live data exposes:**
+
+1. **UC-11 — billed but not received.** `bill_match` reports `received_qty 0` against
+   the PO for **BILL-2026-00017** and **BILL-2026-00018** (both above).
+   MSMED Act s.15 runs the 45 days from the **day of acceptance**. If goods were never
+   received, arguably there was no acceptance, and recommending payment would pay for
+   undelivered goods. **Suppress, or downgrade to `needs_receipt_confirmation`, any
+   UC-04 finding that UC-11 marks `billed_not_received`.** This needs agreement between
+   UC-04 and UC-11's owners.
+2. **UC-03 — BILL-2026-00016** is also a Chakan Transport GTA bill with undeclared RCM.
+   Pay it, but self-assess the ₹1,540 RCM first.
+
+**Corrections §1–§10 need, from the live data:**
+
+1. **§4 filter syntax is invalid:** `Party.list(filters={"is_msme": true})` and
+   `Bill.list(filters={"vendor_id": [...]})` do not exist. Flat, single-valued
+   arguments only; one `Bill.list` per vendor id, or one unfiltered call joined
+   client-side (README Rule 6).
+2. **§9's "no live breach"** is superseded by the 7 above.
+3. **`msme_no` blank on all 8** — s.43B(h) applies only to suppliers *registered* under
+   MSMED (Udyam). Without the number, the agent cannot evidence registration. Emit
+   `missing_required_field` per MSME party, and state the s.43B(h) half as "subject to
+   Udyam confirmation".
+4. **README caveat:** s.43B(h) is Income-tax Act 1961 numbering. The Income-tax Act
+   2025 is understood to apply from 1 April 2026. Confirm the citation.
