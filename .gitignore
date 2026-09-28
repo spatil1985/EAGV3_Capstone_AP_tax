@@ -5,6 +5,12 @@ __pycache__/
 venv/
 .env
 
+# Claude Code local settings. Currently hold only machine-specific permission
+# rules with absolute temp-scratchpad paths, which are meaningless on another
+# machine. Un-ignore .claude/settings.json if the team ever wants shared
+# project-level permissions committed.
+.claude/
+
 # Real Postman environments hold plaintext credentials -- never commit these.
 # The .example.json template (blank values) is intentionally NOT matched here.
 *.postman_environment.json
