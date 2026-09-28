@@ -154,7 +154,7 @@ Two more row types appear, both first defined in these specs:
 |---|---|---|
 | `itc_reversal` | UC-01 §7 | UC-08, UC-15, UC-16, UC-17 |
 | `data_quality` | this README, Rule 0 | every spec |
-| `liability_undeclared` | UC-03 §7 | UC-21, UC-22 |
+| `rcm_undeclared_liability` | UC-03 §7 | UC-21, UC-22 |
 
 `data_quality` row, fixed fields:
 
