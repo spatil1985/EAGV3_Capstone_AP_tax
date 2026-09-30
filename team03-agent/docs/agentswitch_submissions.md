@@ -106,6 +106,13 @@ timestamp cluster pointing at a root cause.
 
 ### C · NOT FILED — the complete list
 
+> **Update 2026-09-30.** B8 and B9 were filed on 23 Sep (`5e64a8bc…`, `70a47383…`), so
+> of the table below only **B5** remains. **Five new candidates, N9–N13**, came out of
+> the use-case sweep, with evidence to append to N1/N6/N7/N8/N128. Full ready-to-paste
+> texts are in [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md). **F18 is not
+> on the platform** (see [`submission_tracker.md`](submission_tracker.md)) and needs
+> re-filing.
+
 **Three items. Everything else in this document is already on the platform.**
 
 | # | Title | Instance | Severity | Status / re-verification 2026-09-23 |

@@ -15,8 +15,18 @@ write-ups for every filed item live in
 **status only** — refresh it by re-running `BugReport.list` and diffing against the
 tables below, not by re-reading prose.
 
-**Latest action (this session):** F18 filed — `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`,
-23 Sep 2026 16:02, `status: "new"`. See §2 below.
+> **Re-verified 2026-09-30 — two changes.**
+> 1. **F18 is not on the platform.** `GET /api/bug-report/mine` returns **27**
+>    reports, not 28. None has id `a9f1888f…` or mentions Rule 42, and
+>    `GET /api/bug-report/a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` → **404**. The 23 Sep
+>    submission did not persist. **Re-file it** (text: `agentswitch_submissions.md` §4).
+> 2. **Five new bug candidates (N9–N13)**, each checked against the 27 filed reports,
+>    with ready-to-paste texts: [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md).
+>    The same file has evidence to append to N1, N6, N7, N8 and N128. **N8's cited
+>    records have been re-stamped and no longer reproduce as filed.**
+
+**Previous action (23 Sep):** F18 submitted as `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`,
+23 Sep 2026 16:02, `status: "new"` — **not found on 30 Sep; see above.**
 
 **To refresh:** log in (`scripts/agentswitch_client.py`), `tools/call BugReport.list
 {"limit": 200}`, fingerprint each returned `description` against the "Fingerprint"
@@ -91,7 +101,19 @@ unscheduled Low card despite two High items in the batch).
 
 | # | Title | Priority | Filed | Platform ID | Board |
 |---|---|---|---|---|---|
-| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | **High** | ✅ 23 Sep 16:02 | `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` | pending — not yet triaged (`status: "new"`) |
+| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | **High** | ⚠️ submitted 23 Sep 16:02 — **absent from `mine` on 30 Sep (GET by id → 404); re-file** | `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` | — |
+
+### Bug candidates identified 30 Sep — not yet filed
+
+| # | Title | Severity | Closest filed | Filed? |
+|---|---|---|---|---|
+| N9 | Expired `RecurringInvoice` templates generate customer invoices (69, ₹11.19 Cr) | High | N6 | 🔴 |
+| N10 | Every recurring-generated invoice carries impossible GST (69/69 vs 0/416) | High | N7, N128 | 🔴 |
+| N11 | Credit notes up to 52× the invoice credited; CNs against purchase invoices | Medium-High | N128 | 🔴 |
+| N12 | `items[].tax_id` holds GSTIN strings — resolves 0/189; `tds_section_code` 0/128 valid | Medium | N127/N5/B6 class | 🔴 |
+| N13 | E-way bills stay `active` after expiry; no EWB number / vehicle | Medium | GST-29 (known) — file with care | 🔴 |
+
+Full texts: [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md).
 
 ---
 
