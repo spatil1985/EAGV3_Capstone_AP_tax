@@ -340,7 +340,19 @@ them, the correction is stated here, not edited in place.*
 
 **Postman folder:** `UC-03 RCM self-invoicing`.
 
+> **Correction 2026-09-30 — the Chakan Transport bills are *not* undeclared RCM.**
+> Their document-level `taxes[]` shows the GTA **charged 18% GST on forward charge**
+> (CGST 9% + SGST 9%). BILL-2026-00016: ₹2,772 + ₹2,772 = ₹5,544, exactly the
+> ₹30,800 → ₹36,344 gap the paragraph below calls unexplained; ₹29,736 across all
+> five. A GTA that opts for forward charge bills GST itself, and the recipient has no
+> RCM liability. §9's original statement stands: **there is no live positive control
+> for undeclared GTA/legal RCM.** What remains valid below: Call 2
+> (`rcm_flag_spurious`, 8 bills) and Corrections 1 and 3. Correction 2 is withdrawn.
+> The forward-charge case needs its own check instead. Is the GTA's forward-charge
+> rate the notified one, and did it opt in (Annexure V)? Neither is in the data.
+
 **§9 said no live case of an undeclared GTA/legal RCM bill had been found. One has.**
+*(Withdrawn — see correction above.)*
 
 **Call 1 — `Bill.list {"vendor_id":"cc5b21fc-1c43-474c-ad1d-3a0cbafebb9d","limit":1000}`**
 (Chakan Transport Lines — MSME micro, `Party.gst_treatment: business_gst`) → 5 bills,
@@ -373,7 +385,8 @@ RCM is set where it cannot apply, and missing where it must.
 1. **§4 filter syntax:** `is_reverse_charge` must be sent as **boolean `true`**, although
    records return `0`/`1`. `1` returns `-32602 "/is_reverse_charge must be boolean"`.
    `filters={...}` does not exist (README Rule 6).
-2. **§9's "no live case"** is superseded. The Chakan bills are the positive control.
+2. ~~**§9's "no live case"** is superseded. The Chakan bills are the positive control.~~
+   *Withdrawn 2026-09-30 — they are forward-charge GTA bills (see correction above).*
 3. **Add a reverse check:** `is_reverse_charge = 1` on a goods HSN with no RCM-notified
    category → `rcm_flag_spurious`. 8 live cases.
 4. **Rate caveat:** the GTA forward-charge option rate may have changed under the

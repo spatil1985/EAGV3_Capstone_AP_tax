@@ -355,8 +355,10 @@ The platform already encodes the 45-day term, and the agent can read `due_date` 
    undelivered goods. **Suppress, or downgrade to `needs_receipt_confirmation`, any
    UC-04 finding that UC-11 marks `billed_not_received`.** This needs agreement between
    UC-04 and UC-11's owners.
-2. **UC-03 — BILL-2026-00016** is also a Chakan Transport GTA bill with undeclared RCM.
-   Pay it, but self-assess the ₹1,540 RCM first.
+2. ~~**UC-03 — BILL-2026-00016** is also a Chakan Transport GTA bill with undeclared RCM.
+   Pay it, but self-assess the ₹1,540 RCM first.~~ *Correction 2026-09-30: withdrawn.
+   The GTA charged 18% forward-charge GST (₹5,544 in `taxes[]`), so no RCM applies
+   (UC-03 §11).*
 
 **Corrections §1–§10 need, from the live data:**
 

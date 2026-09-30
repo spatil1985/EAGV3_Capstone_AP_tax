@@ -95,20 +95,24 @@ manufacturing company, so it illustrates the mechanics; it is not a school resul
 > E  (exempt turnover, Item.tax_preference = tax_exempt)  = ₹2,32,96,704.45
 > F  (total receivable turnover, Sep 2026)                = ₹8,50,07,553.04
 > E/F                                                     = 27.41%
-> T  (item-level tax on input + input_services bills, Sep) = ₹55,491.28
+> T  (total_tax on input + input_services bills, Sep)     = ₹14,80,485.54
 > T1 = T2 = T3 = T4 = 0   (conservative default: all common)
-> C2                                                      = ₹55,491.28
-> D1 = 55,491.28 × 27.41%                                 = ₹15,207.64
+> C2                                                      = ₹14,80,485.54
+> D1 = 14,80,485.54 × 27.41%                              = ₹4,05,733.76
 > D2 = 0   (no non-business use declared)
-> C3 = 55,491.28 − 15,207.64                              = ₹40,283.64
+> C3 = 14,80,485.54 − 4,05,733.76                         = ₹10,74,751.78
 > ```
 >
-> Output: *"September 2026: 27.41% of turnover was exempt. ₹15,207.64 of ₹55,491.28
-> common input credit must be reversed; ₹40,283.64 may be kept."*
+> Output: *"September 2026: 27.41% of turnover was exempt. ₹4,05,733.76 of
+> ₹14,80,485.54 common input credit must be reversed; ₹10,74,751.78 may be kept."*
 >
-> **Caveat carried into the row:** T includes item-level tax that fails Rule 0 on
-> 37 of 96 bill lines. The reversal is therefore stated **with a data-quality range**,
-> not as a single filing figure (§6).
+> **Correction 2026-09-30.** This example previously used item-level tax only
+> (T = ₹55,491.28 → D1 ₹15,207.64), which misses every bill whose GST sits in
+> document-level `taxes[]`. Item-level is only ₹55,571.20 of the ₹14,80,485.54
+> September total. T is now the bills' `total_tax`. Implementations should source
+> tax per document per README "Correction 2026-09-30" (`tax_source`), so the exact
+> figure may move by the bills whose `taxes[]` does not reconcile. Emit those as
+> `data_quality` and state the range.
 
 ---
 
@@ -142,14 +146,14 @@ UC-01 §7 reversal row, unchanged fields, plus:
   "exempt_turnover_E": 23296704.45,
   "total_turnover_F": 85007553.04,
   "ratio": 0.2741,
-  "common_credit_C2": 55491.28,
-  "reversal_base_amount": 15207.64,
+  "common_credit_C2": 1480485.54,
+  "reversal_base_amount": 405733.76,
   "interest_amount": 0.00,
-  "total_exposure": 15207.64,
+  "total_exposure": 405733.76,
   "attribution_basis": "all_common_default",
   "currency": "INR",
   "status": "finding",
-  "summary": "Sep 2026 — 27.41% exempt turnover; reverse ₹15,207.64 of ₹55,491.28 common credit."
+  "summary": "Sep 2026 — 27.41% exempt turnover; reverse ₹4,05,733.76 of ₹14,80,485.54 common credit."
 }
 ```
 
@@ -185,7 +189,7 @@ UC-01 §7 reversal row, unchanged fields, plus:
 - **Does zero-rated (SEZ/export) turnover count in F but not E?** Yes by statute
   (zero-rated is taxable). UC-07 must keep zero-rated out of E. The 15 live SEZ invoices
   are `taxable` items, so they are correctly in T today.
-- **F18 framing:** the live example shows the gap concretely. A ₹15,207.64 reversal is
+- **F18 framing:** the live example shows the gap concretely. A ₹4,05,733.76 reversal is
   computed and cannot be posted. Use this as the evidence line in F18's triage response.
 
 ---
@@ -206,7 +210,7 @@ Monthly split, FY 2026-27 (by `Item.tax_preference`):
 | 2026-06 | 0 | ₹1,92,72,518.28 | 0.00% | 0 | 0 |
 | 2026-07 | 0 | ₹1,34,98,123.63 | 0.00% | 0 | 0 |
 | 2026-08 | 0 | ₹46,44,015.04 | 0.00% | 0 | 0 |
-| **2026-09** | **₹2,32,96,704.45** | **₹8,50,07,553.04** | **27.41%** | **₹55,491.28** | **₹15,207.64** |
+| **2026-09** | **₹2,32,96,704.45** | **₹8,50,07,553.04** | **27.41%** | **₹14,80,485.54** *(header `total_tax`; item-level ₹55,571.20 — corrected 30 Sep)* | **₹4,05,733.76** |
 | FY to date | ₹2,32,96,704.45 | ₹14,94,52,230.91 | 15.59% | — | — |
 
 **Call 3 — `Bill.list`, once per enum value** (Rule 6):

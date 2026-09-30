@@ -290,13 +290,20 @@ them, the correction is stated here, not edited in place.*
 **This confirms §9's statement that no breach exists, and adds when the first one
 arrives:**
 
-| Bill | Date | Crosses day 180 on | Item-level ITC |
-|---|---|---|---|
-| BILL-2026-00001 `60f30f05-df43-4a1c-9e6e-7409d0a86083` (Jindal Steel Depot, balance ₹5,85,162) | 2026-06-07 | **2026-12-05** | **₹0.00** |
-| BILL-2026-00002 | 2026-06-26 | 2026-12-24 | ₹0.00 |
-| BILL-2026-00003 | 2026-07-11 | 2027-01-08 | ₹0.00 |
-| BILL-2026-00004 | 2026-07-22 | 2027-01-19 | ₹0.00 |
-| BILL-2026-00018 | 2026-08-02 | 2027-01-30 | ₹0.00 |
+| Bill | Date | Crosses day 180 on | Item-level ITC | **ITC in `taxes[]`** *(Correction 2026-09-30)* |
+|---|---|---|---|---|
+| BILL-2026-00001 `60f30f05-df43-4a1c-9e6e-7409d0a86083` (Jindal Steel Depot, balance ₹5,85,162) | 2026-06-07 | **2026-12-05** | ₹0.00 | **₹1,02,672** (CGST 51,336 + SGST 51,336) |
+| BILL-2026-00002 | 2026-06-26 | 2026-12-24 | ₹0.00 | ₹50,976 |
+| BILL-2026-00003 | 2026-07-11 | 2027-01-08 | ₹0.00 | ₹29,376 |
+| BILL-2026-00004 | 2026-07-22 | 2027-01-19 | ₹0.00 | ₹36,864 |
+| BILL-2026-00018 | 2026-08-02 | 2027-01-30 | ₹0.00 | ₹9,864 |
+
+> **Correction 2026-09-30.** The "Item-level ITC ₹0.00" column is true but misleading.
+> These bills carry their GST in document-level `taxes[]`, which reconciles exactly to
+> `total_tax` (18%, CGST + SGST). The ITC exists; it is just not on the lines. So the
+> first real Rule 37 case is **BILL-2026-00001 on 2026-12-05: ₹1,02,672 to reverse**,
+> not a ₹0 row. Correction 2 below is withdrawn. Source the tax per README
+> "Correction 2026-09-30" (`tax_source`).
 
 **Corrections §1–§10 need, from the live data:**
 
@@ -305,13 +312,16 @@ arrives:**
    returns `-32602 "/itc_eligibility must be string"`. Use three calls
    (`"input"`, `"input_services"`, `"capital_goods"`), or one unfiltered call with a
    client-side filter. See README Rule 6.
-2. **§5 must suppress zero-ITC rows.** The first five bills to cross 180 days all carry
+2. ~~**§5 must suppress zero-ITC rows.**~~ *Withdrawn 2026-09-30 — the tax is in
+   `taxes[]`; see the correction above.* The first five bills to cross 180 days all carry
    ₹0 item-level tax (their line `tax_percentage` is empty). Without a
    `itc_to_reverse > 0` guard, the first real run on 2026-12-05 emits a ₹0.00
    "reversal". Add: *step 5a — drop rows where `itc_to_reverse = 0`, and count them in
    the summary as "aged but no credit claimed"*.
-3. **§6 needs README Rule 0.** Item-level tax is internally consistent on only 59 of 96
-   taxed bill lines. Sum only valid lines; report invalid ones as `data_quality`.
+3. **§5 step 5 and §6 must read the tax source per document** (README, Correction
+   2026-09-30): `taxes[]` where it reconciles to `total_tax`, otherwise valid item
+   lines, otherwise a `data_quality` row. §6's "never from `Bill.taxes[]`" is
+   superseded for Bills.
 4. **§4 pagination is answered:** `inputSchema` gives `limit` max **1000**, default 20.
 5. **§7's shared schema is used unchanged** by UC-08, UC-15, UC-16 and UC-17 (their
    §7s).

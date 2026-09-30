@@ -116,7 +116,7 @@ rule_42_annual_trueup}`. The Rule 43 row adds `capital_goods_bill_id`,
 
 ## 9. Validation
 
-1. **UC-08 engine regression** (the Sep-2026 real computation: ₹15,207.64) must pass
+1. **UC-08 engine regression** (the Sep-2026 real computation: ₹4,05,733.76 — corrected 30 Sep, was ₹15,207.64) must pass
    unchanged.
 2. **Rule 43 arithmetic fixture:** A = ₹60,000 → Tm = ₹1,000; E/F = 25% → Te = ₹250;
    month 61 → 0.

@@ -28,14 +28,14 @@ changed verdict is explained in that file's §11.
 
 | UC | Title | Owner | Verdict | Headline from live data |
 |---|---|---|---|---|
-| [01](uc-01-rule-37-itc-reversal.md) | Rule 37 — 180-day ITC reversal | Sudip | 🟢 → 🟢 *(no case until 5 Dec 2026)* | Ledger starts 2026-06-07; oldest bill is 113 days. First crossing is BILL-2026-00001 on **2026-12-05**, and it carries **₹0** item-level ITC |
+| [01](uc-01-rule-37-itc-reversal.md) | Rule 37 — 180-day ITC reversal | Sudip | 🟢 → 🟢 *(no case until 5 Dec 2026)* | Ledger starts 2026-06-07; oldest bill is 113 days. First crossing is BILL-2026-00001 on **2026-12-05**, carrying **₹1,02,672** ITC in `taxes[]` *(corrected 30 Sep — was "₹0")* |
 | [02](uc-02-blocked-credit-audit.md) | Blocked credit s.17(5) | Geetha | 🟢 → 🟢 | 0 of 250 bill lines in a blocked HSN/SAC; 54 lines (22%) have no HSN at all, so they cannot be classified |
-| [03](uc-03-rcm-self-invoicing.md) | RCM self-invoicing | Sudip | 🟢 → 🟢 | **Real case:** 5 GTA bills (SAC 996511) from Chakan Transport Lines, RCM flag off, **₹8,260** RCM at 5% undeclared |
+| [03](uc-03-rcm-self-invoicing.md) | RCM self-invoicing | Sudip | 🟢 → 🟢 | 5 GTA bills (SAC 996511) from Chakan Transport Lines, RCM flag off — but the GTA **charges 18% forward-charge GST** (₹29,736 in `taxes[]`), so **no undeclared RCM** *(corrected 30 Sep — was "₹8,260 undeclared")*. No live positive control |
 | [04](uc-04-msme-45-day-exposure.md) | MSME 45-day | Sudip | 🟢 → 🟢 | **7 real breaches**, worst 68 days over (₹5,85,162). `msme_no` blank on all 8 MSME parties |
 | [05](uc-05-duplicate-vendor-payment.md) | Duplicate vendor payment | Sudip | 🟡 → 🟡 | Amount heuristic: 218 pairs, 208 suppressed by the `recurring_bill_id` gate, **10 remain**. Exact tier usable on only **18/227** bills |
 | [06](uc-06-approval-sla-audit.md) | Approval SLA & SoD audit | Sudip | 🟢 → 🟢 | N8 records were re-stamped since filing; now 5/19 resolved wrong, 3/55 open wrong. `ApprovalPolicy` still **403** |
 | [07](uc-07-school-exempt-taxable-split.md) | School exempt/taxable split | Geetha | 🟡 → 🟡 | **Tax-exempt items are being charged GST** (INV-2026-00254). 15 items with goods HSN typed `services` |
-| [08](uc-08-rule-42-apportionment-school.md) | Rule 42 apportionment — school | Geetha | 🔴 → 🔴 *(compute 🟢)* | Real Sep-2026 ratio **27.41%**, C2 ₹55,491.28 → D1 **₹15,207.64**. Zero-tax ≠ exempt: 438/592 lines are zero-tax |
+| [08](uc-08-rule-42-apportionment-school.md) | Rule 42 apportionment — school | Geetha | 🔴 → 🔴 *(compute 🟢)* | Real Sep-2026 ratio **27.41%**, C2 ₹14,80,485.54 → D1 **₹4,05,733.76** *(corrected 30 Sep — was ₹55,491.28 → ₹15,207.64)*. Exempt comes from `Item.tax_preference`, not zero-tax lines |
 | [09](uc-09-vendor-tds-verification.md) | Vendor TDS verification | Sudip | 🟢 → 🟢 | **N7 has grown 9 → 101 bills.** 101/101 stored `tds_amount` wrong; ₹52.57 lakh of phantom TDS; negative payables on all 101 |
 | [10](uc-10-job-work-itc04.md) | Job work / ITC-04 | Sandip | 🔴 → 🟡 | **`challan_type=job_work` exists** (19 challans). spec.md and F19 say it doesn't. Return tracking is what's missing |
 | [11](uc-11-three-way-match.md) | Three-way match | Sandip | 🔴 → 🟡 | **A receipt leg exists.** `bill_match` on all 101 PO bills: 9 exceed tolerance, **8 billed with 0 received**. `recorded_status` null ×101 |
@@ -44,7 +44,7 @@ changed verdict is explained in that file's §11.
 | [14](uc-14-clinic-exempt-taxable-split.md) | Clinic exempt/taxable split | Geetha | 🟡 → 🟡 | No clinic tenant. Engine shared with UC-07; room-rent rule is playbook-only |
 | [15](uc-15-rule-42-43-apportionment-clinic.md) | Rule 42/43 — clinic | Geetha | 🔴 → 🔴 *(compute 🟢)* | Same engine as UC-08; adds Rule 43 capital-goods leg (9 `capital_goods` bills exist) |
 | [16](uc-16-drug-expiry-blocked-credit.md) | Expiry → blocked credit | Geetha | 🟢 → 🟡 | 29 shelf-life items, **only 8 batch-tracked**; no `Batch`/`StockEntry` list tool over MCP |
-| [17](uc-17-composition-scheme.md) | Composition scheme | Sandip | 🔴 → 🔴 | `Company` has no tax-mode field. Buildable sub-check: **4 "composition" vendor bills carry ₹8,079.46 GST** marked ITC-eligible |
+| [17](uc-17-composition-scheme.md) | Composition scheme | Sandip | 🔴 → 🔴 | `Company` has no tax-mode field. Buildable sub-check: **4 "composition" vendor bills carry ₹13,500.98 GST** marked ITC-eligible *(corrected 30 Sep — was ₹8,079.46)* |
 | [18](uc-18-hsn-rate-consistency.md) | HSN rate consistency | Sandip | 🟢 → 🟢 | 5 HSNs charged at 2–5 different rates; HSN 73269099 at 0/5/9/12/18%. Tax oracle has **no HSN input** |
 | [19](uc-19-credit-note-time-limit.md) | Credit-note s.34(2) limit | Sandip | 🟢 → 🟢 | 25/25 CNs within window. **125 FY25-26 invoices; window closes 2026-11-30 (63 days).** 12 CNs link to payable invoices |
 | [20](uc-20-export-lut-tracking.md) | Export / LUT | Sandip | 🟡 → 🟡 | 15 zero-tax SEZ invoices. An LUT row exists in `TaxExemption` but has **no validity dates and no party link** |
@@ -57,6 +57,28 @@ changed verdict is explained in that file's §11.
 
 Rules 1–5 are carried from [`../assignment.md`](../assignment.md) §8. **Rule 0 is new,
 forced by the 2026-09-28 data, and overrides the old wording of Rule 1.**
+
+> **Correction 2026-09-30 — pick the tax source per document, not per rule.** The
+> 2026-09-28 rules below assumed item-level tax is the only candidate source. It
+> is not. On **Bill and Invoice**, document-level `taxes[]` carries a clean
+> CGST/SGST/IGST split that **reconciles to `total_tax` on 401/401 manually created
+> invoices and 63/64 bills whose lines carry no tax**. On those documents item-level
+> tax is simply empty, so an item-only rule reads their ITC and output tax as ₹0.
+> N128's `taxes[]` corruption is on **CreditNote**; it does not generalise.
+>
+> ```
+> tax_source(doc) :=
+>     "taxes[]"   if abs(Σ taxes[].amount − doc.total_tax) <= 1 and every taxes[].tax_type is non-blank
+>     "items[]"   elif abs(Σ item tax − doc.total_tax) <= 1 and every taxed line passes line_is_valid
+>     "none"      otherwise → data_quality row; exclude from totals
+> ```
+>
+> Recurring-generated invoices (69) are the reverse case: `items[]` sums to
+> `total_tax`, but the lines are impossible and `taxes[]` has blank types. They fall to
+> "none" (see [`../bugs_to_file_2026-09-30.md`](../bugs_to_file_2026-09-30.md) N10).
+> Rule 1 below is superseded for Bill and Invoice, and still holds for CreditNote.
+> Figures corrected under this rule are marked *Correction 2026-09-30* in UC-01, UC-03,
+> UC-04, UC-08 and UC-17.
 
 ### Rule 0 — item-level tax is *not* automatically trustworthy (new)
 

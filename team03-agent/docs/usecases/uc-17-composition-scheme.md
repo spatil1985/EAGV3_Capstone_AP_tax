@@ -139,7 +139,8 @@ rule additionally emits a UC-01 §7 reversal row.
 ## 9. Validation
 
 1. **Sub-check live positive controls:** all 4 `business_composition` bills (§11) must
-   produce findings; total GST ₹8,079.46.
+   produce findings; total GST ₹13,500.98 by `total_tax` (₹8,079.46 item-level — see
+   §11 correction).
 2. **Main check:** fixture only. Composition org at ₹1.2 Cr run-rate →
    `approaching`; one inter-state invoice → `disqualified` from its date.
 
@@ -174,13 +175,21 @@ No tax-mode, GSTIN or registration-type field exists. **GAP-3 confirmed.**
 
 **Call 3 — `Bill.list {"gst_treatment":"business_composition","limit":1000}`** → 4 bills:
 
-| Bill | Vendor | Item-level GST | `itc_eligibility` | RCM |
-|---|---|---|---|---|
-| BILL-2026-00019 `be59dc55…` | Bosch Rexroth India | ₹4,419.37 | input | 0 |
-| BILL-2026-00077 `2be5ebc8…` | Bharat EV Motors Ltd | ₹2,069.90 | input_services | 0 |
-| BILL-2026-00072 `89be310f…` | Shreeji Powder Coating | ₹1,434.70 | input | **1** |
-| BILL-2026-00022 `2cfe5989…` | Tata Ficosa Automotive Systems | ₹155.49 | capital_goods | **1** |
-| **Total** | | **₹8,079.46** | all ITC-eligible | |
+| Bill | Vendor | Item-level GST | **`total_tax`** *(30 Sep)* | `itc_eligibility` | RCM |
+|---|---|---|---|---|---|
+| BILL-2026-00019 `be59dc55…` | Bosch Rexroth India | ₹4,419.37 | ₹7,828.60 | input | 0 |
+| BILL-2026-00077 `2be5ebc8…` | Bharat EV Motors Ltd | ₹2,069.90 | ₹2,587.37 | input_services | 0 |
+| BILL-2026-00072 `89be310f…` | Shreeji Powder Coating | ₹1,434.70 | ₹2,608.54 | input | **1** |
+| BILL-2026-00022 `2cfe5989…` | Tata Ficosa Automotive Systems | ₹155.49 | ₹476.47 | capital_goods | **1** |
+| **Total** | | ₹8,079.46 | **₹13,500.98** | all ITC-eligible | |
+
+> **Correction 2026-09-30.** The GST these bills carry is their `total_tax`,
+> ₹13,500.98. The item-level column understates it. None of the three sources agrees
+> on three of the four bills. BILL-2026-00019: lines ₹4,419.37, `taxes[]` ₹3,885.93
+> (one blank-typed row plus IGST and CESS of equal amount), `total_tax` ₹7,828.60.
+> Report `total_tax` as the exposure and emit a `data_quality` row for the
+> disagreement. This inconsistency is evidence for N128 (see
+> `../bugs_to_file_2026-09-30.md`).
 
 **Call 4 — `Party.list {"limit":1000}`** → `gst_treatment`: blank 139 · consumer 40 ·
 business_gst 15 · sez 1 · **business_composition 0**.
