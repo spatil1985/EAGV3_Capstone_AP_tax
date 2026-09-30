@@ -15,3 +15,7 @@ venv/
 # The .example.json template (blank values) is intentionally NOT matched here.
 *.postman_environment.json
 !*.postman_environment.example.json
+
+# Harness run output: traces, reports, anomalies, recordings and finding state.
+# Contains live business data -- never commit.
+team03-agent/runs/

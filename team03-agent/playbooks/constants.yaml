@@ -1,0 +1,27 @@
+# Statutory constants — rules, not data (harness_plan.md §5, spec.md §7).
+# Owner: Sudip (assignment.md §7). Playbooks read these via ctx.constant(name) and
+# must never hardcode them, so a changed notification is a one-line edit here.
+#
+# Each entry: value · unit · source (statute / notification) · verified (date a human
+# last checked the source; null = not yet checked).
+#
+# Seeded with UC-12's constants only. Add the rest (180 d, 45 d, ₹50 lakh, ₹5,000/day,
+# 1 yr / 3 yr, 30 Nov, 18% p.a.) as their playbooks land.
+
+eway_bill_threshold_inr:
+  value: 50000
+  unit: INR, consignment value including tax
+  source: Rule 138(1), CGST Rules 2017
+  verified: null
+
+eway_bill_km_per_day:
+  value: 200
+  unit: km of distance per day of validity, normal cargo
+  source: Rule 138(10), CGST Rules 2017
+  verified: null
+
+eway_bill_km_per_day_odc:
+  value: 20
+  unit: km of distance per day of validity, over-dimensional cargo
+  source: Rule 138(10), CGST Rules 2017
+  verified: null

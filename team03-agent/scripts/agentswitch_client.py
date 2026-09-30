@@ -67,6 +67,12 @@ class AgentSwitchClient:
         response.raise_for_status()
         return response.json()
 
+    def rest_get(self, path: str, params: dict | None = None) -> dict:
+        """GET any REST path (e.g. /api/accounting/reports/ap-aging) and return JSON."""
+        response = self._session.get(f"{self.base_url}{path}", params=params, timeout=30)
+        response.raise_for_status()
+        return response.json()
+
     # -- MCP (JSON-RPC 2.0 over POST /api/mcp) ---------------------------
 
     def mcp_rpc(self, method: str, params: dict | None = None) -> dict:
