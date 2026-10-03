@@ -99,19 +99,23 @@ the load.
 
 ## Status of our filed US reports, observed 2026-10-03
 
-These look fixed on the server. They are recorded here for
-[`../../submission_tracker.md`](../../submission_tracker.md); confirm on the board
-before changing a status.
+Tallied with the class bug board on 2026-10-03; the board status is authoritative.
+The full Team 3 mapping is in
+[`../../agentswitch_submissions.md` §A](../../agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03).
 
-| Filed | Observed now |
-|---|---|
-| **N1** `is_overdue` on resolved requests | 0/93 wrong. The 8 cited records now carry the correct flag (e.g. APR-2026-00121 `is_overdue 1`) |
-| **N2** match never persisted | `recorded_status` populated on 81/81 |
-| **N3** `bill_match` metadata | not re-checked |
-| **N4** nexus YTD stuck at 0 | MI $713,601.20 / 28, PA $1,077,985.76 / 28, OH $2,400,857.51 / 102: all equal our recompute |
-| **B7 → N6** recurring runaway | `next_bill_date` now advances (2026-11-01); 15 of 20 generated bills voided; `last_generated_date` **still null** on all 4 templates |
-| **B8** INR bills on USD company | 15 of 16 voided, 1 draft |
-| **B9** flags vs tools | not re-checked |
+| Filed | Board | Board status | Observed on Keystone, 3 Oct |
+|---|---|---|---|
+| **N1** `is_overdue` on resolved requests | N224 (merged with N8) | Live in Release 7 | 0/93 wrong. Cited records corrected (e.g. APR-2026-00121 `is_overdue 1`) |
+| **N2** match never persisted | N242 | Fixed, ships next release | `recorded_status` populated on 81/81 |
+| **N3** `bill_match` metadata | N243 | Live in Release 7 | not re-checked |
+| **N4** nexus YTD stuck at 0 | N225 | Fixed, ships next release | MI $713,601.20 / 28, PA $1,077,985.76 / 28, OH $2,400,857.51 / 102: all equal our recompute |
+| **B7 → N6** recurring runaway | N220 | Live in Release 7 | `next_bill_date` advances (2026-11-01); 15 of 20 generated bills voided; `last_generated_date` **still null** on all 4 templates. Worth a comment on N220 |
+| **B8** INR bills on USD company | N223 | Fixed, ships next release | 15 of 16 voided, 1 draft |
+| **B9** flags vs tools | N227 | Fixed, ships next release | not re-checked |
+
+New US bugs from these use cases, verified and not on the board: **N14–N16**
+([`../../agentswitch_submissions.md` §C.1](../../agentswitch_submissions.md#c1--new-bugs-to-file--verified-2026-10-03)).
+US-06's W-9 finding is already on the board as **N398** (team07).
 
 ## Statutory caveats (flagged, not asserted)
 

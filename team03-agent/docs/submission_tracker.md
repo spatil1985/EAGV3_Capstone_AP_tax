@@ -15,18 +15,25 @@ write-ups for every filed item live in
 **status only** — refresh it by re-running `BugReport.list` and diffing against the
 tables below, not by re-reading prose.
 
+> **Tallied with the class bug board 2026-10-03.** The board's rows are embedded in its
+> artifact page, so it is now readable. All 21 Team 3 rows are mapped, with board ids
+> and statuses, in
+> [`agentswitch_submissions.md` §A](agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03):
+> 8 Live · 5 Fixed (ships in next release) · 5 In review (N9–N13 = N414–N418, each with
+> an open question for us) · 3 To do. **New, unfiled: N14–N16** (§C.1). The board
+> status columns in the tables below predate this tally; §A is authoritative.
+
 > **Re-verified 2026-09-30 — two changes.**
-> 1. **F18 is not on the platform.** `GET /api/bug-report/mine` returns **27**
->    reports, not 28. None has id `a9f1888f…` or mentions Rule 42, and
->    `GET /api/bug-report/a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` → **404**. The 23 Sep
->    submission did not persist. **Re-file it** (text: `agentswitch_submissions.md` §4).
+> 1. ~~**F18 is not on the platform.**~~ **Corrected 2026-10-03: F18 is board N273
+>    (To do). Do not re-file.** It is absent from `bug-report/mine` (27 reports at the
+>    time, and GET by id → 404), but the board has it.
 > 2. **Five new bug candidates (N9–N13)**, each checked against the 27 filed reports,
 >    with ready-to-paste texts: [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md).
 >    The same file has evidence to append to N1, N6, N7, N8 and N128. **N8's cited
 >    records have been re-stamped and no longer reproduce as filed.**
 
 **Previous action (23 Sep):** F18 submitted as `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9`,
-23 Sep 2026 16:02, `status: "new"` — **not found on 30 Sep; see above.**
+23 Sep 2026 16:02, `status: "new"`. It is absent from `mine`, but on the board as N273.
 
 **To refresh:** log in (`scripts/agentswitch_client.py`), `tools/call BugReport.list
 {"limit": 200}`, fingerprint each returned `description` against the "Fingerprint"
@@ -101,7 +108,7 @@ unscheduled Low card despite two High items in the batch).
 
 | # | Title | Priority | Filed | Platform ID | Board |
 |---|---|---|---|---|---|
-| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | **High** | ⚠️ submitted 23 Sep 16:02 — **absent from `mine` on 30 Sep (GET by id → 404); re-file** | `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` | — |
+| F18 | ITC apportionment, Rule 42/43 (blocks School + Clinic verticals) | **High** | ✅ submitted 23 Sep 16:02 (absent from `mine`, but on the board) | `a9f1888f-dd7d-4884-b5dc-c5f17fd944a9` | **N273** ⚪ To do (backlog) |
 
 ### Bug candidates identified 30 Sep — not yet filed
 
