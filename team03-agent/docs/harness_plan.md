@@ -2,6 +2,11 @@
 
 **Team 03 · 2026-09-30 · companion to [`spec.md`](spec.md), [`assignment.md`](assignment.md), [`../DESIGN.md`](../DESIGN.md)**
 
+> **Superseded 2026-10-03 by [`agent_design.md`](agent_design.md)**, the from-scratch
+> design for all three trigger modes. The LLM contract (§4.1), policy rules (§4.3),
+> field quarantine (§6.3), finding schema (§5) and playbook manifests (§4.5) carry over
+> into it. GitHub Actions cron (§4.7) is replaced by an in-process scheduler with leases.
+
 ## Context
 
 The Week 1 review flagged one blocking gap: *"we have not received any harness-related
