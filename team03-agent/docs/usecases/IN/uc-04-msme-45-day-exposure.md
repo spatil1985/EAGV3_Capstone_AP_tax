@@ -16,9 +16,9 @@
 ## 2. Statutory basis
 
 *Constants used here are tracked centrally in
-[`statutory_constants.md`](../../playbooks/statutory_constants.md#rule-msme-45d)
+[`statutory_constants.md`](../../../playbooks/statutory_constants.md#rule-msme-45d)
 (RULE-MSME-45D) and
-[...#rate-msme-penal](../../playbooks/statutory_constants.md#rate-msme-penal)
+[...#rate-msme-penal](../../../playbooks/statutory_constants.md#rate-msme-penal)
 (RATE-MSME-PENAL) — edit rates/thresholds there, not here.*
 
 Two independent statutes bite on the same fact pattern — a late payment to an MSME

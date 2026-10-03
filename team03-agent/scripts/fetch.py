@@ -12,7 +12,7 @@ by accident:
 
 Deliberate difference from harness_plan.md §6.3: Bill/Invoice document-level `taxes[]`
 is **not** stripped. It reconciles to `total_tax` on 401/401 manual invoices and 63/64
-header-taxed bills (docs/usecases/README.md, "Correction 2026-09-30"). Only
+header-taxed bills (docs/usecases/IN/README.md, "Correction 2026-09-30"). Only
 CreditNote.taxes[] (N128) is stripped.
 """
 
@@ -61,7 +61,7 @@ class Fetcher:
 
     def list(self, entity: str, **filters) -> list[dict]:
         """All records matching `filters`. Filters are flat, one value each
-        (docs/usecases/README.md Rule 6); range filtering is the caller's job."""
+        (docs/usecases/IN/README.md Rule 6); range filtering is the caller's job."""
         tool = f"{entity}.list"
         rows: list[dict] = []
         offset = 0

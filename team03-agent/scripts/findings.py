@@ -1,6 +1,6 @@
 """Shared Finding row — the output contract every playbook emits.
 
-Fixed fields follow UC-01 §7 (docs/usecases/uc-01-rule-37-itc-reversal.md), the
+Fixed fields follow UC-01 §7 (docs/usecases/IN/uc-01-rule-37-itc-reversal.md), the
 schema `assignment.md` §7 designates as shared. Playbooks may put use-case-specific
 values in `details`, but must not rename or drop the fixed fields.
 

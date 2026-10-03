@@ -82,7 +82,7 @@ triggers:
 compute: scripts.uc.uc04_msme:MsmeExposure
 tools: [Party.list, Bill.list]       # added to the read allowlist for this run only
 escalate: new_findings               # or never
-spec: docs/usecases/uc-04-msme-45-day-exposure.md
+spec: docs/usecases/IN/uc-04-msme-45-day-exposure.md
 ---
 ```
 
@@ -163,7 +163,7 @@ Predicates worth writing for UC-12, from its spec §9:
 ## Differences from harness_plan.md (deliberate)
 
 - **Bill/Invoice `taxes[]` is not quarantined.** It is the reliable tax source there
-  (docs/usecases/README.md, "Correction 2026-09-30"). Only `CreditNote.taxes[]` is
+  (docs/usecases/IN/README.md, "Correction 2026-09-30"). Only `CreditNote.taxes[]` is
   stripped.
 - **The CLI is `python -m harness`, and `run_agent.py` is untouched.** Plan §9 moves
   the LLM loop out of `run_agent.py` in Phase 1, which is Geetha's gateway work.
