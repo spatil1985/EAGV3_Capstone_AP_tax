@@ -44,7 +44,7 @@ than one person absorbing all three.
 | **C** | **Sandip** | UC-10, UC-11, UC-12, UC-17, UC-18, UC-19, UC-20, UC-22 | 8 | 3🟢 2🟡 3🔴 | **GAP-2/3/5/6** → filed as **F19–F22**; **GAP-4** → already **F1** |
 
 All six gaps are now filed as feature requests
-([`agentswitch_submissions.md`](agentswitch_submissions.md) §D.2). **Owning a gap here
+([`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.2). **Owning a gap here
 means owning the technical argument behind it, not the filing** — if triage comes back
 with questions on F18, Geetha answers them; on F19–F22, Sandip does.
 
@@ -69,7 +69,7 @@ order in all 22, so they can be read and reviewed interchangeably.
 | 1 | **Question** | The user's own words, verbatim from `spec.md`. Do not rephrase into system language |
 | 2 | **Statutory basis** | Exact section / rule / notification number **and the consequence** (interest rate, penalty, disallowance). "Rule 37" is not enough; "Rule 37 — reversal with interest at 18% p.a. from the date of availment" is |
 | 3 | **Trigger** | When the agent runs this — on request, on a schedule, or on a document event. State the period it computes over |
-| 4 | **Input contract** | Exact MCP tool or REST path, exact field names, filters, pagination limits. Every field must be one you have confirmed in `/api/schemas` or [`mcp_tool_inventory_india.md`](mcp_tool_inventory_india.md) — cite where you confirmed it |
+| 4 | **Input contract** | Exact MCP tool or REST path, exact field names, filters, pagination limits. Every field must be one you have confirmed in `/api/schemas` or [`mcp_tool_inventory_india.md`](../platform/mcp_tool_inventory_india.md) — cite where you confirmed it |
 | 5 | **Algorithm** | Numbered steps, deterministic, with a **worked example using real numbers pulled from the live instance**. Where the data does not exist (school/clinic), a constructed example with the values stated as constructed |
 | 6 | **Known-bad data** | Which stored fields this use case must *not* trust, naming the bug: N7 `tds_amount`, N128 `CreditNote.taxes[]`, N1/N8 `is_overdue`, §7a document-level `taxes[]`. State the recomputation used instead |
 | 7 | **Output contract** | The exact shape the agent returns: row schema, sort order, what makes a row a "finding" vs. context, and the one-sentence summary a human reads first |
@@ -84,7 +84,7 @@ report the first place they get stuck.
 
 For 🔴 use cases, sections 4–5 describe what *would* be needed and section 10 carries
 the gap argument — those specs feed the feature requests in
-[`agentswitch_submissions.md`](agentswitch_submissions.md) §D, so they must be strong
+[`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D, so they must be strong
 enough to file.
 
 ---
@@ -165,7 +165,7 @@ exempt turnover is derived.
 **You own GAP-1, now filed as F18** — the argument that ITC apportionment needs
 platform support. It blocks two of five verticals, it is what Clear monetises
 separately as MaxITC, and the computation is already possible — only the posting is
-not. [`agentswitch_submissions.md`](agentswitch_submissions.md) calls F18 the
+not. [`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) calls F18 the
 strongest feature ask in the document and says to file it **alone**, not batched.
 Your UC-08 and UC-15 specs are the evidence behind that ask, so they need to be
 strong enough for triage to read directly.
@@ -237,7 +237,7 @@ sent back in review.
    Every use case ends in a report or an escalation. Say so in §8 of each spec rather
    than leaving it implied.
 4. **Cite where you confirmed each field** — a `/api/schemas` pull or
-   [`mcp_tool_inventory_india.md`](mcp_tool_inventory_india.md). A field name that
+   [`mcp_tool_inventory_india.md`](../platform/mcp_tool_inventory_india.md). A field name that
    turns out not to exist invalidates the spec that depends on it.
 5. **Tax positions are engineering specifications, not tax advice.** Rates, thresholds
    and exemption entries change. Each spec names the notification it relies on so it
@@ -253,7 +253,7 @@ sent back in review.
   and deliberately so — the spec review (§3) is the point at which we find out whether
   a use case is as buildable as `spec.md` claims.
 - **The competitor gaps** (F9–F17 in
-  [`agentswitch_submissions.md`](agentswitch_submissions.md) §D.1). They argue *"a
+  [`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.1). They argue *"a
   rival ships this and we don't"*, are product requests rather than use cases, and
   none has a `spec.md` entry. Distinct from §D.2's F18–F22, which are the six gaps
   owned above and argue *"Indian tax law requires this and the data model cannot

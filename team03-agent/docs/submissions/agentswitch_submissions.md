@@ -3,7 +3,7 @@
 Consolidated, submission-ready list of everything we've found on the AgentSwitch
 platform: confirmed defects, plus feature gaps from two sources — comparison against
 real competitor products, and the multi-vertical requirements in
-[`spec.md`](spec.md) (school, manufacturing, clinic, retail, agency under Indian tax
+[`spec.md`](../planning/spec.md) (school, manufacturing, clinic, retail, agency under Indian tax
 law).
 
 **Submission channel:** `POST /api/bug-report` (per the brief, §Week 4 Milestone 2 —
@@ -23,6 +23,25 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 ---
 
 ## Status summary
+
+> 🆕 **Update 2026-10-03 — tallied against the class bug board. Read this first.**
+> Source: the board artifact (`claude.ai/artifact/6LvLawFFUXGoRHUQKbPg9h`), whose
+> rows are embedded in the page HTML (428 rows), cross-checked with
+> `GET /api/bug-report/mine` (33 reports).
+>
+> - **All 21 Team 3 board rows are mapped in §A.** Every distinct report we filed is
+>   on the board.
+> - **8 Live on server · 5 Fixed (ships in next release) · 5 In review · 3 To do.**
+>   Statuses below are the board's, not our observations.
+> - **N9–N13 are board N414–N418, In review, and each carries an open question
+>   addressed to us** (see [§A.1](#a1--triage-is-waiting-on-us--open-questions-on-n414n418)).
+>   They are waiting on our answer, not on triage.
+> - **F18 is on the board as N273 (To do, backlog).** Our earlier note "not on the
+>   platform, re-file" was **wrong**: `bug-report/mine` didn't show it, but the board
+>   has it, attributed to Team 3 by F-series numbering. **Do not re-file F18.**
+> - **Three new bugs are verified and ready to file: N14–N16**, all on Keystone (US).
+>   No board row duplicates them. Full texts are in
+>   **[§C.1 New bugs to file](#c1--new-bugs-to-file--verified-2026-10-03)**.
 
 **Verified against `GET /api/bug-report/mine`, 2026-09-23:** 25 reports on the India
 account, 0 on Keystone. Every report was **fingerprinted by description content**,
@@ -48,25 +67,66 @@ position and got one item wrong.
 
 ---
 
-### A · FILED (21 filings → 13 distinct issues)
+### A · FILED — tallied with the class bug board, 2026-10-03
+
+**Board statuses:** 🟢 Live on server · 🔵 Fixed, ships in next release · 🟣 In review ·
+⚪ To do (Carbon upgrade). "Observed" notes are our own checks of live data.
 
 **Defects**
 
-| # | Title | Instance | Filed | Board | Status |
-|---|---|---|---|---|---|
-| B1 | US tax jurisdictions on the India company | India | 21 Sep | **N126** | ✅ **Fixed, live on server** |
-| B2 | `is_group=false` with `group_taxes` children | India | 21 Sep | **N127** | ✅ **Fixed, live on server** |
-| B3 | Tax Summary renders product names as tax heads | India | 21 Sep | merged **N127** | ✅ **Fixed** |
-| B4 | Tax lines storable that the calculator can't produce | India | 21 Sep | **N128** | 🔴 Open (Medium) |
-| B6 | N127's fix is incomplete — `group_taxes[].tax_type` | India | 22 Sep | pending | ⏳ Awaiting triage |
-| N1 | `is_overdue` wrong on resolved requests (8.6%) | US | 23 Sep | pending | ⏳ Awaiting triage |
-| N2 | 3-way match computed but never persisted to Bill | US | 23 Sep | pending | ⏳ Awaiting triage |
-| N3 | `bill_match` metadata contradicts its description | US | 23 Sep | pending | ⏳ Awaiting triage |
-| N4 | Economic-nexus YTD counters stuck at zero | US | 23 Sep | pending | ⏳ Awaiting triage |
-| N5 | Tool names in `ApprovalRequest.steps[]`/`history[]` | India | 23 Sep | pending | ⏳ Awaiting triage |
-| N6 | Recurring-bill duplication + expired template firing | India | 23 Sep | pending | ⏳ Awaiting triage |
-| N7 | TDS independent of base → negative `grand_total` | India | 23 Sep | pending | ⏳ Awaiting triage |
-| N8 | `is_overdue` false negatives 74%, bulk-resolve cluster | India | 23 Sep | pending | ⏳ Awaiting triage |
+| Ours | Title | Instance | Filed | **Board** | **Board status** | Observed by us |
+|---|---|---|---|---|---|---|
+| B1 | US tax jurisdictions on the India company | India | 21 Sep | **N126** | 🟢 Live (`c3986d40e`) | — |
+| B2 + B3 | Tax records carry tool names; Tax Summary counts them | India | 21 Sep | **N127** | 🟢 Live (`92682d0a3`, `4c812eb0f`) | — |
+| B4 | Tax lines storable that the calculator can't produce | India | 21 Sep | **N128** | 🟢 Live: "tax lines are checked against the tax calculator when a document is saved" | — |
+| B6 | N127's fix missed `group_taxes` component rows | India | 22 Sep | **N174** | 🟢 Live (`fc6557992`) | — |
+| N1 + N8 | `is_overdue` not recalculated on resolved approvals | US + India | 23 Sep | **N224** (merged) | 🟢 Live in Release 7, 30 Sep | Keystone 0/93 wrong on 3 Oct. N8's "re-stamped" records were this fix |
+| N3 | `bill_match` labelled write but says read-only | US | 23 Sep | **N243** | 🟢 Live in Release 7, 30 Sep | — |
+| N5 | Tool names in approval steps/history | India | 23 Sep | **N226** | 🟢 Live in Release 7, 30 Sep | — |
+| N6 (= B7) | Recurring bills created every day from stale templates | India + US | 23 Sep | **N220** | 🟢 Live in Release 7, 30 Sep | US 3 Oct: `next_bill_date` advances; `last_generated_date` still null on all 4 templates |
+| N2 | Bill match status never stored | US | 23 Sep | **N242** | 🔵 Fixed, ships next release | US 3 Oct: `recorded_status` populated 81/81 |
+| N4 | Nexus records never count sales | US | 23 Sep | **N225** | 🔵 Fixed, ships next release | US 3 Oct: all 4 nexus equal the invoice recompute |
+| N7 | TDS unrelated to bill value → negative totals | India | 23 Sep | **N222** | 🔵 Fixed, ships next release | India 30 Sep: 124 bills affected |
+| B8 | US company bills in rupees with GST fields | US | 23 Sep | **N223** | 🔵 Fixed, ships next release | US 3 Oct: 15 of 16 INR bills voided |
+| B9 | US company offered India-only e-way bill tools | US | 23 Sep | **N227** | 🔵 Fixed, ships next release | — |
+| N9 | Expired recurring invoice templates keep generating invoices | India | 30 Sep `7089b941…` | **N414** | 🟣 In review, High · R9 `4bf17e375` merged, gate pending · **open question** | — |
+| N10 | Generated recurring invoices carry impossible GST | India | 30 Sep `1892baf0…` | **N415** | 🟣 In review, High · **open question** | — |
+| N11 | Credit notes far above the invoice, and against purchase invoices | India | 30 Sep `de773f35…` | **N416** | 🟣 In review, High · "forward transaction guard and MCP race are fixed" · **open question** | — |
+| N12 | Bill and template `tax_id` holds GSTIN strings | India | 30 Sep `d1af1860…` | **N417** | 🟣 In review, Medium (area: Demo data) · **open question** | — |
+| N13 | E-way bills never expire; active ones lack numbers | India | 30 Sep `230450f3…` | **N418** | 🟣 In review, Medium · **open question** | — |
+
+**Feature requests**
+
+| Ours | Board | Board status |
+|---|---|---|
+| F1–F8 | **N173** | ⚪ To do. Board note: "the Approvals app is now enabled for this seat on both apps (22 Sep)" |
+| F18 Rule 42/43 apportionment | **N273** | ⚪ To do (backlog, size L, School and Clinic only). On the board although absent from `bug-report/mine` |
+| Requested tools (20) `dbfe303f…` | **N426** | ⚪ To do. "8–9 expose existing REST reads as tools; reviewed with the tool catalogue work" |
+
+**Not on the board:** B5 (never filed), and the 4 duplicate filings in §B (absorbed
+into their originals).
+
+N9–N13 texts: [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md).
+
+### A.1 · Triage is waiting on us — open questions on N414–N418
+
+Each of our 30 Sep bugs is In review with a question for Team 3. Verbatim from the
+board:
+
+| Board | Open question |
+|---|---|
+| **N414** | "Provide authoritative recurring-template/generated-invoice records and finance-approved reconciliation instructions for historical expired or duplicate invoices." |
+| **N415** | "Provide authoritative invoice/template tax treatment and source tax records, with finance approval, for historical invoice corrections." |
+| **N416** | "Provide the source invoice/credit-note ledger and finance approval for historical amount/link corrections." |
+| **N417** | "Provide authoritative Tax record IDs and approved TDS-section mappings for unsupported historical bills/templates; GSTIN text alone establishes neither." |
+| **N418** | "Provide official issuing-portal e-way-bill numbers and validity/status records for historical records." |
+
+The forward fixes are merged in Release 9 (`4bf17e375`). The questions are about
+**correcting historical records**. We hold no authoritative source records: this is
+demo/seed data, and we have no NIC portal or source ledger. **Suggested reply:** say
+so plainly; ask triage to void or archive the affected historical documents rather
+than correct them; and offer the entity-id lists from our reports so they can be
+scoped. Do not invent "authoritative" values.
 
 *"Instance" = the company the defect is **about**. Every one of the 28 filings sits
 on the **India** account's `bug-report/mine` — the Keystone-company findings
@@ -106,12 +166,10 @@ timestamp cluster pointing at a root cause.
 
 ### C · NOT FILED — the complete list
 
-> **Update 2026-09-30.** B8 and B9 were filed on 23 Sep (`5e64a8bc…`, `70a47383…`), so
-> of the table below only **B5** remains. **Five new candidates, N9–N13**, came out of
-> the use-case sweep, with evidence to append to N1/N6/N7/N8/N128. Full ready-to-paste
-> texts are in [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md). **F18 is not
-> on the platform** (see [`submission_tracker.md`](submission_tracker.md)) and needs
-> re-filing.
+> **Update 2026-10-03.** B8 and B9 were filed on 23 Sep (`5e64a8bc…`, `70a47383…`), and
+> N9–N13 on 30 Sep, so of the older items only **B5** remains unfiled. The new bugs
+> to file are **N14–N16** in **§C.1 below**. F18 is already on the board (N273): do
+> not re-file.
 
 **Three items. Everything else in this document is already on the platform.**
 
@@ -134,12 +192,225 @@ obvious precedent to attach it to.
 
 ---
 
+### C.1 · NEW BUGS TO FILE — verified 2026-10-03
+
+Found while writing the US use cases ([`usecases/US/`](../usecases/US/README.md)) and
+re-verified on live Keystone data on 2026-10-03. Each was checked against all 33
+reports in `bug-report/mine` **and all 428 rows of the class board (every team)**:
+none duplicates an existing report.
+
+| # | Bug | Severity | Closest existing | Order |
+|---|---|---|---|---|
+| **N14** | `indirect-tax/determinations` returns HTTP 500 for every document on the US tenant | **High** | none. Board N342 (team09, RSS feed 500) is the same *pattern* on a different endpoint | **1st** — a deterministic crash with an India control |
+| **N15** | Exempt sales recorded against a county jurisdiction but labelled "state"; the liability report's Stark County invoice count is 102 instead of 71 | Medium | none. Board N325 (team07: exempt customer charged tax on a sales order) is a different defect in the same area | 2nd |
+| **N16** | The sales-tax liability report drops `liability_account_id` (null on 4/4) although every jurisdiction maps to "Sales Tax Payable" | Low-Med | B1 / N126 (India: *wrong* account, not a dropped one) | 3rd |
+
+**Not filed, already on the board:** US-06's finding (a 1099 vendor with no W-9) is
+covered by **N398** (team07, In review): "A 1099 vendor with no W-9 is not
+backup-withheld."
+
+**Ruled out during verification — do not file:** *"the tax engine ignores destination
+sourcing"* (US-05). The platform's own `POST /api/accounting/tax/compute` with
+`{"amount":1000,"state_code":"OH","city":"Columbus"}` returns **Ohio 5.75% only, no
+Stark County**, so the engine sources correctly. The 71 invoices carrying Stark County
+tax were all created by one seeding user (`e30b0c70…`) on 2026-09-16 with no
+`tax_computation_note`. At most, add them to **N128** as US evidence that stored tax
+is not validated against the engine.
+
+---
+
+#### N14 · `indirect-tax/determinations` returns HTTP 500 for every document on the US tenant
+
+**Severity:** High · **Area:** Tax / Indirect-tax API · **Instance:** Keystone (US) · **`page`:** `Accounting:Home`
+
+```
+GET /api/accounting/indirect-tax/determinations/{document_id} fails with HTTP 500
+"Internal Server Error" for every request on the US company -- invoices, bills, an
+id that does not exist, and with or without the document_entity parameter. The same
+endpoint on the India company returns a clean 404 JSON for the same kinds of request.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a)
+Instance: https://class.agentswitch.theschoolofai.in -- US locale, tax_regime
+"sales_use_tax". Role: finance_user. Verified 2026-10-03.
+
+REPRODUCTION (all GET, as finance_user)
+  /api/accounting/indirect-tax/determinations/e31f99fd-bd47-46c7-bef8-d561ce9ec41e?document_entity=Invoice   (INV-2026-00158) -> 500
+  /api/accounting/indirect-tax/determinations/ef1ab1c7-03a7-4384-af4e-c952b5715a28?document_entity=Invoice   (INV-2026-00157) -> 500
+  /api/accounting/indirect-tax/determinations/7f64b10c-6edf-4190-989c-6d452aa8d5f0?document_entity=Invoice   (INV-2026-00150, exempt) -> 500
+  /api/accounting/indirect-tax/determinations/d1b5642e-6bb1-4877-b638-0deecbcb8ba6?document_entity=Invoice   (INV-2026-00145, exempt) -> 500
+  /api/accounting/indirect-tax/determinations/c277bae2-0aef-4c39-998b-f3c3ac79efbb?document_entity=Bill      (BILL-2026-00101) -> 500
+  /api/accounting/indirect-tax/determinations/ddfb1582-a740-44db-916e-e4d5202c50a4?document_entity=Bill      (BILL-2026-00100) -> 500
+  /api/accounting/indirect-tax/determinations/00000000-0000-0000-0000-000000000000?document_entity=Invoice   (no such id) -> 500
+  /api/accounting/indirect-tax/determinations/e31f99fd-bd47-46c7-bef8-d561ce9ec41e                           (no entity param) -> 500
+  Body in every case: "Internal Server Error" (plain text, no JSON detail).
+
+CONTROLS
+  Same tenant, sibling endpoints work:
+    GET /api/accounting/indirect-tax/ledger-balance?period=2026-09 -> 200
+    GET /api/accounting/indirect-tax/reconcile?period=2026-09      -> 200
+  Same endpoint, India tenant (Suryodaya, 5cbe5a55-...), same session type:
+    GET .../determinations/60f30f05-df43-4a1c-9e6e-7409d0a86083?document_entity=Bill -> 404
+        {"detail":"No tax determination for this document"}
+    GET .../determinations/00000000-0000-0000-0000-000000000000?document_entity=Invoice -> 404 (same body)
+
+EXPECTED
+200 with the document's tax determination, or 404 {"detail": "No tax determination
+for this document"} as on India. Never 500.
+
+ACTUAL
+500 for every input, including a non-existent id. The failure happens before the
+document lookup, which points at a code path specific to the US / sales_use_tax
+locale (an inference -- not confirmed).
+
+IMPACT
+This is the read path for "how was tax determined on this document". On the US
+company it is unusable for every document, so no client (UI, agent or report) can
+explain or audit a sales/use tax figure through it. An unhandled 500 on a read
+endpoint also means any caller that fans out over documents fails outright rather
+than degrading.
+
+ENTITY IDS
+Company: c1e47d8d-b849-4187-9a32-4103d3dece4a
+Invoices: e31f99fd-bd47-46c7-bef8-d561ce9ec41e, ef1ab1c7-03a7-4384-af4e-c952b5715a28,
+  7f64b10c-6edf-4190-989c-6d452aa8d5f0, d1b5642e-6bb1-4877-b638-0deecbcb8ba6
+Bills: c277bae2-0aef-4c39-998b-f3c3ac79efbb, ddfb1582-a740-44db-916e-e4d5202c50a4
+No job_id -- found by direct REST inspection.
+```
+
+---
+
+#### N15 · Exempt sales recorded against a county jurisdiction but labelled "state" — liability report counts 102 Stark County invoices instead of 71
+
+**Severity:** Medium · **Area:** Tax / Sales-tax liability report · **Instance:** Keystone (US) · **`page`:** `Accounting:Home`
+
+```
+All 31 exempt invoices on the US company carry their exempt tax row against the Stark
+County (OH) jurisdiction -- a county-level jurisdiction -- while the row itself says
+jurisdiction_level "state". The sales-tax liability report counts these rows as Stark
+County invoices, so Stark County shows invoice_count 102 when only 71 invoices were
+taxed there.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a), US,
+tax_regime "sales_use_tax". Verified 2026-10-03.
+
+SUMMARY
+TaxJurisdiction 33864f88-190f-4eee-95cd-3032534f96f2 "Stark County (OH)" has
+jurisdiction_level "county", rate 0.75%. The 31 exempt invoices (all to Tri-State
+Farm Equipment, under resale certificate OH-ST1-2025-0447) each carry one tax row:
+  {"tax_type": "Sales tax -- exempt (resale certificate)", "rate": 0, "amount": 0.0,
+   "jurisdiction_id": "33864f88-190f-4eee-95cd-3032534f96f2",
+   "jurisdiction_name": "Stark County (OH)", "state_code": "OH",
+   "jurisdiction_level": "state", "is_exempt": true}
+The row points at a county record but labels itself state-level, and it does not
+reference the Ohio State Sales Tax jurisdiction (a9f5bab7-203f-48ba-8236-f2a0600becf6)
+at all.
+
+REPRODUCTION
+1. GET /api/accounting/reports/sales-tax-liability?from_date=2026-01-01&to_date=2026-09-30
+   -> "Stark County (OH)": invoice_count 102, tax_billed 13729.96
+      "Ohio State Sales Tax": invoice_count 71, tax_billed 105263.08
+2. tools/call Invoice.list {"limit": 1000}
+   -> invoices with a non-exempt Stark County row: 71
+   -> invoices with an is_exempt row on jurisdiction_id 33864f88-...: 31 (71 + 31 = 102)
+3. tools/call TaxJurisdiction.get {"id": "33864f88-190f-4eee-95cd-3032534f96f2"}
+   -> jurisdiction_level "county"
+Example: INV-2026-00150 (7f64b10c-6edf-4190-989c-6d452aa8d5f0), 2026-06-20, $33,793.44.
+
+EXPECTED
+An exempt sale is recorded against the jurisdictions it is exempt from (the state,
+and the county where it applies), each at its own level. The report's per-jurisdiction
+invoice_count counts invoices taxed there, with exempt sales reported separately. The
+report already has a top-level exempt_sales figure ($570,195.62, correct).
+
+ACTUAL
+Exempt sales are attributed to the county only, labelled as state-level, and inflate
+the county's invoice count by 31 (44%). Tax amounts are unaffected (the exempt rows
+are 0).
+
+IMPACT
+Per-jurisdiction counts and exempt-sales attribution feed jurisdiction-level returns
+(Ohio's sales tax return is filed by county). Any consumer reading the row's level gets
+"state" for a county record, and the Ohio state jurisdiction shows no exempt sales.
+Note: all 31 invoices were created by one user (e30b0c70-...) on 2026-09-16, possibly
+seed data; the report counts them either way.
+
+ENTITY IDS
+Company: c1e47d8d-b849-4187-9a32-4103d3dece4a
+TaxJurisdiction: 33864f88-190f-4eee-95cd-3032534f96f2 (Stark County, county level)
+Invoices: 7f64b10c-6edf-4190-989c-6d452aa8d5f0 (INV-2026-00150),
+  d1b5642e-6bb1-4877-b638-0deecbcb8ba6 (INV-2026-00145), and the 29 other Tri-State
+  Farm Equipment invoices with an exempt row.
+No job_id -- found by direct REST/MCP inspection.
+```
+
+---
+
+#### N16 · Sales-tax liability report drops the jurisdiction's liability account (null on 4/4)
+
+**Severity:** Low-Medium · **Area:** Reports / Sales-tax liability · **Instance:** Keystone (US) · **`page`:** `Accounting:Home` · **Related to B1/N126**
+
+```
+The sales-tax liability report returns liability_account_id: null for every
+jurisdiction, although every TaxJurisdiction on the company is mapped to the
+"Sales Tax Payable" account.
+
+ENVIRONMENT
+Company: Keystone Precision Works LLC (c1e47d8d-b849-4187-9a32-4103d3dece4a), US.
+Verified 2026-10-03.
+
+REPRODUCTION
+1. GET /api/accounting/reports/sales-tax-liability?from_date=2026-01-01&to_date=2026-09-30
+   -> jurisdictions[].liability_account_id = null for all 4:
+      Ohio State Sales Tax, Pennsylvania State Sales Tax, Michigan State Sales Tax,
+      Stark County (OH)
+2. tools/call TaxJurisdiction.list {"limit": 100}
+   -> liability_account_id = ecec6350-4b83-40ee-939b-441212b95de4
+      (_liability_account_id_display "Sales Tax Payable") on all 4:
+      a9f5bab7-203f-48ba-8236-f2a0600becf6, 92de95ce-72d2-433c-bb46-dd0e2418ba01,
+      4b4c644b-310a-4ba5-925a-9a9c70a84471, 33864f88-190f-4eee-95cd-3032534f96f2
+
+EXPECTED
+The report carries each jurisdiction's liability_account_id (the field exists in its
+output for that purpose), so tax collected can be tied to the GL account that holds it.
+
+ACTUAL
+null on every row, while the source records hold the mapping.
+
+IMPACT
+The report cannot be reconciled to the general ledger by account. A consumer checking
+"is collected tax sitting in the right liability account?" from the report gets no
+account at all. Related to B1/N126 (India, where the mapped account was wrong --
+"Unsecured Loans"). Here the mapping is right, and the report loses it.
+
+ENTITY IDS
+Company: c1e47d8d-b849-4187-9a32-4103d3dece4a
+TaxJurisdiction: a9f5bab7-203f-48ba-8236-f2a0600becf6, 92de95ce-72d2-433c-bb46-dd0e2418ba01,
+  4b4c644b-310a-4ba5-925a-9a9c70a84471, 33864f88-190f-4eee-95cd-3032534f96f2
+Account: ecec6350-4b83-40ee-939b-441212b95de4 (Sales Tax Payable)
+No job_id -- found by direct REST/MCP inspection.
+```
+
+---
+
+**Post as comments on existing cards, not as new filings:**
+- **N220** (our N6, Live in R7): on Keystone, `last_generated_date` is still null on
+  all 4 recurring templates after the fix.
+- **N128** (Live): US invoices carry Stark County tax the engine does not produce
+  (seed data, created 2026-09-16).
+
+N1/N8 (N224), N2 (N242) and N4 (N225) are already fixed or shipping; no comment is
+needed.
+
+---
+
 ### D · NEW — gaps identified but not yet written up
 
 **Two sources, kept separate because they argue differently:**
 
 - **D.1 — competitor gaps (F9–F17).** "A competitor ships this and we don't."
-- **D.2 — multi-vertical gaps (F18–F22).** From [`spec.md`](spec.md): "Indian tax
+- **D.2 — multi-vertical gaps (F18–F22).** From [`spec.md`](../planning/spec.md): "Indian tax
   law requires this and we cannot represent it." These are **statutory**, not
   competitive — the argument is compliance exposure, not feature parity, which is a
   stronger case to make to a platform team.
@@ -1332,8 +1603,8 @@ platform's own ticket ids. Re-filing risks rejection as already-known.
 
 ## 4. Feature requests
 
-Derived from the competitor analysis in [`gap_report.md`](gap_report.md) and
-[`razorpay_gap_report.md`](razorpay_gap_report.md). These are gaps, not defects —
+Derived from the competitor analysis in [`gap_report.md`](../gapreports/gap_report.md) and
+[`razorpay_gap_report.md`](../gapreports/razorpay_gap_report.md). These are gaps, not defects —
 submit separately from bugs, since the bug bounty is for defects.
 
 **Each entry states how we proved the gap exists here and how we proved a
@@ -1700,14 +1971,25 @@ route around.
 
 ## 5. Suggested submission order
 
-**Everything in §A is already filed. Only three defects remain (§C).**
+> **Updated 2026-10-03.** Everything in §A is filed, including B8, B9 and N9–N13.
+> The new defects to file are in §C.1:
+>
+> 1. **N14** — `indirect-tax/determinations` returns HTTP 500 on US. A deterministic
+>    crash with a clean India control; the strongest of the three.
+> 2. **N15** — exempt rows labelled "state" against a county jurisdiction; Stark
+>    County invoice count 102 vs 71.
+> 3. **N16** — liability report drops `liability_account_id`.
+> 4. **B5** — only after reproducing against a concrete `JournalEntry.id`.
+>
+> Then **answer the five open questions on N414–N418 (§A.1)**, which triage is
+> waiting on, and post the two §C.1 comments (N220, N128). **Do not re-file F18**:
+> it is board N273. The list below is the 23 Sep plan, kept for history.
 
-1. **B8 (INR bills on the USD company)** — verified still live and worsening (13,
-   was 10). Pairs with the already-fixed B1/N126 as the same wrong-jurisdiction
-   seed-data defect in the opposite direction, which gives triage a precedent.
-2. **B9 (feature flags vs tool exposure)** — weaker, but carries four
-   correctly-aligned control cases, so it cannot be dismissed as a misunderstanding
-   of how the flags work.
+**As of 23 Sep (historical):** *Everything in §A is already filed. Only three defects
+remain (§C).*
+
+1. ~~**B8 (INR bills on the USD company)**~~ — ✅ filed 23 Sep (`5e64a8bc…`).
+2. ~~**B9 (feature flags vs tool exposure)**~~ — ✅ filed 23 Sep (`70a47383…`).
 3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
 4. ~~**F18 (ITC apportionment, Rule 42/43)**~~ — ✅ **Filed** `a9f1888f…`, 23 Sep,
    **on its own, not in a batch**, exactly as recommended here: the one item whose

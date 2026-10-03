@@ -1,7 +1,7 @@
 # UC-03 — RCM Self-Invoicing Exposure
 
 **Workstream A · Owner: Sudip · Verdict: 🟢 Buildable**
-**Status: draft — pairs with [UC-21](uc-21-import-services-rcm.md); same check, domestic counterparty**
+**Status: draft — pairs with [UC-21](uc-21-import-of-services-rcm.md); same check, domestic counterparty**
 
 ---
 
@@ -112,7 +112,7 @@ notification (per `spec.md` §8's disclaimer) before being relied on.
 | Director's sitting fees/services to the company | Notif. 13/2017-CT(R) entry 6 | N/A — not SAC-coded; identified via `Party` tagged as a director-type payee, not a standard vendor | Always |
 | Sponsorship services | Notif. 13/2017-CT(R) entry 4 | `9983` (indicative, sponsorship is not always cleanly SAC-isolated) | Always, when recipient is a body corporate/partnership |
 | Supply from an **unregistered person** (s.9(4), notified classes) | Notif. 07/2019-CT(R) and successors (real estate promoters primarily; general s.9(4) is largely suspended/narrowed post-2019) | N/A | Only for the specific notified classes still in force — **this spec does not assume blanket s.9(4) applicability**, since the general reverse charge on all unregistered-supplier purchases was deferred/narrowed after 2017. Flag `gst_treatment = unregistered_business` as a **review candidate**, not an automatic RCM-expected finding, pending the specific notified class check |
-| Import of services | s.9(3) via IGST Act s.5(3) | N/A | **Out of scope for this spec — see [UC-21](uc-21-import-services-rcm.md)**, which covers the `overseas` counterparty case as its own complete spec |
+| Import of services | s.9(3) via IGST Act s.5(3) | N/A | **Out of scope for this spec — see [UC-21](uc-21-import-of-services-rcm.md)**, which covers the `overseas` counterparty case as its own complete spec |
 
 ### 5b. Steps
 
@@ -230,7 +230,7 @@ notification (per `spec.md` §8's disclaimer) before being relied on.
   confidence) from `"playbook_rate_on_taxable_value"` (estimated — lower
   confidence, must be labelled as such per §5 step 6). This use case's finding is
   conceptually a "liability owed" finding like UC-01's reversal, but is **not**
-  wired to the shared reversal row schema ([UC-01 §7](uc-01-rule-37-itc-reversal.md#7-output-contract-the-shared-reversal-row-schema)):
+  wired to the shared reversal row schema ([UC-01 §7](uc-01-rule-37-itc-reversal.md#7-output-contract--the-shared-reversal-row-schema)):
   that schema is for "credit that must be given back" (ITC reversal); this is
   "liability that was never assessed in the first place" — a different finding
   shape (no `interest_amount` concept the same way, since RCM interest only starts

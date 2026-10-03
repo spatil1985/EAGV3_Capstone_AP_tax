@@ -23,14 +23,14 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from harness.context import ROOT, ContextError, RunContext
-from harness.gateway import ToolGateway
-from harness.registry import Registry
-from harness.report import EscalationWriter, JsonReport, MarkdownReport
-from harness.runner import Runner
-from harness.state import LocalJsonStore, MemoryStore
-from harness.trace import AnomalyLog, CallCounter, EventBus, JsonlTraceWriter
-from harness.transport import LiveTransport, RecordingTransport, ReplayTransport
+from harness.core.context import ROOT, ContextError, RunContext
+from harness.access.gateway import ToolGateway
+from harness.core.registry import Registry
+from harness.output.report import EscalationWriter, JsonReport, MarkdownReport
+from harness.core.runner import Runner
+from harness.tracking.state import LocalJsonStore, MemoryStore
+from harness.tracking.trace import AnomalyLog, CallCounter, EventBus, JsonlTraceWriter
+from harness.access.transport import LiveTransport, RecordingTransport, ReplayTransport
 from scripts.fetch import Fetcher
 
 ENV_PREFIX = {"in": "AGENTSWITCH", "us": "US_AGENTSWITCH"}

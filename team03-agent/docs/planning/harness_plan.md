@@ -1,6 +1,6 @@
 # harness_plan.md — Agent harness for Seat 03 (Payables & Tax)
 
-**Team 03 · 2026-09-30 · companion to [`spec.md`](spec.md), [`assignment.md`](assignment.md), [`../DESIGN.md`](../DESIGN.md)**
+**Team 03 · 2026-09-30 · companion to [`spec.md`](spec.md), [`assignment.md`](assignment.md), [`../DESIGN.md`](../../DESIGN.md)**
 
 > **Superseded 2026-10-03 by [`agent_design.md`](agent_design.md)**, the from-scratch
 > design for all three trigger modes. The LLM contract (§4.1), policy rules (§4.3),
@@ -10,7 +10,7 @@
 ## Context
 
 The Week 1 review flagged one blocking gap: *"we have not received any harness-related
-GitHub code yet."* Today [`run_agent.py`](../run_agent.py) is a 60-line loop whose LLM
+GitHub code yet."* Today [`run_agent.py`](../../run_agent.py) is a 60-line loop whose LLM
 call is a stub. It exposes all 468 MCP tools to the model, it has no policy layer, and
 it has no way to run on a schedule. Meanwhile `spec.md` defines 22 use cases, and
 `assignment.md` splits them across three people.
@@ -97,6 +97,10 @@ nothing posts to the ledger (`JournalEntry` is read-only for `finance_user`).
 ---
 
 ## 3. Repository layout
+
+> **As built (2026-10-03):** the harness modules are grouped into `harness/core/`,
+> `access/`, `tracking/` and `output/`, not the flat layout planned below. See
+> [`architecture.md`](architecture.md) for the actual structure and each file's role.
 
 The existing names stay: `scripts/` remains the home of deterministic code, as SKILL.md
 already says.
@@ -446,20 +450,20 @@ Q1 and Q3 below resolve to.
 
 ## 9. Changes to existing files
 
-- [`run_agent.py`](../run_agent.py): becomes a thin CLI; the loop moves to `harness/loop.py`.
-- [`SKILL.md`](../SKILL.md): real entities (`Bill`, `Invoice(direction)`, `Party`
+- [`run_agent.py`](../../run_agent.py): becomes a thin CLI; the loop moves to `harness/loop.py`.
+- [`SKILL.md`](../../SKILL.md): real entities (`Bill`, `Invoice(direction)`, `Party`
   `contact_type=vendor`, `GSTReturn`, `Item`), read-only `JournalEntry`/`Payment`, a
   vertical dimension, the exempt-supply inversion rule, a pointer to the playbook
   index, and the write tiers (spec.md §7, CURRENT_STATUS §7.1).
-- [`playbooks/duplicate_audit.md`](../playbooks/duplicate_audit.md),
-  [`playbooks/tax_audit.md`](../playbooks/tax_audit.md): replaced by the UC-05 and
+- [`playbooks/duplicate_audit.md`](../../playbooks/duplicate_audit.md),
+  [`playbooks/tax_audit.md`](../../playbooks/tax_audit.md): replaced by the UC-05 and
   period-liability manifests. `TaxLine.list`, `Invoice.update(hold_payment)` and
   `AgentMessage.create` do not exist.
-- [`scripts/tax_math.py`](../scripts/tax_math.py),
-  [`scripts/invoice_matcher.py`](../scripts/invoice_matcher.py): reworked to real field
+- [`scripts/tax_math.py`](../../scripts/tax_math.py),
+  [`scripts/invoice_matcher.py`](../../scripts/invoice_matcher.py): reworked to real field
   names, `Decimal`, and the three-tier UC-05 key. The existing hand-written tests
   change with them, by their authors.
-- [`scripts/agentswitch_client.py`](../scripts/agentswitch_client.py): kept as the
+- [`scripts/agentswitch_client.py`](../../scripts/agentswitch_client.py): kept as the
   transport. It gains MCP `isError`/`content[]` parsing and a retry with backoff on
   5xx and timeouts.
 - `.gitignore`: add `runs/`.

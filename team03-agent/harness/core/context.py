@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # harness/core/context.py -> team03-agent/
 CONSTANTS_FILE = ROOT / "playbooks" / "constants.yaml"
 
 

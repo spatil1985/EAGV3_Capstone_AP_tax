@@ -7,7 +7,7 @@ Patterns:
 - **Chain of Responsibility** — each `Policy` inspects a call and either decides
   (refuse / suppress) or passes it on. The first decision wins; if none decides, the
   call goes through. New rules are new `Policy` classes, inserted in the chain.
-- Events go to an `EventBus` (**Observer**, see trace.py).
+- Events go to an `EventBus` (**Observer**, see harness/tracking/trace.py).
 
 Refusals happen *before* the transport is touched, so a refused call shows zero MCP
 traffic in the trace — which is what the boundary tests check.
@@ -18,8 +18,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import IntEnum
 
-from harness.trace import EventBus, ToolCallEvent, result_hash
-from harness.transport import ToolResult, Transport
+from harness.tracking.trace import EventBus, ToolCallEvent, result_hash
+from harness.access.transport import ToolResult, Transport
 
 
 class Tier(IntEnum):

@@ -163,8 +163,8 @@ Done:
   (`CURRENT_STATUS.md`): real entity model, full 436-tool MCP inventory, real
   `BugReport.create` schema, live record counts, and the platform's own documented
   list of known gaps (with ticket ids) for the gap report / bug-hunting strategy.
-- **Week 1 gap report delivered** — `docs/gap_report.md` (all six competitors) plus
-  `docs/razorpay_gap_report.md` (RazorpayX verified first-hand, screen by screen).
+- **Week 1 gap report delivered** — `docs/gapreports/gap_report.md` (all six competitors) plus
+  `docs/gapreports/razorpay_gap_report.md` (RazorpayX verified first-hand, screen by screen).
 - **Platform bugs found, filed and two already fixed in production:**
   - `N126` — all 100 `TaxJurisdiction` rows on the India company were US sales-tax
     data → **fixed, live on server**; re-verified, those rows are now gone.

@@ -1,6 +1,6 @@
 """UC-12 — E-way bill coverage and expiry audit.
 
-Spec: docs/usecases/uc-12-eway-bill-coverage.md (owner: Sandip).
+Spec: docs/usecases/IN/uc-12-eway-bill-coverage.md (owner: Sandip).
 Question: "Is anything moving on the road right now without valid documentation?"
 
 Statute: s.68 CGST Act + Rule 138 CGST Rules — an e-way bill is required before moving
@@ -24,7 +24,7 @@ dicts and call `EWayBillAudit().evaluate(dataset, ctx)`.
 import math
 from datetime import date
 
-from harness.playbook import Dataset, Playbook, PlaybookOutcome, RecordRule, Rule
+from harness.core.playbook import Dataset, Playbook, PlaybookOutcome, RecordRule, Rule
 from scripts.findings import Finding
 from scripts.money import fmt, money
 

@@ -1,6 +1,6 @@
 # Bugs to file — 2026-09-30
 
-**Source:** a sweep of the 22 use-case specs in [`usecases/`](usecases/) against
+**Source:** a sweep of the 22 use-case specs in [`usecases/IN/`](../usecases/IN/) against
 [`agentswitch_submissions.md`](agentswitch_submissions.md), with every candidate
 re-verified on live Suryodaya data on 2026-09-30.
 **Duplicate check:** against `GET /api/bug-report/mine` — **27 reports** on the
@@ -27,7 +27,7 @@ closest to and why it is not a duplicate.
 | Append | → N8 | **Evidence re-stamped — as filed, it no longer reproduces** | | | |
 | Append | → N1/N8 | Open request flagged overdue with both deadlines in the future | | | |
 | Append | → N128 | Bill `taxes[]` / line tax / `total_tax` disagree on 26 bills | | | |
-| **Re-file** | F18 | **Not on the platform.** The tracker says filed; `mine` has no such id (GET → 404) | Feature | | |
+| ~~Re-file~~ | F18 | **Correction 3 Oct: it is on the board as N273 (To do). Do not re-file.** | Feature | | |
 
 **Order:** N9 and N10 together (they cite each other), then N11, N12, N13.
 
@@ -436,11 +436,10 @@ resolution date in the future.
 IGST 1,136.41 + CESS 1,136.41 = 3,885.93. Same class as N128 ("nothing validates tax
 on write"), on a second entity.
 
-**F18 — re-file (feature, no bounty).** `submission_tracker.md` records F18 as
-filed `a9f1888f…` on 23 Sep. `GET /api/bug-report/mine` returns 27 reports, none
-with that id or mentioning Rule 42, and `GET /api/bug-report/a9f1888f-…` → 404. The
-submission apparently did not persist. The full text is in
-`agentswitch_submissions.md` §4.
+~~**F18 — re-file (feature, no bounty).**~~ **Correction 2026-10-03: do not re-file.**
+F18 is on the class bug board as **N273** (To do, backlog), attributed to Team 3 by its
+F-series numbering. It is absent from `GET /api/bug-report/mine` and its recorded id
+returns 404, but the board has it, so re-filing would create a duplicate.
 
 ---
 
