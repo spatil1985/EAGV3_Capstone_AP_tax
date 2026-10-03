@@ -2,7 +2,7 @@
 
 | Folder | What's in it | Start with |
 |---|---|---|
-| [`planning/`](planning/) | What we're building and who builds it | [`spec.md`](planning/spec.md) — the 22 use cases · [`assignment.md`](planning/assignment.md) — owners · [`harness_plan.md`](planning/harness_plan.md) — agent architecture |
+| [`planning/`](planning/) | What we're building and who builds it | [`spec.md`](planning/spec.md) — the 22 use cases · [`assignment.md`](planning/assignment.md) — owners · [`agent_design.md`](planning/agent_design.md) — agent design of record · [`harness_plan.md`](planning/harness_plan.md) — earlier harness design (superseded) |
 | [`usecases/`](usecases/README.md) | Detailed specs, one file per use case, by jurisdiction | [`IN/`](usecases/IN/README.md) — UC-01…22 (GST) · [`US/`](usecases/US/README.md) — US-01…10 (sales & use tax) |
 | [`submissions/`](submissions/) | What we report to the AgentSwitch platform team | [`agentswitch_submissions.md`](submissions/agentswitch_submissions.md) — every bug and feature request, tallied with the class bug board · [`submission_tracker.md`](submissions/submission_tracker.md) — status only · [`requested_tools.md`](submissions/requested_tools.md) — MCP tools we need · [`bugs_to_file_2026-09-30.md`](submissions/bugs_to_file_2026-09-30.md) — N9–N13 (filed) |
 | [`gapreports/`](gapreports/) | How AgentSwitch compares with competitor products | [`gap_report.md`](gapreports/gap_report.md) — all six · [`razorpay_gap_report.md`](gapreports/razorpay_gap_report.md) · [`clear_gap_report.md`](gapreports/clear_gap_report.md) · [`gap_report_mysa.md`](gapreports/gap_report_mysa.md) |
