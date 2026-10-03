@@ -1,6 +1,6 @@
 # UC-18 — HSN-Wise Rate-Slab Correctness
 
-**Workstream C · Owner: Sandip · Verdict: 🟢 Buildable as a consistency check**
+**Workstream C · Verdict: 🟢 Buildable as a consistency check**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

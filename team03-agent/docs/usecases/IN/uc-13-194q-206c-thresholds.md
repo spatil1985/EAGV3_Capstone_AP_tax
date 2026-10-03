@@ -1,6 +1,6 @@
 # UC-13 — 194Q / 206C(1H) ₹50 Lakh Threshold Monitoring
 
-**Workstream A · Owner: Sudip · Verdict: 🟡 Buildable by aggregation — with a statutory correction**
+**Workstream A · Verdict: 🟡 Buildable by aggregation — with a statutory correction**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

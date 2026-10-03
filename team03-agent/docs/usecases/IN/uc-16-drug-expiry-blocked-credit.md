@@ -1,6 +1,6 @@
 # UC-16 — Drug Expiry and Batch Exposure → Blocked Credit
 
-**Workstream B · Owner: Geetha · Verdict: 🟢 Buildable (spec.md) → 🟡 Partial (live data)**
+**Workstream B · Verdict: 🟢 Buildable (spec.md) → 🟡 Partial (live data)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Emits:** the UC-01 reversal row · **Reuses:** UC-02's blocking logic
 

@@ -1,6 +1,6 @@
 # US-04 — Exemption Certificate Coverage on Untaxed Sales
 
-**US · Proposed owner: Geetha · Verdict: 🟢 Buildable — 0 findings on live data**
+**US · Verdict: 🟢 Buildable — 0 findings on live data**
 **IN counterparts:** UC-07 (exempt vs taxable), UC-20 (zero-rating needs documentation) · **live evidence 2026-10-03**
 
 ---

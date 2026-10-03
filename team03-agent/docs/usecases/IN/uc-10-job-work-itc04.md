@@ -1,6 +1,6 @@
 # UC-10 — Job Work Movement and ITC-04
 
-**Workstream C · Owner: Sandip · Verdict: 🔴 Blocked (spec.md) → 🟡 Partial (live data)**
+**Workstream C · Verdict: 🔴 Blocked (spec.md) → 🟡 Partial (live data)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Backs:** F19 / GAP-2 — **the live data contradicts F19's filed premise; see §11**
 

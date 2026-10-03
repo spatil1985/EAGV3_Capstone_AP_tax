@@ -1,6 +1,6 @@
 # UC-15 — Rule 42/43 Apportionment for a Clinic
 
-**Workstream B · Owner: Geetha · Verdict: 🔴 Blocked as a platform capability · 🟢 computable and reportable**
+**Workstream B · Verdict: 🔴 Blocked as a platform capability · 🟢 computable and reportable**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Depends on:** [UC-14](uc-14-clinic-exempt-taxable-split.md) (E, F) · **Reuses:** [UC-08](uc-08-rule-42-apportionment-school.md) Rule 42 engine · **Emits:** UC-01 reversal row · **Backs:** F18
 

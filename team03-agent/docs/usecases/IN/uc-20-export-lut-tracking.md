@@ -1,6 +1,6 @@
 # UC-20 — Export of Services / LUT Tracking
 
-**Workstream C · Owner: Sandip · Verdict: 🟡 Partial (classification data exists; LUT validity does not)**
+**Workstream C · Verdict: 🟡 Partial (classification data exists; LUT validity does not)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Backs:** F21 / GAP-5 · **Owns shared contract:** place-of-supply determination (used by UC-03, UC-21)
 

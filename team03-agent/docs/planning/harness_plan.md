@@ -15,8 +15,8 @@ call is a stub. It exposes all 468 MCP tools to the model, it has no policy laye
 it has no way to run on a schedule. Meanwhile `spec.md` defines 22 use cases, and
 `assignment.md` splits them across three people.
 
-This plan describes the **shared harness** that all three workstreams (A: Sudip, B:
-Geetha, C: Sandip) plug their use cases into. It covers:
+This plan describes the **shared harness** that all three workstreams (A, B, C) plug their use cases
+into. It covers:
 
 - one codebase serving **two tenants**, Suryodaya (IN, GST) and Keystone (US, Sales &
   Use Tax), with branching driven only by `GET /api/accounting/locale`;
@@ -24,8 +24,8 @@ Geetha, C: Sandip) plug their use cases into. It covers:
   that is what both real tenants are. School, clinic, retail and agency playbooks are
   registered with status `spec`, so the harness can explain them but does not run them.
   Adding a vertical later means adding a playbook, not changing the harness;
-- the **LLM gateway is supplied by Geetha.** This plan fixes only the interface it must
-  meet (§4.1).
+- the **LLM gateway is a separate component.** This plan fixes only the interface it
+  must meet (§4.1).
 
 Decisions already taken: live tenants only, with no seeded or fixture tenants for the
 other verticals; a hand-rolled loop with no agent frameworks (a capstone rule); and
@@ -77,7 +77,7 @@ nothing posts to the ledger (`JournalEntry` is read-only for `finance_user`).
                                   ▼                              ▼
    ┌────────── Agent Loop ──────────┐              ┌──── Playbook runner ────┐
    │ system = SKILL.md + playbook   │              │ compute(ctx, fetch) →    │
-   │ index; LLMGateway (Geetha's)   │── tool ─────▶│ Finding rows             │
+   │ index; LLMGateway              │── tool ─────▶│ Finding rows             │
    │ budget: turns/tokens/time      │   calls      └────────────┬────────────┘
    └───────────────┬────────────────┘                           │
                    ▼                                            ▼
@@ -110,7 +110,7 @@ team03-agent/
 ├── run_agent.py              # CLI entry only (argparse → harness)
 ├── SKILL.md                  # charter (rewritten per CURRENT_STATUS §7, see §9)
 ├── harness/
-│   ├── llm.py                # LLMGateway Protocol + message/tool types (Geetha's impl plugs in)
+│   ├── llm.py                # LLMGateway Protocol + message/tool types (gateway impl plugs in)
 │   ├── context.py            # RunContext: tenant login, locale, period, vertical profile
 │   ├── loop.py               # agent loop (moved out of run_agent.py)
 │   ├── gateway.py            # ToolGateway: policy, aliasing, wrapping, tracing
@@ -124,13 +124,13 @@ team03-agent/
 │   ├── agentswitch_client.py # (exists) auth + MCP transport
 │   ├── fetch.py              # paged fetchers with field quarantine
 │   ├── money.py              # Decimal money, rounding, currency from locale
-│   ├── findings.py           # shared Finding row (UC-01 §7 schema) — owner Sudip
+│   ├── findings.py           # shared Finding row (UC-01 §7 schema)
 │   ├── vertical.py           # vertical profile detection from Item mix
 │   ├── tax_math.py           # (rework) per-regime liability strategies
 │   ├── invoice_matcher.py    # (rework) UC-05 three-tier key
 │   └── uc/                   # one module per use case: uc01_rule37.py, uc05_duplicates.py, …
 ├── playbooks/
-│   ├── constants.yaml        # statutory constants table — owner Sudip (assignment §7)
+│   ├── constants.yaml        # statutory constants table (assignment §7)
 │   ├── uc-01-rule-37.md      # SOP text + YAML front-matter manifest
 │   └── …
 ├── tests/                    # graded, HAND-WRITTEN only (see §8)
@@ -139,13 +139,13 @@ team03-agent/
 ```
 
 New dependency: `pyyaml` (manifests and constants). Nothing else. The LLM SDK comes in
-with Geetha's gateway.
+with the gateway.
 
 ---
 
 ## 4. Components
 
-### 4.1 LLM gateway contract (Geetha supplies the implementation)
+### 4.1 LLM gateway contract
 
 The harness depends only on this Protocol, in `harness/llm.py`:
 
@@ -261,7 +261,6 @@ Each use case is a Markdown SOP with a YAML front-matter manifest:
 id: uc-01
 title: Rule 37 — 180-day non-payment ITC reversal
 questions: ["Which unpaid bills are about to cost me my input credit?"]
-owner: sudip
 status: live            # live | spec | blocked
 blocked_by: null        # e.g. F18 for UC-08/UC-15
 tax_regimes: [gst]
@@ -347,15 +346,15 @@ Cadences taken from the specs:
 
 ---
 
-## 5. Shared contracts (one owner each, per assignment.md §7)
+## 5. Shared contracts (one definition each, per assignment.md §7)
 
-| Contract | File | Owner | Consumed by |
+| Contract | File | Defined in | Consumed by |
 |---|---|---|---|
-| Finding row: `finding_type, rule, entity_type, entity_id, entity_ref, counterparty_id, counterparty_name, reversal_base_amount, interest_amount, total_exposure, currency, status, summary` + `run_id`, `fingerprint` added by the harness | `scripts/findings.py` (dataclass + `to_dict`) | Sudip (UC-01 §7) | all playbooks, report, escalations |
-| Statutory constants: 180 d, 45 d, ₹50 L, ₹5,000/day, ₹50,000, 1 yr/3 yr, 30 Nov, 18% p.a., each with its notification id | `playbooks/constants.yaml` | Sudip | all |
-| Place-of-supply determination | `scripts/pos.py` | Sandip (UC-20) | UC-03, UC-21 |
+| Finding row: `finding_type, rule, entity_type, entity_id, entity_ref, counterparty_id, counterparty_name, reversal_base_amount, interest_amount, total_exposure, currency, status, summary` + `run_id`, `fingerprint` added by the harness | `scripts/findings.py` (dataclass + `to_dict`) | UC-01 §7 | all playbooks, report, escalations |
+| Statutory constants: 180 d, 45 d, ₹50 L, ₹5,000/day, ₹50,000, 1 yr/3 yr, 30 Nov, 18% p.a., each with its notification id | `playbooks/constants.yaml` | assignment §7 | all |
+| Place-of-supply determination | `scripts/pos.py` | UC-20 | UC-03, UC-21 |
 | Money: `Decimal`, ROUND_HALF_UP to 2 dp, currency from `locale.base_currency` | `scripts/money.py` | harness | all (**replace the floats in `tax_math.py`**) |
-| LLM gateway Protocol | `harness/llm.py` | Geetha | loop |
+| LLM gateway Protocol | `harness/llm.py` | §4.1 | loop |
 
 ---
 
@@ -405,16 +404,14 @@ Each phase ends in something pushable to GitHub, which answers the review's conc
 | Phase | Scope | Exit criterion |
 |---|---|---|
 | **0 · Contract spike** (read-only, 1 day) | Pull real `inputSchema` for every allowlisted tool on **both** tenants into `docs/tool_contracts.md`: paging params, filter syntax, `updated_at` filter, `AgentEscalation`/`AgentMemory`/`AgentSession` shapes, `BillIntakeEvent`, Keystone use-tax fields. Confirm the vertical profile on both tenants. Restore the deleted `.env.example` | Every field this plan names is confirmed or crossed out |
-| **1 · Walking skeleton** | `llm.py` Protocol + `ScriptedLLM`, `context.py`, `gateway.py` (aliasing, allowlist, refusal, wrapping, tracing, paging), `loop.py`, CLI. Geetha's gateway plugged in | `--tenant in` and `--tenant us` both answer "how many unpaid bills do we have?" end-to-end with a trace; a SalarySlip request is refused with 0 MCP calls |
+| **1 · Walking skeleton** | `llm.py` Protocol + `ScriptedLLM`, `context.py`, `gateway.py` (aliasing, allowlist, refusal, wrapping, tracing, paging), `loop.py`, CLI. LLM gateway plugged in | `--tenant in` and `--tenant us` both answer "how many unpaid bills do we have?" end-to-end with a trace; a SalarySlip request is refused with 0 MCP calls |
 | **2 · Contracts + first playbooks** | `findings.py`, `money.py`, `constants.yaml`, `fetch.py` + quarantine, `registry.py`, `runner.py`. Playbooks: **UC-05** (reworked matcher), **UC-01**, **period liability IN + US** | The Core Challenge Prompt is answered on both tenants from finding rows; numbers match a hand calculation |
 | **3 · Triggers + state + actions** | `triggers.py`, `state.py` (fingerprints, watermarks), escalation writer with dedupe, `--dry-run`, GitHub Actions cron (daily/weekly) + CI running `pytest tests/` | A second daily run raises **no** duplicate escalations; an event poll picks up only new bills |
-| **4 · Workstream plug-in** | Each owner adds playbooks in their `assignment.md` sequence (A: UC-01→05→04→03/21→06→09→13 · B: UC-02 live; UC-07/14/16 spec; UC-08/15 blocked · C: UC-12→19→18, rest spec/blocked). One PR per playbook: manifest, `scripts/uc/ucNN.py`, SOP | Each PR adds exactly one playbook, and harness code stays unchanged |
+| **4 · Workstream plug-in** | Playbooks are added in each workstream's `assignment.md` sequence (A: UC-01→05→04→03/21→06→09→13 · B: UC-02 live; UC-07/14/16 spec; UC-08/15 blocked · C: UC-12→19→18, rest spec/blocked). One PR per playbook: manifest, `scripts/uc/ucNN.py`, SOP | Each PR adds exactly one playbook, and harness code stays unchanged |
 | **5 · Hardening** | Anomaly → bug-report drafting workflow, prompt-injection and boundary scenarios, token/cost report per run, DESIGN.md + README refresh | Scenario suite passes on both tenants |
 
-**Proposed builders** (a team decision, since `assignment.md` §9 leaves implementation
-open): Geetha builds Phases 0–1 plus the LLM gateway; Sudip builds the Phase 2
-contracts he already owns; Sandip builds Phase 3 triggers. Everyone does Phase 4 for
-their own workstream.
+**Build order** (`assignment.md` §9 leaves implementation open): the team works
+through the phases together, in order, as one team.
 
 ---
 

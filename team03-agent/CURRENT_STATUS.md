@@ -72,8 +72,8 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
 ## 4. Where things stand (2026-10-03)
 
 ### 4.1 Use cases
-- **India:** 22 specs (UC-01…22), owners per `assignment.md` (A: Sudip, B: Geetha,
-  C: Sandip), each with a §11 of live evidence.
+- **India:** 22 specs (UC-01…22), grouped into workstreams A/B/C per
+  `assignment.md`, each with a §11 of live evidence.
 - **US:** 10 specs (US-01…10), with a full IN→US mapping in
   [`docs/usecases/US/README.md`](docs/usecases/US/README.md). Highlights: our liability
   recompute matches the platform report to the cent ($226,488.27 YTD); no use tax is
@@ -85,7 +85,7 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
   state → reports) and **one live playbook, UC-12** (e-way bill audit). On India
   (2026-09-30): 367 findings from 3 MCP calls; a second run reports 0 new; replay is
   identical; on US it is skipped by locale with 0 MCP calls.
-- **Not built:** the LLM loop (Geetha's gateway), event polling, the `AgentMemory`
+- **Not built:** the LLM loop (LLM gateway), event polling, the `AgentMemory`
   store, vertical detection, cron, and every playbook except UC-12. Next playbooks
   per the plan: UC-05 (duplicates), UC-01 (Rule 37), period liability IN + US.
 

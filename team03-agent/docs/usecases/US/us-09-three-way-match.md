@@ -1,6 +1,6 @@
 # US-09 — Three-Way Match (US instance of UC-11)
 
-**US · Proposed owner: Sandip · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
+**US · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
 **IN spec (algorithm, output contract):** [`../IN/uc-11-three-way-match.md`](../IN/uc-11-three-way-match.md) · **live evidence 2026-10-03**
 
 ---

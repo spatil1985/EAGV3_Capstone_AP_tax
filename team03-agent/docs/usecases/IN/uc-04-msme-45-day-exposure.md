@@ -1,6 +1,6 @@
 # UC-04 — MSME 45-Day Exposure
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable now**
+**Workstream A · Verdict: 🟢 Buildable now**
 **Status: draft**
 
 ---

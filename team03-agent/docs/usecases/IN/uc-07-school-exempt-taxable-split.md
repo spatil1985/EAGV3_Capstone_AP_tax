@@ -1,6 +1,6 @@
 # UC-07 — School: Exempt vs Taxable Revenue Split
 
-**Workstream B · Owner: Geetha · Verdict: 🟡 Partial (fields exist; no school tenant)**
+**Workstream B · Verdict: 🟡 Partial (fields exist; no school tenant)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 > **Write this first in WS-B.** UC-08 cannot be specified until this spec defines how

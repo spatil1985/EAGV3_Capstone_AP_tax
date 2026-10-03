@@ -1,6 +1,6 @@
 # UC-21 — Import of Services: Reverse Charge
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable (spec.md) → 🟡 Partial (live data: the classification it relies on is unreliable)**
+**Workstream A · Verdict: 🟢 Buildable (spec.md) → 🟡 Partial (live data: the classification it relies on is unreliable)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Pairs with:** [UC-03](uc-03-rcm-self-invoicing.md) — same check, different trigger; ship as one playbook · **Uses:** UC-20's place-of-supply contract
 

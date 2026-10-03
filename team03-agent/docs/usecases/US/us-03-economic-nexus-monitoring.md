@@ -1,6 +1,6 @@
 # US-03 — Economic Nexus Threshold Monitoring
 
-**US · Proposed owner: Sudip · Verdict: 🟢 Buildable — 0 findings on live data, which is the correct result**
+**US · Verdict: 🟢 Buildable — 0 findings on live data, which is the correct result**
 **IN counterpart:** UC-13 (a cumulative threshold that starts an obligation) · **live evidence 2026-10-03**
 
 ---

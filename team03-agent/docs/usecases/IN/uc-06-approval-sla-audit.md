@@ -1,6 +1,6 @@
 # UC-06 — Approval SLA and Segregation-of-Duties Audit
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable (newly unblocked — confirmed live)**
+**Workstream A · Verdict: 🟢 Buildable (newly unblocked — confirmed live)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

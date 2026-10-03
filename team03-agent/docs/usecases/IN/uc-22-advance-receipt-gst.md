@@ -1,6 +1,6 @@
 # UC-22 — Advance-Receipt GST on Services
 
-**Workstream C · Owner: Sandip · Verdict: 🟡 Partial (advances are visible; their tax is not representable)**
+**Workstream C · Verdict: 🟡 Partial (advances are visible; their tax is not representable)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

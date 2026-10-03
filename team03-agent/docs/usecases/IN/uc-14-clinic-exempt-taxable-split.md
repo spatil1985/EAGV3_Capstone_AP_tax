@@ -1,6 +1,6 @@
 # UC-14 — Clinic: Healthcare Exempt vs Pharmacy Taxable Split
 
-**Workstream B · Owner: Geetha · Verdict: 🟡 Partial (fields support it; rules are playbook-carried; no clinic tenant)**
+**Workstream B · Verdict: 🟡 Partial (fields support it; rules are playbook-carried; no clinic tenant)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Engine shared with:** [UC-07](uc-07-school-exempt-taxable-split.md) — same two-stage classifier, different rule table
 

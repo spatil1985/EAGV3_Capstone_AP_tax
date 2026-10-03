@@ -22,23 +22,18 @@ Records: 101 Bill · 158 Invoice (all receivable) · 120 Party · 67 PaymentMade
 
 ## Index
 
-| US | Title | IN counterpart | Proposed owner | Verdict | Headline from live data |
-|---|---|---|---|---|---|
-| [01](us-01-period-sales-use-tax-liability.md) | Period sales & use tax liability | period liability (harness plan §6.1) | Geetha | 🟢 | Our recompute matches the platform's liability report **to the cent** in all 4 jurisdictions (YTD $226,488.27). Use tax accrued: $0 (→ US-02) |
-| [02](us-02-consumer-use-tax-on-purchases.md) | Consumer use tax on untaxed purchases | UC-03, UC-21 (self-assessed tax) | Sudip | 🟡 | 81 bills, $588,555.24, **no vendor tax and no use tax on any**. $260,985 is outside "production material" → up to **$16,964.03** use tax, subject to classification |
-| [03](us-03-economic-nexus-monitoring.md) | Economic nexus threshold monitoring | UC-13 (cumulative thresholds) | Sudip | 🟢 | Platform YTD counters now equal our recompute (**N4 appears fixed**). No sales outside the 3 registered states |
-| [04](us-04-exemption-certificate-coverage.md) | Exemption certificate coverage | UC-07, UC-20 (exempt / zero-rated) | Geetha | 🟢 | 31 exempt invoices ($570,195.62), **31/31 covered** by a valid resale certificate valid to 2029-04-01 |
-| [05](us-05-sourcing-and-rate-correctness.md) | Sales tax sourcing & rate correctness | UC-18 (rate correctness) | Sandip | 🟡 | Arithmetic exact on every line. But **36 OH invoices charge Stark County tax ($7,919.93) to customers outside Stark County**, while jurisdictions are configured `sourcing: destination` |
-| [06](us-06-form-1099-readiness.md) | Form 1099 readiness & backup withholding | UC-09 (TDS) | Sudip | 🟢 | 2 reportable vendors at the 2026 **$2,000** threshold; **1 needs a W-9** (Canton Industrial Consulting, $7,800) |
-| [07](us-07-duplicate-vendor-payment.md) | Duplicate vendor payment | UC-05 (same check) | Sudip | 🟢 | 0 suspicious pairs. 15 groups of identical bills are fortnightly standing orders with distinct POs. Recurring runaway bills are now void/draft |
-| [08](us-08-approval-sla-audit.md) | Approval SLA & segregation-of-duties audit | UC-06 (same check) | Sudip | 🟢 | **0/93** resolved requests with a wrong `is_overdue` (filed N1 had 8, so it **appears fixed**); 0 self-approvals |
-| [09](us-09-three-way-match.md) | Three-way match | UC-11 (same check) | Sandip | 🟢 | 81/81 PO bills within tolerance; `recorded_status` **now persisted** (filed N2 had null ×81, so it **appears fixed**) |
-| [10](us-10-credit-memo-refund-window.md) | Sales tax on credit memos & refund windows | UC-19 (credit-note time limit) | Sandip | ⚪ spec | No CreditNote exists on the tenant; the liability report shows `credited_sales: 0` |
-
-**Owners are a proposal.** They follow the IN workstream that owns each counterpart
-([`../../assignment.md`](../../planning/assignment.md)). WS-B (Geetha) is mostly GST
-input-credit work with no US equivalent, so US-01 and US-04 move to her to balance
-the load.
+| US | Title | IN counterpart | Verdict | Headline from live data |
+|---|---|---|---|---|
+| [01](us-01-period-sales-use-tax-liability.md) | Period sales & use tax liability | period liability (harness plan §6.1) | 🟢 | Our recompute matches the platform's liability report **to the cent** in all 4 jurisdictions (YTD $226,488.27). Use tax accrued: $0 (→ US-02) |
+| [02](us-02-consumer-use-tax-on-purchases.md) | Consumer use tax on untaxed purchases | UC-03, UC-21 (self-assessed tax) | 🟡 | 81 bills, $588,555.24, **no vendor tax and no use tax on any**. $260,985 is outside "production material" → up to **$16,964.03** use tax, subject to classification |
+| [03](us-03-economic-nexus-monitoring.md) | Economic nexus threshold monitoring | UC-13 (cumulative thresholds) | 🟢 | Platform YTD counters now equal our recompute (**N4 appears fixed**). No sales outside the 3 registered states |
+| [04](us-04-exemption-certificate-coverage.md) | Exemption certificate coverage | UC-07, UC-20 (exempt / zero-rated) | 🟢 | 31 exempt invoices ($570,195.62), **31/31 covered** by a valid resale certificate valid to 2029-04-01 |
+| [05](us-05-sourcing-and-rate-correctness.md) | Sales tax sourcing & rate correctness | UC-18 (rate correctness) | 🟡 | Arithmetic exact on every line. But **36 OH invoices charge Stark County tax ($7,919.93) to customers outside Stark County**, while jurisdictions are configured `sourcing: destination` |
+| [06](us-06-form-1099-readiness.md) | Form 1099 readiness & backup withholding | UC-09 (TDS) | 🟢 | 2 reportable vendors at the 2026 **$2,000** threshold; **1 needs a W-9** (Canton Industrial Consulting, $7,800) |
+| [07](us-07-duplicate-vendor-payment.md) | Duplicate vendor payment | UC-05 (same check) | 🟢 | 0 suspicious pairs. 15 groups of identical bills are fortnightly standing orders with distinct POs. Recurring runaway bills are now void/draft |
+| [08](us-08-approval-sla-audit.md) | Approval SLA & segregation-of-duties audit | UC-06 (same check) | 🟢 | **0/93** resolved requests with a wrong `is_overdue` (filed N1 had 8, so it **appears fixed**); 0 self-approvals |
+| [09](us-09-three-way-match.md) | Three-way match | UC-11 (same check) | 🟢 | 81/81 PO bills within tolerance; `recorded_status` **now persisted** (filed N2 had null ×81, so it **appears fixed**) |
+| [10](us-10-credit-memo-refund-window.md) | Sales tax on credit memos & refund windows | UC-19 (credit-note time limit) | ⚪ spec | No CreditNote exists on the tenant; the liability report shows `credited_sales: 0` |
 
 ---
 

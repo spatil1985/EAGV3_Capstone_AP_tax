@@ -3,7 +3,7 @@ Plain English: If we bought something from a supplier and claimed a tax credit f
 
 Example: We buy ₹1,00,000 of steel, claim ₹18,000 GST credit on it. Six months later, we still haven't paid the steel vendor. The agent should say: "Warning — you owe the government ₹18,000 back, plus interest, because you never paid this bill."
 
-Why it's first: it applies to literally every kind of business (school, factory, clinic — all of them), no competitor product checks for this, and the "shape" of its output (a warning row) gets reused by two of Geetha's use cases later. So getting this one right sets the template for others.
+Why it's first: it applies to literally every kind of business (school, factory, clinic — all of them), no competitor product checks for this, and the "shape" of its output (a warning row) gets reused by two of the WS-B use cases later. So getting this one right sets the template for others.
 
 UC-05 — Duplicate vendor payment (your original core mission)
 Plain English: Is any vendor accidentally being paid twice for the same thing?

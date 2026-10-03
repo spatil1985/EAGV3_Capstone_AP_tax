@@ -1,6 +1,6 @@
 # UC-08 — Rule 42 Apportionment for a Mixed-Supply School
 
-**Workstream B · Owner: Geetha · Verdict: 🔴 Blocked as a platform capability · 🟢 computable and reportable by the agent**
+**Workstream B · Verdict: 🔴 Blocked as a platform capability · 🟢 computable and reportable by the agent**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Depends on:** [UC-07](uc-07-school-exempt-taxable-split.md) (supplies E and F) · **Emits:** the UC-01 reversal row · **Backs:** F18 / GAP-1
 

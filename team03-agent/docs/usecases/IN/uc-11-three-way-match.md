@@ -1,6 +1,6 @@
 # UC-11 — Three-Way Match (PO ↔ Receipt ↔ Bill)
 
-**Workstream C · Owner: Sandip · Verdict: 🔴 Structurally blocked (spec.md) → 🟡 Partial — receipt leg exists (live data)**
+**Workstream C · Verdict: 🔴 Structurally blocked (spec.md) → 🟡 Partial — receipt leg exists (live data)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Backs:** F1 / GAP-4 — **the live data weakens F1's premise; see §10–11**
 
@@ -174,8 +174,8 @@ result.recorded_status               null on 101/101 (N2)
 - **UC-04 interaction:** under MSMED Act s.15 the 45-day clock runs from the *day of
   acceptance*. If goods were never received, arguably there was no acceptance and the
   clock has not started. UC-04 should suppress its finding (or downgrade it) when UC-11
-  says `billed_not_received`. **Needs agreement between Sudip (UC-04) and Sandip
-  (UC-11).**
+  says `billed_not_received`. **Needs agreement between UC-04 and
+  UC-11.**
 
 ---
 

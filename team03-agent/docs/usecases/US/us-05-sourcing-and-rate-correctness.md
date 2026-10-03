@@ -1,6 +1,6 @@
 # US-05 — Sales Tax Sourcing & Rate Correctness
 
-**US · Proposed owner: Sandip · Verdict: 🟡 Buildable as a consistency check — one live contradiction found**
+**US · Verdict: 🟡 Buildable as a consistency check — one live contradiction found**
 **IN counterpart:** UC-18 (rate correctness by product code) · **live evidence 2026-10-03**
 
 ---

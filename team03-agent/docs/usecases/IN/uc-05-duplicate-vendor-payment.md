@@ -1,6 +1,6 @@
 # UC-05 — Duplicate Vendor Payment Detection
 
-**Workstream A · Owner: Sudip · Verdict: 🟡 Rework required (unchanged by live data)**
+**Workstream A · Verdict: 🟡 Rework required (unchanged by live data)**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

@@ -3,7 +3,6 @@ id: uc-12
 title: E-way bill coverage and expiry audit
 questions:
   - "Is anything moving on the road right now without valid documentation?"
-owner: sandip
 status: live
 blocked_by: null
 tax_regimes: [gst]

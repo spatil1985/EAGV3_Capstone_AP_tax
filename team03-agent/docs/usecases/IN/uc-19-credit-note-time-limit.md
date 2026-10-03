@@ -1,6 +1,6 @@
 # UC-19 — Credit-Note Time-Limit Monitoring (s.34(2))
 
-**Workstream C · Owner: Sandip · Verdict: 🟢 Buildable**
+**Workstream C · Verdict: 🟢 Buildable**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

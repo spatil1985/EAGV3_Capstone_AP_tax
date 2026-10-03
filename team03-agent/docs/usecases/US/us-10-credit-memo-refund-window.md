@@ -1,6 +1,6 @@
 # US-10 — Sales Tax on Credit Memos & Refund Windows
 
-**US · Proposed owner: Sandip · Verdict: ⚪ spec — no credit memos exist on the tenant**
+**US · Verdict: ⚪ spec — no credit memos exist on the tenant**
 **IN counterpart:** UC-19 (s.34(2) credit-note time limit) · **live evidence 2026-10-03**
 
 ---

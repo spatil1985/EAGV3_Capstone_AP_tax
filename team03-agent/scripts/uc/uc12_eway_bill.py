@@ -1,6 +1,6 @@
 """UC-12 — E-way bill coverage and expiry audit.
 
-Spec: docs/usecases/IN/uc-12-eway-bill-coverage.md (owner: Sandip).
+Spec: docs/usecases/IN/uc-12-eway-bill-coverage.md.
 Question: "Is anything moving on the road right now without valid documentation?"
 
 Statute: s.68 CGST Act + Rule 138 CGST Rules — an e-way bill is required before moving

@@ -1,6 +1,6 @@
 # US-07 — Duplicate Vendor Payment (US instance of UC-05)
 
-**US · Proposed owner: Sudip · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
+**US · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
 **IN spec (algorithm, tiers, output contract):** [`../IN/uc-05-duplicate-vendor-payment.md`](../IN/uc-05-duplicate-vendor-payment.md) · **live evidence 2026-10-03**
 
 ---

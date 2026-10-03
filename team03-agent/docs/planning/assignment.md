@@ -1,12 +1,12 @@
-# assignment.md — Use-case spec ownership (Team 03, Seat 03)
+# assignment.md — Use-case workstreams (Team 03, Seat 03)
 
 **2026-09-23 · companion to [`spec.md`](spec.md)**
 
 [`spec.md`](spec.md) catalogues 22 use cases across five verticals at *functional*
 depth — what each one is, why it matters, and whether the data exists. It does not go
-deep enough to implement from. This document splits those 22 into three workstreams,
-assigns each to one person, and defines what "a detailed spec" has to contain so that
-three people writing separately produce work that fits together.
+deep enough to implement from. This document groups those 22 into three workstreams
+and defines what "a detailed spec" has to contain so that specs written separately
+fit together. The team works on all three as one team.
 
 **Nothing here changes the content of `spec.md`.** Verdicts (🟢/🟡/🔴), gap numbers and
 phase ordering are carried over unchanged.
@@ -18,8 +18,7 @@ phase ordering are carried over unchanged.
 The grouping axis is **the data spine each question reads**, not the vertical it
 serves. Verticals cut across each other (a clinic is also a retailer; a school is also
 an agency buyer), but the *fields* a use case touches do not. Grouping by spine means
-two people rarely need to reason about the same fields at the same time, and each
-person builds one mental model instead of five.
+each workstream needs one mental model instead of five.
 
 | Workstream | Spine — the records it reads | The shape of every question in it |
 |---|---|---|
@@ -29,33 +28,27 @@ person builds one mental model instead of five.
 
 A second, deliberate property of this split: **WS-A is almost entirely 🟢 buildable,
 WS-C is where most of the 🔴 blocks live, and WS-B holds the single hardest
-computation.** Each person therefore owns a different kind of difficulty — delivery
-pressure, platform-gap argumentation, and statutory complexity respectively — rather
-than one person absorbing all three.
+computation.** Each workstream therefore carries a different kind of difficulty —
+delivery pressure, platform-gap argumentation, and statutory complexity respectively.
 
 ---
 
-## 2. Assignment at a glance
+## 2. Workstreams at a glance
 
-| WS | Owner | Use cases | Count | Verdicts | Platform gaps owned |
-|---|---|---|---|---|---|
-| **A** | **Sudip** | UC-01, UC-03, UC-04, UC-05, UC-06, UC-09, UC-13, UC-21 | 8 | 6🟢 2🟡 | none — owns the two shared contracts instead (§7) |
-| **B** | **Geetha** | UC-02, UC-07, UC-08, UC-14, UC-15, UC-16 | 6 | 2🟢 2🟡 2🔴 | **GAP-1** → filed as **F18** |
-| **C** | **Sandip** | UC-10, UC-11, UC-12, UC-17, UC-18, UC-19, UC-20, UC-22 | 8 | 3🟢 2🟡 3🔴 | **GAP-2/3/5/6** → filed as **F19–F22**; **GAP-4** → already **F1** |
+| WS | Use cases | Count | Verdicts | Platform gaps |
+|---|---|---|---|---|
+| **A** | UC-01, UC-03, UC-04, UC-05, UC-06, UC-09, UC-13, UC-21 | 8 | 6🟢 2🟡 | none — defines the two shared contracts instead (§7) |
+| **B** | UC-02, UC-07, UC-08, UC-14, UC-15, UC-16 | 6 | 2🟢 2🟡 2🔴 | **GAP-1** → filed as **F18** |
+| **C** | UC-10, UC-11, UC-12, UC-17, UC-18, UC-19, UC-20, UC-22 | 8 | 3🟢 2🟡 3🔴 | **GAP-2/3/5/6** → filed as **F19–F22**; **GAP-4** → already **F1** |
 
 All six gaps are now filed as feature requests
-([`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.2). **Owning a gap here
-means owning the technical argument behind it, not the filing** — if triage comes back
-with questions on F18, Geetha answers them; on F19–F22, Sandip does.
+([`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.2). If triage
+comes back with questions on F18, the WS-B specs carry the technical argument; on
+F19–F22, the WS-C specs do.
 
-**Why Sudip takes WS-A:** it contains the two use cases where prior work already exists
-under his name — UC-05 is a rework of `scripts/invoice_matcher.py`, and UC-06 depends
-on the `is_overdue` defects filed as N1/N8. Reassigning either would mean re-deriving
-findings that are already understood.
-
-**Why Geetha and Sandip take B and C as listed:** no basis to prefer one over the
-other — swap freely if either has relevant domain exposure. The split between B and C
-matters; who takes which does not.
+WS-A contains the two use cases where prior work already exists — UC-05 is a rework of
+`scripts/invoice_matcher.py`, and UC-06 depends on the `is_overdue` defects filed as
+N1/N8 — so it builds on findings that are already understood.
 
 ---
 
@@ -79,7 +72,7 @@ order in all 22, so they can be read and reviewed interchangeably.
 
 **Definition of done:** another team member can implement the use case from the spec
 without asking the author a question. That is the review test — each spec is read by
-the other two people, and the reviewer's job is to try to implement it mentally and
+the rest of the team, and the reviewer's job is to try to implement it mentally and
 report the first place they get stuck.
 
 For 🔴 use cases, sections 4–5 describe what *would* be needed and section 10 carries
@@ -89,7 +82,7 @@ enough to file.
 
 ---
 
-## 4. WS-A · Sudip — Inward obligations
+## 4. WS-A — Inward obligations
 
 *Every question here starts from a supplier bill or a payment against one.*
 
@@ -113,7 +106,7 @@ aggregations that need no context from the rest of WS-A.
 
 ---
 
-## 5. WS-B · Geetha — ITC entitlement (exempt & mixed supply)
+## 5. WS-B — ITC entitlement (exempt & mixed supply)
 
 *Every question here is a variation on: we paid GST on inputs — how much of it is
 actually ours to keep?*
@@ -162,12 +155,12 @@ both.
 Classification before apportionment: UC-08 cannot be specified until UC-07 defines how
 exempt turnover is derived.
 
-**You own GAP-1, now filed as F18** — the argument that ITC apportionment needs
+**This workstream carries GAP-1, now filed as F18** — the argument that ITC apportionment needs
 platform support. It blocks two of five verticals, it is what Clear monetises
 separately as MaxITC, and the computation is already possible — only the posting is
 not. [`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) calls F18 the
 strongest feature ask in the document and says to file it **alone**, not batched.
-Your UC-08 and UC-15 specs are the evidence behind that ask, so they need to be
+The UC-08 and UC-15 specs are the evidence behind that ask, so they need to be
 strong enough for triage to read directly.
 
 ⚠️ **Data reality:** these fields exist but are **unpopulated** — no school or clinic
@@ -177,7 +170,7 @@ it was checked.
 
 ---
 
-## 6. WS-C · Sandip — Outward supply, movement & organisation tax mode
+## 6. WS-C — Outward supply, movement & organisation tax mode
 
 *Every question here is about what left the building — goods, an invoice, or a
 declaration — and whether it was correctly classified and covered.*
@@ -197,9 +190,9 @@ declaration — and whether it was correctly classified and covered.*
 Buildable first, blocked last — so that if time runs out, what is lost is gap
 argumentation rather than shippable capability.
 
-**You own five of the six platform gaps** — GAP-2 job work (**F19**), GAP-3
-composition mode (**F20**), GAP-4 GRN (**F1**, filed earlier), GAP-5 LUT registry
-(**F21**), GAP-6 s.52 e-commerce TCS (**F22**). All are filed; your specs are what
+**This workstream carries five of the six platform gaps** — GAP-2 job work (**F19**),
+GAP-3 composition mode (**F20**), GAP-4 GRN (**F1**, filed earlier), GAP-5 LUT registry
+(**F21**), GAP-6 s.52 e-commerce TCS (**F22**). All are filed; these specs are what
 backs them if triage pushes back.
 
 GAP-6/F22 has no use case of its own in `spec.md` — it needs one, scoped alongside
@@ -210,18 +203,18 @@ workstream.
 
 ## 7. Shared contracts — where the three workstreams must agree
 
-Three things are used by more than one person. Each has **one owner**, and the other
-two consume rather than redefine.
+Three things are used by more than one workstream. Each is **defined in one place**,
+and the others consume rather than redefine.
 
-| Contract | Owner | Consumed by | Why it must be shared |
+| Contract | Defined in | Consumed by | Why it must be shared |
 |---|---|---|---|
-| **ITC reversal row schema** | Sudip (defined in UC-01) | Geetha (UC-08, UC-15, UC-16) | Rule 37, Rule 42/43 and s.17(5)(h) all produce "credit to be reversed" findings. Three different row shapes for one concept would make the output unreadable |
-| **Statutory constants table** | Sudip | Everyone | 180 days · 45 days · ₹50 lakh · ₹5,000/day · ₹50,000 · 1yr/3yr · 30 November. These are **rules, not data** — one playbook file, updatable same-day, never hardcoded in a spec |
-| **Place-of-supply determination** | Sandip (defined in UC-20) | Sudip (UC-03, UC-21) | Inward RCM and outward export both turn on the same determination. One logic, two directions |
+| **ITC reversal row schema** | UC-01 (WS-A) | UC-08, UC-15, UC-16 (WS-B) | Rule 37, Rule 42/43 and s.17(5)(h) all produce "credit to be reversed" findings. Three different row shapes for one concept would make the output unreadable |
+| **Statutory constants table** | `playbooks/constants.yaml` | All use cases | 180 days · 45 days · ₹50 lakh · ₹5,000/day · ₹50,000 · 1yr/3yr · 30 November. These are **rules, not data** — one playbook file, updatable same-day, never hardcoded in a spec |
+| **Place-of-supply determination** | UC-20 (WS-C) | UC-03, UC-21 (WS-A) | Inward RCM and outward export both turn on the same determination. One logic, two directions |
 
 ---
 
-## 8. Rules that bind all three of us
+## 8. Rules that bind every spec
 
 Carried from [`spec.md`](spec.md) §0 and §7. Any spec that violates one of these gets
 sent back in review.
@@ -249,14 +242,14 @@ sent back in review.
 
 - **Dates.** Sequencing within each workstream is given; calendar deadlines are not.
   Add them once the milestone date is fixed.
-- **Implementation.** This covers specs only. Who builds what is a separate decision,
+- **Implementation.** This covers specs only. Build order is a separate decision,
   and deliberately so — the spec review (§3) is the point at which we find out whether
   a use case is as buildable as `spec.md` claims.
 - **The competitor gaps** (F9–F17 in
   [`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.1). They argue *"a
   rival ships this and we don't"*, are product requests rather than use cases, and
   none has a `spec.md` entry. Distinct from §D.2's F18–F22, which are the six gaps
-  owned above and argue *"Indian tax law requires this and the data model cannot
+  listed above and argue *"Indian tax law requires this and the data model cannot
   represent it"*.
 - **Filing and triage follow-up.** The submissions document owns that. This document
-  only says who can answer a technical question about each gap.
+  only says which specs carry the technical argument for each gap.

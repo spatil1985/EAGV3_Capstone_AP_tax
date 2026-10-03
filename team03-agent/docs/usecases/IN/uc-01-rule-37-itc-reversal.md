@@ -1,6 +1,6 @@
 # UC-01 — Rule 37: 180-Day Non-Payment ITC Reversal
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable now**
+**Workstream A · Verdict: 🟢 Buildable now**
 **Status: draft — first spec written, defines the shared reversal row schema (§7)**
 
 ---
@@ -154,8 +154,8 @@ this endpoint specifically) until exhausted; do not assume all bills fit in one 
 
 ## 7. Output contract — the shared reversal row schema
 
-This is the schema `assignment.md` §7 designates as shared: **UC-08, UC-15 (Geetha)
-and UC-16 (Geetha) must emit rows of this same shape**, since Rule 37, Rule 42/43 and
+This is the schema `assignment.md` §7 designates as shared: **UC-08, UC-15
+and UC-16 must emit rows of this same shape**, since Rule 37, Rule 42/43 and
 s.17(5)(h) are all variations on "credit must be reversed."
 
 ```json

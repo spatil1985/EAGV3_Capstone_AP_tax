@@ -1,6 +1,6 @@
 # UC-12 — E-Way Bill Coverage and Expiry Audit
 
-**Workstream C · Owner: Sandip · Verdict: 🟢 Buildable as a coverage and expiry audit**
+**Workstream C · Verdict: 🟢 Buildable as a coverage and expiry audit**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 > Start here in WS-C: it is the 🟢 use case with the most live data behind it.

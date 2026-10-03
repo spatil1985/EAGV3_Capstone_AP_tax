@@ -81,7 +81,6 @@ Every gateway call → EventBus → JsonlTraceWriter, CallCounter               
 id: uc-04
 title: MSME 45-day exposure
 questions: ["Which small suppliers are we about to pay late?"]
-owner: sudip
 status: live                 # live | spec | blocked
 blocked_by: null             # e.g. F18
 tax_regimes: [gst]           # or [all]
@@ -177,9 +176,9 @@ Predicates worth writing for UC-12, from its spec §9:
   (docs/usecases/IN/README.md, "Correction 2026-09-30"). Only `CreditNote.taxes[]` is
   stripped.
 - **The CLI is `python -m harness`, and `run_agent.py` is untouched.** Plan §9 moves
-  the LLM loop out of `run_agent.py` in Phase 1, which is Geetha's gateway work.
+  the LLM loop out of `run_agent.py` in Phase 1, which is the LLM gateway work.
   Wiring `run_agent.py` to this CLI is a one-line change once that lands.
-- **`constants.yaml` holds UC-12's constants only.** The owner (Sudip) adds the rest.
+- **`constants.yaml` holds UC-12's constants only.** The rest get added as their playbooks land.
 
 ## Not built yet (plan phases 0–3)
 

@@ -1,6 +1,6 @@
 # UC-02 — Blocked Credit (s.17(5)) Audit
 
-**Workstream B · Owner: Geetha · Verdict: 🟢 Buildable now**
+**Workstream B · Verdict: 🟢 Buildable now**
 **Status: draft — defines the HSN-prefix → blocked-category mapping table that UC-16 reuses**
 
 ---

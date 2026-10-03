@@ -1,6 +1,6 @@
 # UC-17 — Composition Scheme Eligibility and Breach
 
-**Workstream C · Owner: Sandip · Verdict: 🔴 Blocked (confirmed live) — with a 🟢 buildable sub-check found in the data**
+**Workstream C · Verdict: 🔴 Blocked (confirmed live) — with a 🟢 buildable sub-check found in the data**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 **Backs:** F20 / GAP-3
 

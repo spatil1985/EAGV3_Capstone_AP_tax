@@ -1,6 +1,6 @@
 # UC-03 — RCM Self-Invoicing Exposure
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable**
+**Workstream A · Verdict: 🟢 Buildable**
 **Status: draft — pairs with [UC-21](uc-21-import-of-services-rcm.md); same check, domestic counterparty**
 
 ---
@@ -38,7 +38,7 @@
   self-invoiced and paid is real and separate from the credit question.
 - **This spec covers the identification and self-invoicing/payment gap check only.**
   It does not compute the ITC eligibility of the resulting self-paid tax — that is
-  a downstream step covered conceptually by UC-02 (Geetha's blocked-credit audit),
+  a downstream step covered conceptually by UC-02 (the blocked-credit audit),
   not duplicated here.
 
 ---
@@ -268,7 +268,7 @@ notification (per `spec.md` §8's disclaimer) before being relied on.
   §5a are current as of this spec's writing and must be reconfirmed against the
   live notification before being relied on for a filing decision, per `spec.md` §8.
 - **This does not compute or claim the ITC eligibility of RCM tax once paid** — that
-  is UC-02's domain (Geetha, blocked-credit audit), referenced but not duplicated
+  is UC-02's domain (blocked-credit audit), referenced but not duplicated
   here.
 
 ---

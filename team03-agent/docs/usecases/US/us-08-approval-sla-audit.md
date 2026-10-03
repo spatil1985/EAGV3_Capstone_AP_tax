@@ -1,6 +1,6 @@
 # US-08 — Approval SLA & Segregation-of-Duties Audit (US instance of UC-06)
 
-**US · Proposed owner: Sudip · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
+**US · Verdict: 🟢 Buildable — regime-agnostic; 0 findings on live data**
 **IN spec (algorithm, output contract):** [`../IN/uc-06-approval-sla-audit.md`](../IN/uc-06-approval-sla-audit.md) · **live evidence 2026-10-03**
 
 ---

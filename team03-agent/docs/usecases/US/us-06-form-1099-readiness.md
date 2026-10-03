@@ -1,6 +1,6 @@
 # US-06 — Form 1099 Readiness & Backup Withholding
 
-**US · Proposed owner: Sudip · Verdict: 🟢 Buildable — the platform's 1099 report is the oracle**
+**US · Verdict: 🟢 Buildable — the platform's 1099 report is the oracle**
 **IN counterpart:** UC-09 (TDS — tax on vendor payments) · **live evidence 2026-10-03**
 
 ---

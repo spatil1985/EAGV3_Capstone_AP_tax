@@ -1,6 +1,6 @@
 # UC-09 — Vendor TDS Verification (194C / 194J / 194I)
 
-**Workstream A · Owner: Sudip · Verdict: 🟢 Buildable as a verification layer**
+**Workstream A · Verdict: 🟢 Buildable as a verification layer**
 **Status: draft · live evidence 2026-09-28 · reference template: [UC-01](uc-01-rule-37-itc-reversal.md)**
 
 ---

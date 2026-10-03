@@ -1,5 +1,5 @@
 # Statutory constants — rules, not data (harness_plan.md §5, spec.md §7).
-# Owner: Sudip (assignment.md §7). Playbooks read these via ctx.constant(name) and
+# Shared contract (assignment.md §7). Playbooks read these via ctx.constant(name) and
 # must never hardcode them, so a changed notification is a one-line edit here.
 #
 # Each entry: value · unit · source (statute / notification) · verified (date a human

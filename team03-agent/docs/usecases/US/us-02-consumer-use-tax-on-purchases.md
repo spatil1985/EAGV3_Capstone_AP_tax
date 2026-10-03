@@ -1,6 +1,6 @@
 # US-02 — Consumer Use Tax on Untaxed Purchases
 
-**US · Proposed owner: Sudip · Verdict: 🟡 Buildable, but the amount depends on a taxability classification the data doesn't carry**
+**US · Verdict: 🟡 Buildable, but the amount depends on a taxability classification the data doesn't carry**
 **IN counterpart:** UC-03 / UC-21 (tax the buyer self-assesses) · **live evidence 2026-10-03**
 
 ---

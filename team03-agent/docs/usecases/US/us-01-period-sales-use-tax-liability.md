@@ -1,6 +1,6 @@
 # US-01 — Period Sales & Use Tax Liability
 
-**US · Proposed owner: Geetha · Verdict: 🟢 Buildable — platform report is a working oracle**
+**US · Verdict: 🟢 Buildable — platform report is a working oracle**
 **IN counterpart:** period liability, harness_plan.md §6.1 (US column) · **live evidence 2026-10-03**
 
 ---
