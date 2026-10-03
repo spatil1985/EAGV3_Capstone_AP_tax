@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from harness.context import ROOT
+from harness.core.context import ROOT
 
 PLAYBOOK_DIR = ROOT / "playbooks"
 

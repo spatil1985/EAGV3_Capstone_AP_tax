@@ -4,7 +4,7 @@ Fixed fields follow UC-01 §7 (docs/usecases/IN/uc-01-rule-37-itc-reversal.md), 
 schema `assignment.md` §7 designates as shared. Playbooks may put use-case-specific
 values in `details`, but must not rename or drop the fixed fields.
 
-`run_id` and `fingerprint` are stamped by the harness (harness/runner.py), never by a
+`run_id` and `fingerprint` are stamped by the harness (harness/core/runner.py), never by a
 playbook, so compute code stays free of run state.
 """
 

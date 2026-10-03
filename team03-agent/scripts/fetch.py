@@ -16,7 +16,7 @@ header-taxed bills (docs/usecases/IN/README.md, "Correction 2026-09-30"). Only
 CreditNote.taxes[] (N128) is stripped.
 """
 
-from harness.transport import ToolResult
+from harness.access.transport import ToolResult
 
 QUARANTINE: dict[str, list[tuple[str, str, str]]] = {
     # entity: [(action, field, defect)]

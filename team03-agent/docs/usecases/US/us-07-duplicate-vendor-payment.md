@@ -34,7 +34,7 @@ it (US-02).
 
 ## 8. Limits (US)
 
-As UC-05. Holds would use the requested `Bill.hold` (`../../requested_tools.md` T3.3).
+As UC-05. Holds would use the requested `Bill.hold` (`../../submissions/requested_tools.md` T3.3).
 
 ## 9. Validation (US)
 

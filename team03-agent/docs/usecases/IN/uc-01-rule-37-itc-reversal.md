@@ -54,7 +54,7 @@ All fields below are confirmed present via `CURRENT_STATUS.md` §3 (real entity 
 verified against live `/api/schemas`) and `spec.md` §4.1 UC-01's data list.
 
 **Tool:** `Bill.list` — paginated, `finance_user` has `read` permission
-(`docs/mcp_tool_inventory_india.md` §Bill).
+(`docs/platform/mcp_tool_inventory_india.md` §Bill).
 
 **Filter to apply server-side where the tool supports it, else client-side:**
 ```

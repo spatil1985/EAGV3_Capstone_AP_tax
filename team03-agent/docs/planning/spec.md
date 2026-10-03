@@ -17,11 +17,11 @@ to answer it actually exists**, verified against the live schema rather than ass
 | Source | What it gives us | Confidence |
 |---|---|---|
 | `GET /api/schemas` live, 2026-09-23 | Real field names, enums, types | **Verified** |
-| [`mcp_tool_inventory_india.md`](mcp_tool_inventory_india.md) | 468 tools, 142 groups, `finance_user` scope | **Verified** |
+| [`mcp_tool_inventory_india.md`](../platform/mcp_tool_inventory_india.md) | 468 tools, 142 groups, `finance_user` scope | **Verified** |
 | `CURRENT_STATUS.md` §7a/§9a | Which tax data is trustworthy | **Verified** |
-| [`razorpay_gap_report.md`](razorpay_gap_report.md) | RazorpayX, one live account | **[LIVE]** / **[DEMO]** |
-| [`clear_gap_report.md`](clear_gap_report.md) | Clear, adversarially verified marketing | **[VENDOR-V]** |
-| [`gap_report_mysa.md`](gap_report_mysa.md) | Mysa, vendor pages | **[CLAIM]** |
+| [`razorpay_gap_report.md`](../gapreports/razorpay_gap_report.md) | RazorpayX, one live account | **[LIVE]** / **[DEMO]** |
+| [`clear_gap_report.md`](../gapreports/clear_gap_report.md) | Clear, adversarially verified marketing | **[VENDOR-V]** |
+| [`gap_report_mysa.md`](../gapreports/gap_report_mysa.md) | Mysa, vendor pages | **[CLAIM]** |
 
 **Two constraints carried forward from prior findings, both still binding:**
 
@@ -611,7 +611,7 @@ Ranked by value per unit of work, given everything above.
 
 **Phase 3 — blocked pending platform**
 GAP-1 through GAP-6, filed as feature requests per
-[`agentswitch_submissions.md`](agentswitch_submissions.md) §D.
+[`agentswitch_submissions.md`](../submissions/agentswitch_submissions.md) §D.
 
 ---
 

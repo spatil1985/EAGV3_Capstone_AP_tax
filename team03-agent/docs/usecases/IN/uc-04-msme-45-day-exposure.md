@@ -15,11 +15,11 @@
 
 ## 2. Statutory basis
 
-*Constants used here are tracked centrally in
-[`statutory_constants.md`](../../../playbooks/statutory_constants.md#rule-msme-45d)
-(RULE-MSME-45D) and
-[...#rate-msme-penal](../../../playbooks/statutory_constants.md#rate-msme-penal)
-(RATE-MSME-PENAL) — edit rates/thresholds there, not here.*
+*Constants used here (RULE-MSME-45D, RATE-MSME-PENAL) belong in the central
+statutory constants table,
+[`playbooks/constants.yaml`](../../../playbooks/constants.yaml). Edit rates and
+thresholds there, not here. They are not yet added: the file currently holds only
+UC-12's constants.*
 
 Two independent statutes bite on the same fact pattern — a late payment to an MSME
 supplier — and both must be reported, since neither substitutes for the other:

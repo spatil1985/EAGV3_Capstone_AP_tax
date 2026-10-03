@@ -1,9 +1,20 @@
 # Harness — how it fits together, and how to add a playbook
 
-Deterministic path of [`docs/harness_plan.md`](../docs/harness_plan.md): registry,
+Deterministic path of [`docs/planning/harness_plan.md`](../docs/planning/harness_plan.md): registry,
 policy gateway, runner, state and reports, with **UC-12 (e-way bill audit)** as the
 first live playbook. The LLM loop (plan §4.4) plugs in on top of the same gateway and
 runner later; nothing here changes when it does.
+
+**Module map** — every file's role is in
+[`docs/planning/architecture.md`](../docs/planning/architecture.md):
+
+| Package | Modules | Role |
+|---|---|---|
+| `harness/` | `__main__.py` | CLI and composition root |
+| `harness/core/` | `context`, `playbook`, `registry`, `runner` | What a run is |
+| `harness/access/` | `transport`, `gateway` | How we reach AgentSwitch, under policy |
+| `harness/tracking/` | `state`, `trace` | What a run remembers and logs |
+| `harness/output/` | `report` | Reports and escalations |
 
 ```
 py -3 -m harness routes --tenant in                     # what would run, and why not
@@ -49,7 +60,7 @@ Every gateway call → EventBus → JsonlTraceWriter, CallCounter               
 |---|---|---|
 | **Template Method** | `Playbook.run()`, `RecordRule.evaluate()` | Every use case runs the same skeleton; authors fill hooks only |
 | **Strategy** | `Rule` subclasses; `ReportRenderer` subclasses | Checks and output formats are independent, reorderable, reusable |
-| **Registry + Factory** | `registry.py`: YAML manifests, `instantiate()` | New use case = new files; the runner never imports use-case code |
+| **Registry + Factory** | `core/registry.py`: YAML manifests, `instantiate()` | New use case = new files; the runner never imports use-case code |
 | **Proxy** | `ToolGateway` | Same interface as a transport, but every call is policed and traced |
 | **Chain of Responsibility** | `gateway.Policy` chain | Refusal / write-tier / allowlist / dry-run rules added one class at a time |
 | **Repository** | `scripts/fetch.py` `Fetcher` | Paging and field quarantine in one place; no playbook sees raw MCP |
@@ -92,7 +103,7 @@ source. Read it with `ctx.constant("msme_payment_days")`, and never hardcode it.
 **3. Code** — `scripts/uc/uc04_msme.py`:
 
 ```python
-from harness.playbook import Dataset, Playbook, RecordRule
+from harness.core.playbook import Dataset, Playbook, RecordRule
 from scripts.findings import Finding
 from scripts.money import money
 
@@ -154,7 +165,7 @@ Predicates worth writing for UC-12, from its spec §9:
 
 | Check | Result |
 |---|---|
-| Live run, India, dry-run | 367 findings over 3 MCP calls: 167 `ewb_missing`, 80 `ewb_not_real`, 68 `ewb_expired_in_transit`, 52 `ewb_part_b_missing`, 0 `ewb_validity_wrong`; ₹14.18 Cr of consignments (each document counted once). The EWB counts match the independent 30 Sep verification ([`../docs/bugs_to_file_2026-09-30.md`](../docs/bugs_to_file_2026-09-30.md) N13) |
+| Live run, India, dry-run | 367 findings over 3 MCP calls: 167 `ewb_missing`, 80 `ewb_not_real`, 68 `ewb_expired_in_transit`, 52 `ewb_part_b_missing`, 0 `ewb_validity_wrong`; ₹14.18 Cr of consignments (each document counted once). The EWB counts match the independent 30 Sep verification ([`../docs/bugs_to_file_2026-09-30.md`](../docs/submissions/bugs_to_file_2026-09-30.md) N13) |
 | Second run | 0 new; no escalation attempted |
 | Replay, offline | Identical result |
 | Keystone (US) | Skipped: `tax_regime sales_use_tax not in ['gst']`, 0 MCP calls |
@@ -174,7 +185,7 @@ Predicates worth writing for UC-12, from its spec §9:
 
 The LLM loop and `LLMGateway` (§4.1, §4.4) · untrusted-data wrapping for model-facing
 results (§4.3) · event-trigger polling with watermarks (§4.7; needs the
-`updated_since` filter requested in `docs/requested_tools.md` T3.1) · an
+`updated_since` filter requested in `docs/submissions/requested_tools.md` T3.1) · an
 `AgentMemory`-backed `FindingStore` (open question Q6) · `scripts/vertical.py`
 (the vertical defaults to manufacturing and the report says so) · re-read-before-write
 for T1/T2 · the GitHub Actions cron.

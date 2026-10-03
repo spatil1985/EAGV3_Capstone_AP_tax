@@ -1,327 +1,190 @@
-# CURRENT_STATUS.md — verified against the live Suryodaya (India) instance
+# CURRENT_STATUS.md — read this first
 
-Snapshot date: **2026-09-20**, taken by logging in as `team03@theschoolofai.in` against
-`https://agentswitch.theschoolofai.in` and calling the real REST + MCP endpoints (via
-PowerShell/curl, credentials as ephemeral env vars, never written to disk). Everything
-below is what the platform actually returned, not what the brief's illustrative
-examples described — see **Corrections needed** for where those two disagree.
+**Team 03 · Seat 03 (Ledger — Payables & Tax) on AgentSwitch · status as of 2026-10-03**
 
-The ledger is live and shared with Teams 01/02, and a background job scheduler keeps
-running against it, so exact counts here will already be stale by the time you read
-this. Treat this as "shape of the data," not a frozen number to code against.
+This is the onboarding brief for a teammate, or a teammate's Claude, opening this repo
+cold. It says what the project is, where everything lives, what is true on the live
+platform today, and the rules we learned the hard way. Facts marked *(live)* were
+re-checked against both tenants on 2026-10-03. Earlier verification logs
+(20–22 Sep) are in git history: `git log -p -- team03-agent/CURRENT_STATUS.md`.
 
-## 1. Identity & access (confirmed via `/api/auth/login` + `/api/auth/me`)
+---
 
-- Account: `team03@theschoolofai.in`, display name "Team 03", `id`
-  `a9851867-7424-4578-b2cf-66872da1312d`.
-- `role`: `finance_user`. `roles`: `finance_user`, `user`, `agent_user`,
-  `sales_viewer`. `allowed_apps`: `accounting`, `agent`, `crm`.
-- `company_id` (Suryodaya Precision Works Pvt. Ltd.): `5cbe5a55-af74-4363-a436-f5350593114c`.
-- **We are not scoped to a narrow "AP & Tax only" role.** `sales_viewer` plus the
-  `crm` app grant means this account can also read CRM entities (Lead, Deal,
-  Quotation, SalesOrder, Pipeline, ...) that have nothing to do with the Seat 03
-  brief. The 403 boundary the brief describes is enforced per-entity (see §4), not
-  by hiding everything outside "our" domain.
+## 0. For Claude on a new machine — ground rules
 
-## 2. India locale (`GET /api/accounting/locale`)
+1. **Read in this order:** this file → [`../README.md`](../README.md) (mission and
+   grading) → [`docs/README.md`](docs/README.md) (doc map) →
+   [`docs/planning/architecture.md`](docs/planning/architecture.md) (harness as built)
+   → the use case you're working on in [`docs/usecases/`](docs/usecases/README.md).
+2. **The ledger is live and shared** with Teams 01 and 02. Never write to it unless the
+   user explicitly asks. The harness defaults to **dry-run**, and T3 writes (ledger
+   mutations) are refused in code.
+3. **Never commit credentials.** They live in `.env` and
+   `postman/*.postman_environment.json`, both gitignored. Never echo passwords.
+4. **Graded tests must be hand-written by a human.** LLM-generated tests score 0. Do
+   not add files under `tests/` on your own initiative; propose predicates instead.
+5. **Bugs score, features don't** (100 points per verified bug; feature requests went
+   into one unscheduled card). Before filing anything, check the **class bug board**
+   (§4.3) as well as `bug-report/mine` — they disagree (see F18 in §4.3).
+6. **Verify before claiming.** Several "bugs" we nearly filed turned out to be by design
+   or seed data (§6). Re-check live data and the platform's own oracle first.
+
+---
+
+## 1. The project in one paragraph
+
+Build an agent that answers, live and against a real shared ledger, *"What is our tax
+liability this period, what is unclaimed, and is any vendor being paid twice?"* for
+two companies in two jurisdictions, branching only on `GET /api/accounting/locale`,
+never on company name. It uses a hand-rolled loop with no agent frameworks (capstone
+rule). Score = 10 × hand-written tests + 100 × verified platform bugs.
+
+## 2. Setup on a new machine
 
 ```
-country: IN, accounting_standard: ind_as ("Ind AS / Schedule III")
-tax_regime: gst, base_currency: INR, fiscal_year_start_month: april
-gst_filing_frequency: monthly, coa_template: india_standard (91 accounts)
-fiscal_year (current): FY 2026-27, 2026-04-01 to 2027-03-31
-ledger: gl_entry_count=11966, account_count=132, is_empty=false
-feature flags: gst_returns=true, gst_ims=true, eway_bill=true, msme_45_day=true,
-               tds_tcs=true, einvoicing=false,
-               sales_tax_jurisdictions=false, sales_tax_nexus=false (US-only features, correctly off)
+cd team03-agent
+cp .env.example .env            # fill AGENTSWITCH_* (India) and US_AGENTSWITCH_* (US)
+py -3 -m pip install -r requirements.txt     # requests, pytest, pyyaml
+py -3 -m pytest -q                            # expect 10 passed, 5 skipped (live tests skip without creds)
+py -3 -m harness routes --tenant in           # needs AGENTSWITCH_* in the environment
+py -3 -m harness run --tenant in --playbook uc-12        # dry-run; writes runs/<run_id>/
 ```
 
-The response also carries a **`not_yet_supported` list that the platform documents
-about itself**, each with an internal ticket-style id. This is directly useful for
-both the Week 1 gap report and Week 4 bug hunting — **don't spend bug-bounty effort
-rediscovering these; they're already known**:
+On this Windows machine Python is `py -3` (3.14); `python` is not on PATH. Postman
+users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in copy of
+`AgentSwitch.postman_environment.example.json` (see `postman/README.md`).
 
-| Key | Status | Ticket |
-|---|---|---|
-| `period_close` | Partial — closing entries work, no adjusting-entry checklist / soft-close | — |
-| `depreciation_posting` | Asset activation computes depreciation but posts **zero GL rows** (account mappings unset) | — |
-| `inventory_costing` | `default_valuation_method` setting exists, no code reads it; LIFO not blocked despite Ind AS 2 prohibiting it | — |
-| `tds_returns` | TDS/TCS now hit `grand_total` and post their own GL legs; no 26Q/27Q filing, no challan tracking | GST-18 |
-| `einvoicing` | **Not implemented at all** despite a full settings page; no IRN, no signed QR, invoices above ₹5 Cr turnover are legally invalid as a result | GST-28 |
-| `eway_bill_generation` | Partial — records link to documents, validity from distance; no NIC portal integration, no auto-generate at ₹50k threshold | GST-29 |
-| `gst_amendments` | No amendment concept; a back-dated invoice into an already-filed period is accepted silently | GST-32 |
-| `gstr9` | Annual return endpoint returns **HTTP 501** | GST-39 |
-| `consolidation` | No multi-entity consolidation | — |
+## 3. Repo map
 
-(The US side has its own equivalent list — `asc_606`, `us_payroll`, `tax_rate_service`
-[Avalara/TaxJar wired but never called against a live sandbox], `asc_830` [FX
-remeasurement absent], etc. — tagged US-12/US-28/US-34/etc. Full text is in the raw
-locale response if needed later for the Keystone side of the gap report.)
-
-## 3. Real entity model (from `/api/schemas`, 425 entities total across the whole platform)
-
-`/api/schemas` returns the **entire platform's** data model (CRM, HR/payroll, esign,
-contracts, storefront, design review, everything) unfiltered by seat — it is not a
-per-seat view. The per-seat view is `tools/list` over MCP (§4). Entities actually
-relevant to Seat 03, with real field names:
-
-| Entity | Domain | Role | Notes |
-|---|---|---|---|
-| `Invoice` | accounting | AR **and** AP | Single entity for both directions via `direction: "receivable" \| "payable"`. Carries `taxes[]`, `tds_amount`, `itc_eligibility`, `approval_status`. |
-| `Bill` | accounting | AP (vendor bills) | Separate from `Invoice(direction=payable)` — see open question below. Has `vendor_id`, `ims_status` (`pending/accept/reject` — GSTR-2B Invoice Management System), `itc_eligibility`, `use_tax_accrued` (US). |
-| `Party` | core | Customers **and** vendors | No separate `Vendor` entity. Filter with `contact_type: "vendor"` (flat field) — confirmed against a real record (Bosch Rexroth India, `contact_type: "vendor"`, `roles: [{role: "supplier", active: true}]`, `tags: [{tag: "vendor"}]`). MSME fields (`is_msme`, `msme_type`, `msme_no`) live here, not on the bill. |
-| `Tax` / `TaxGroup` / `TaxJurisdiction` / `TaxExemption` / `TaxNexus` | accounting | Tax config, not a per-document ledger | No `TaxLine` entity exists anywhere in the schema. `Tax.tax_type` enum: `IGST/CGST/SGST/UTGST/CESS/TDS/TCS/SALES_TAX/USE_TAX/EXCISE/WITHHOLDING_1099/other`. |
-| `GSTReturn` | accounting | Period-level GST filing | Already carries **computed** `taxable_amount`, `igst_amount`, `cgst_amount`, `sgst_amount`, `cess_amount`, `net_tax_payable` per period/return-type (GSTR-1/3B/2A/2B/9). 5 exist today for Suryodaya. |
-| `JournalEntry` / `GLEntry` | accounting | Ledger | `finance_user` (our role) has **read-only** access to both — cannot post journal entries directly. |
-| `Payment` | accounting | Read-only summary | `finance_user` gets `read` only; actual payment writes go through `PaymentMade` / `PaymentReceived`. |
-| `SalarySlip`, `Contract`, `EsignDocument` | payroll / contracts / esign | **Prohibited per SKILL.md** | Confirmed absent from our `tools/list` entirely (see §4) — the boundary is enforced by not exposing the tool, not just a runtime 403. |
-
-`status` fields on `Invoice`/`Bill`/`PaymentMade` are `type: "state"` bound to a named
-flow (`InvoiceFlow`, `BillFlow`, `PaymentMadeFlow`) — **not a freeform string**. There
-is no `hold_payment` field anywhere on `Invoice` or `Bill`.
-
-## 4. Real MCP tool inventory (`tools/list`, protocol `2025-11-25`)
-
-**436 tools** visible to this account (confirmed via the actual handshake:
-`initialize` → `notifications/initialized` → `tools/list`). `initialize.result`
-includes a server-provided instruction string: *"Tools are scoped to the
-authenticated caller: you see only what your roles, app entitlements and row scope
-permit, and every call is executed through the same permission-checked path the REST
-API uses."*
-
-Relevant groups for Seat 03:
-
-- **Core AP/Tax CRUD**: `Invoice.{list,get,create,update}`, `Bill.{list,get,create,update}`,
-  `Party.{list,get,create,update}`, `Tax.{list,get}`, `TaxGroup.{list,get}`,
-  `TaxJurisdiction.{list,get}`, `GSTReturn.{list,get}` (no create/update/delete for
-  `finance_user`), `JournalEntry.{list,get}`, `GLEntry.{list,get}`, `Payment.{list,get}`,
-  `PaymentMade.{list,get,create,update}`, `PaymentReceived.{list,get,create,update}`,
-  `CreditNote.{list,get,create,update}`, `VendorCredit.{list,get,create,update}`.
-- **Named workflow/state-transition tools** (not plain field updates):
-  `Bill.open`, `Bill.submit`, `Bill.record_partial_payment`,
-  `Bill.record_full_payment.{open,partially_paid,overdue}.paid`, `Bill.approval.submit`,
-  `Invoice.send`, `Invoice.record_partial_payment`,
-  `Invoice.record_full_payment.{sent,partially_paid,overdue}.paid`,
-  `Invoice.cancel.draft.cancelled`, `Invoice.approval.submit`,
-  `PaymentMade.mark_paid`, `PaymentMade.cancel`, `VendorCredit.{open,close}`,
-  `PurchaseOrder.make.Bill`.
-- **Escalation / audit-trail tools that actually exist**: `AgentEscalation.{list,get,create,update}`,
-  `AgentMessage.{list,get}` (**no `.create`**), `AgentTodo.{list,get,create,update}`,
-  `Notification.{list,get,create,update}`.
-- **Agent job/session framework** (own domain, not mentioned in the brief's SKILL.md
-  example): `AgentJob.{list,get}`, `AgentJobStep.{list,get}`,
-  `AgentSession.{list,get,create,update,pause,resume,close...}`,
-  `AgentTask.{list,get,create,update,pause,resume,complete,fail,run_now}`,
-  `AgentRunbook(Run).{list,get}`, `AgentMemory.{list,get,create,update}`,
-  `AgentSkill.{list,get}`, `AgentPersona.{list,get,daily_limits}`,
-  `endpoint.job_ledger.{forensics,verify,replay,retention.preview}`.
-- **Bug reporting**: `BugReport.{list,get,create}` — see §5 for the real schema.
-- **Confirmed absent** (matches SKILL.md's prohibited list): no `SalarySlip.*`, no
-  `Contract.*` entity tools, no `EsignDocument.*` anywhere in the 436.
-- Also present but **out of Seat 03's stated scope**: full CRM (`Lead`, `Deal`,
-  `Quotation`, `SalesOrder`, `Pipeline`, `AccountPlan`, ...), storefront endpoints,
-  email/calendar, design review, contracts-domain endpoints
-  (`endpoint.contracts.attribute_spend`) — available to this account because of the
-  `sales_viewer`/`crm` grant in §1, not because Seat 03 is supposed to use them.
-
-## 5. `BugReport.create` — real schema (fixes the guessed template in `postman/`)
-
-```json
-{
-  "required": ["description"],
-  "properties": {
-    "description": "string",
-    "company_id": "string",
-    "page": "string",
-    "agent_seat": "string",
-    "job_id": "string",
-    "app_version": "string",
-    "reporter": "string",
-    "status": "new | triaged | fixed | wont_fix (default new)",
-    "resolution_note": "string",
-    "delivery": "filed | local (default local)",
-    "issue_number": "number",
-    "issue_url": "string"
-  }
-}
-```
-
-Only `description` is required — much simpler than the guessed
-`title/job_id/entity_ids/expected/actual/steps` shape currently in
-`postman/AgentSwitch.postman_collection.json`. **Action item**: update that template
-request and put the reproduction detail (steps, expected vs. actual, entity ids) into
-`description` itself, or as `page`/`resolution_note` free text, since there's no
-structured field for them.
-
-## 6. Live data volumes today (Suryodaya, will drift — background jobs are running)
-
-| Entity/filter | Count |
+| Path | What |
 |---|---|
-| `Invoice(direction=receivable)` | 315 |
-| `Invoice(direction=payable)` | 165 |
-| `Bill` | 101 |
-| `Party` (all) | 194 |
-| `GSTReturn` | 5 |
-| `Tax` | 100 |
-| `JournalEntry` | 1,119 |
-| `PaymentMade` | 134 |
-| `PaymentReceived` | 215 |
-| `GLEntry` | 11,966 (matches `locale.ledger.gl_entry_count` exactly — good cross-check) |
+| `harness/` | The agent harness: `core/` (context, playbook, registry, runner), `access/` (transport, policy gateway), `tracking/` (state, trace), `output/` (reports), `__main__.py` (CLI). Guide: [`harness/README.md`](harness/README.md) |
+| `scripts/` | Client, `fetch.py` (paging + quarantine), `findings.py` (output contract), `money.py`, `uc/` (one module per use case; UC-12 so far). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
+| `playbooks/` | Use-case manifests (`uc-12-eway-bill.md`) and `constants.yaml`. `duplicate_audit.md` / `tax_audit.md` are legacy SOPs (no manifest), to be replaced by UC-05 and period-liability playbooks |
+| `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (owners), `harness_plan.md` (design), `architecture.md` (as built) |
+| `docs/usecases/` | `IN/` UC-01…22 and `US/` US-01…10, each with live evidence |
+| `docs/submissions/` | Bugs and feature requests: `agentswitch_submissions.md` (master, tallied with the board), `submission_tracker.md`, `requested_tools.md`, `bugs_to_file_2026-09-30.md` |
+| `docs/gapreports/` | Competitor analyses (RazorpayX, Clear, Mysa, overall) |
+| `docs/platform/` | MCP tool inventories (IN/US), UI screen inventory, screen-to-API mapping |
+| `SKILL.md`, `DESIGN.md` | Agent charter (loaded by `run_agent.py`); design notes. `SKILL.md` still needs the corrections in §8 |
+| `runs/` | Gitignored run output: reports, traces, anomalies, recordings, dedup state |
 
-The brief's "415 records" figure doesn't match any single count or obvious subtotal
-above — most likely stale from when the brief was written, or referring to a
-different snapshot/subset. Don't treat 415 as a target to reconcile against.
+## 4. Where things stand (2026-10-03)
 
-Also notable: `AgentJob` has **985** records already, many with
-`trigger_kind: "schedule"` / `trigger_entity: "AgentTask"` and
-`status: "failed"`, `error: "agent_authority_unresolved"`. This looks like a
-platform-side scheduled-agent-task runner that's failing to resolve some kind of
-identity/authority binding — worth a closer look as a possible bug-bounty candidate
-(not yet investigated further; not one of the documented `not_yet_supported` gaps in
-§2).
+### 4.1 Use cases
+- **India:** 22 specs (UC-01…22), owners per `assignment.md` (A: Sudip, B: Geetha,
+  C: Sandip), each with a §11 of live evidence.
+- **US:** 10 specs (US-01…10), with a full IN→US mapping in
+  [`docs/usecases/US/README.md`](docs/usecases/US/README.md). Highlights: our liability
+  recompute matches the platform report to the cent ($226,488.27 YTD); no use tax is
+  accrued on any purchase; 36 Ohio invoices charge Stark County tax to customers
+  outside the county (seed data).
 
-## 7. Corrections needed (SKILL.md / playbooks / postman — not yet applied)
+### 4.2 Harness
+- **Built and verified live:** the deterministic path (registry → gateway → runner →
+  state → reports) and **one live playbook, UC-12** (e-way bill audit). On India
+  (2026-09-30): 367 findings from 3 MCP calls; a second run reports 0 new; replay is
+  identical; on US it is skipped by locale with 0 MCP calls.
+- **Not built:** the LLM loop (Geetha's gateway), event polling, the `AgentMemory`
+  store, vertical detection, cron, and every playbook except UC-12. Next playbooks
+  per the plan: UC-05 (duplicates), UC-01 (Rule 37), period liability IN + US.
 
-Everything below was written against the brief's **illustrative example**, which the
-instructor explicitly flagged as simplified ("Section 8 works one example through for
-you"). Now that we have the real schema, these need fixing:
+### 4.3 Bug bounty — tallied with the class bug board
+The board is a Claude artifact (`claude.ai/artifact/6LvLawFFUXGoRHUQKbPg9h`). Its rows
+are embedded in the page HTML, so it can be parsed. **Team 3 has 21 board rows:**
+8 Live on server · 5 Fixed (ships in next release) · 5 In review · 3 To do. The full
+mapping, with our ids and board ids, is in
+[`docs/submissions/agentswitch_submissions.md` §A](docs/submissions/agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03).
 
-1. **`SKILL.md`** lists allowed entities as `Invoice, Payment, TaxLine, Vendor,
-   JournalEntry`. Real equivalents: `Invoice` (both directions) + `Bill` (AP-specific),
-   `Party` (filter `contact_type="vendor"`) instead of `Vendor`, `Tax`/`TaxGroup`/
-   `TaxJurisdiction`/`GSTReturn` instead of `TaxLine`, and `JournalEntry`/`Payment` are
-   **read-only** for our `finance_user` role, not read/write.
-2. **`playbooks/duplicate_audit.md`** step 4 calls
-   `Invoice.update(id=..., status="under_review", hold_payment=True)`. Neither
-   `hold_payment` nor a freeform `status="under_review"` exists — `status` is a
-   flow-driven state. The real mechanism for "flag and hold" is almost certainly
-   `AgentEscalation.create` (exists, matches "escalate to Admin or Human operator" in
-   SKILL.md) plus `Invoice.approval.submit` / `Bill.approval.submit` to move
-   `approval_status` to `pending_approval` — needs confirming against the tool's
-   actual `inputSchema` before relying on it.
-3. **`playbooks/duplicate_audit.md`** step 4 also calls `AgentMessage.create`, which
-   does not exist (`AgentMessage` only has `.list`/`.get`). Use `AgentEscalation.create`,
-   `AgentTodo.create`, or `Notification.create` instead.
-2. **`postman/AgentSwitch.postman_collection.json`**: `Vendor.list` and `TaxLine.list`
-   example requests use tool names that don't exist. `Invoice.update (hold suspected
-   duplicate)` uses the same nonexistent `hold_payment` field. The `File Bug Report`
-   template's body shape doesn't match the real `BugReport.create` schema in §5.
-4. **`scripts/invoice_matcher.py` / `scripts/tax_math.py`**: logic is still sound in
-   the abstract (group-by-vendor exact/suspicious matching; output-tax minus claimed-ITC),
-   but the field names they assume (`vendor_id` on the invoice itself, `type` values
-   `sales_invoice`/`purchase_bill`, `is_itc_eligible`/`is_claimed` booleans) don't match
-   the real fields (`Bill.vendor_id` exists, but `Invoice` uses `party_id` + `direction`;
-   real eligibility is `itc_eligibility: input/input_services/capital_goods/ineligible`,
-   and there's no `is_claimed` boolean — claim status is closer to `Bill.ims_status`
-   `accept/reject/pending`). These will need reworking once we decide the exact
-   query/aggregation approach against real data.
+**Do next:**
+1. **File N14–N16** (texts in §C.1 of that file): the US
+   `indirect-tax/determinations` endpoint returns HTTP 500 for every document; exempt
+   rows labelled "state" on a county jurisdiction; the liability report drops
+   `liability_account_id`.
+2. **Answer the open questions on N414–N418** (§A.1). Triage asks us for
+   "authoritative records and finance approval" to correct historical documents. Honest
+   answer: it's seed data and we have none; suggest voiding the documents instead.
+3. **B5** (journal voucher renders ₹0.00) still needs reproduction before filing.
 
-None of the above has been changed yet — this file is a record of what's true, not a
-diff. Next step is deciding how to re-derive SKILL.md/playbooks/scripts from this
-real model (separate task).
+**Lesson:** F18 (Rule 42/43 apportionment) is missing from `bug-report/mine` and its
+id returns 404, **but it is on the board as N273**. We nearly re-filed a duplicate.
+Always check the board.
 
-### 7a. Tax data on this instance is not trustworthy — do not drive tax logic off it
+## 5. Platform facts *(live, 2026-10-03)*
 
-> **UPDATE 2026-09-22 — partially fixed upstream. The rule below still stands.**
-> Two of the three defects were fixed and shipped (§9). Re-verified against live
-> data: `TaxJurisdiction` is now clean, and `Tax` master names and the `is_group`
-> flag are corrected. **But `group_taxes[].tax_type` and `CreditNote.taxes[]` are
-> still corrupt**, so item-level GST fields remain the only safe source. See §9 for
-> the field-by-field post-fix verification.
+| | India | US |
+|---|---|---|
+| Company | Suryodaya Precision Works Pvt. Ltd. `5cbe5a55-af74-4363-a436-f5350593114c` | Keystone Precision Works LLC `c1e47d8d-b849-4187-9a32-4103d3dece4a` |
+| Base URL | `https://agentswitch.theschoolofai.in` | `https://class.agentswitch.theschoolofai.in` |
+| Locale | `gst`, Ind AS, INR, FY Apr–Mar (FY 2026-27) | `sales_use_tax`, US GAAP, USD, FY = calendar 2026 |
+| Features on | gst_returns, gst_ims, eway_bill, msme_45_day, tds_tcs | sales_tax_jurisdictions, sales_tax_nexus, exemption_certificates, form_1099, lifo_permitted |
+| MCP tools | 508 | 500 |
+| Records | 281 Bill · 487 Invoice · 230 Party · 176 ApprovalRequest · 100 EWayBill · 25 CreditNote · 1,142 JournalEntry · 12,026 GL entries | 101 Bill · 158 Invoice · 120 Party · 123 ApprovalRequest · 0 CreditNote · 296 JournalEntry · 2,775 GL entries |
 
-Verified 2026-09-21 while investigating an odd Tax Summary report. Three defects
-filed (§9). The practical rule for `scripts/tax_math.py`:
+- **Identity (both):** `team03@theschoolofai.in`, role `finance_user`, roles
+  `finance_user, user, agent_user, sales_viewer`, apps
+  `accounting, agent, crm, approvals` (F6 granted).
+- **Read-only for us:** `JournalEntry`, `GLEntry`, `Payment`. Nothing can be *posted*.
+- **Entity model:** AP is both `Bill` and `Invoice(direction=payable)` (why both exist
+  is open). Vendors and customers are `Party` (no `Vendor` entity). There is no
+  `TaxLine` entity. Document `status` is a flow state, and there is no `hold_payment`
+  field. MSME fields live on `Party`. US 1099 fields (`tin`, `w9_on_file`,
+  `form_1099_box`, `backup_withholding`) are also on `Party`.
+- **Prohibited (absent from `tools/list`):** SalarySlip, Contract, EsignDocument. CRM is
+  readable through `sales_viewer`, but the harness doesn't expose it.
 
-**Use the item-level GST fields (`items[].cgst_amount`, `sgst_amount`, `igst_amount`,
-`cess_amount`) as the source of truth. Do not use document-level `taxes[]`, the
-`Tax`/`TaxJurisdiction` master, or `group_taxes`.** The item-level fields are the
-only coherent source — they're what produces the correct `SGST @ 9%` / `CGST @ 9%` /
-`IGST @ 18%` rows in the UI's own Tax Summary.
+## 6. Data-trust rules — what we learned
 
-Why the others can't be trusted here:
+| Rule | Why |
+|---|---|
+| **Tax source is per document.** On Bill/Invoice use document-level `taxes[]` where it reconciles to `total_tax`; else item-level lines that pass validity; else emit `data_quality` | `taxes[]` reconciles on 401/401 manual invoices and 63/64 bills, where lines carry no tax. Recurring-generated invoices are the reverse (N10/N415). The old rule "item-level only" read real GST as ₹0 |
+| **`CreditNote.taxes[]` — never** | N128 (fixed going forward; historical rows remain) |
+| **Recompute, don't trust:** `Bill.tds_amount`, `ApprovalRequest.is_overdue`, `Bill.match_status` | N7, N1/N8 (now fixed in R7), N2 (fixed, next release). `scripts/fetch.py` quarantines these at fetch time |
+| **Expect seed data** | Clusters like 213 bills dated 2026-09, dozens created within seconds on 2026-09-12 17:19, one seeding user (`e30b0c70…`) creating US invoices. Before calling anything a platform bug, check whether the platform's own engine produces it (`POST /api/accounting/tax/compute`) |
+| **Use the platform's oracles** | `tax/compute` (arithmetic), `endpoint.approvals.check_sla {"dry_run":true}`, `endpoint.accounting.bill_match`, US `GET /api/accounting/reports/sales-tax-liability`, US `GET /api/cpa/reports/1099-summary` |
 
-- **Document-level `taxes[].tax_type` is free text and holds product names.** 0 of 68
-  populated values on Invoice/CreditNote match the `Tax.tax_type` enum; every one is a
-  product name ("V-Block Pair 7363"). The rows are also arithmetically incoherent —
-  `rate` doesn't relate to `amount` (a `rate=0` row carrying ₹1,381.05 of tax), and in
-  11 of 25 credit notes the `taxes[]` row is excluded from the document's own
-  `total_tax`.
-- **`Tax`/`TaxJurisdiction` master is US data on the India company.** All 100
-  `TaxJurisdiction` rows have `country="US"` with county/special-district levels and
-  nexus flags, even though the locale reports `sales_tax_jurisdictions=false` and
-  `sales_tax_nexus=false` for India. One row maps its liability account to
-  "Unsecured Loans".
-- **`group_taxes` contradicts its own parent.** 67 of 100 `Tax` rows have
-  `is_group=false` yet carry `group_taxes` children, and 0 of 88 child `tax_type`
-  values are valid enum members — so composite-tax expansion (GST 18% → CGST 9% +
-  SGST 9%) can't be driven off this master either.
+## 7. Working with the API — conventions and gotchas
 
-Root cause of the naming garbage is the data seeder, not application logic: the
-product number tracks the record index exactly (CN-2026-000**23** → "V-Block Pair
-**7363**", CN-000**22** → **7362**, CN-000**11** → **7351**, diff=0 across all
-sampled rows). The *product* defects are the report consuming unvalidated free text,
-the missing `is_group` invariant, and the locale/jurisdiction contradiction.
+- **MCP:** `POST /api/mcp`, JSON-RPC 2.0. Do the handshake once (`initialize` →
+  `notifications/initialized`). The `tools/call` result is in
+  `result.content[0].text` (a JSON string); errors arrive as a JSON-RPC `error`
+  (`-32602` for bad arguments) or as `result.isError`.
+- **List filters are flat, single-valued and strictly typed:**
+  `{"itc_eligibility":"input"}` works, an array does not; booleans must be `true`, not
+  `1`. `limit` max 1000. There are **no range or `updated_since` filters**, so do
+  ranges client-side (requested as T3.1).
+- **REST-only capabilities** (not MCP tools yet): tax compute, AP/AR ageing, GSTR-2B
+  reconcile, indirect-tax ledger and reconcile, US liability and 1099 reports. Full
+  list: [`docs/submissions/requested_tools.md`](docs/submissions/requested_tools.md).
+- **`BugReport.create`:** only `description` is required (plus optional `page`,
+  `agent_seat`, `job_id`). Put steps, expected vs actual and entity ids in the
+  description text. Our reports go in via the India account.
+- **Platform-documented gaps are not bugs.** The locale's `not_yet_supported` lists
+  them. India: e-invoicing (GST-28), e-way generation (GST-29), amendments (GST-32),
+  GSTR-9 501 (GST-39), TDS returns (GST-18), depreciation posting, inventory costing,
+  consolidation. US: ASC 606/842/830, US payroll filings, tax rate service (rates are
+  manual), 1099 e-filing, cash basis.
+- **Windows tooling:** print with UTF-8 (₹ breaks cp1252); Git Bash heredocs strip
+  regex backslashes, so write scripts to files; `rm -rf "$VAR"/*` is blocked by a
+  safety check, so use literal paths.
 
-## 9. Bug reports filed
+## 8. Open questions and known follow-ups
 
-Filed 2026-09-21 via `POST /api/bug-report` (all returned `delivery: "local"`, i.e.
-saved in-platform for the AgentSwitch team; no external GitHub issue was opened).
-Track with `GET /api/bug-report/mine` or `BugReport.list`.
-
-| id | Board | Subject | Board status |
-|---|---|---|---|
-| `2a655790-2b05-4528-ade1-cff6d9c5ce15` | **N126** | All 100 `TaxJurisdiction` rows on the India company are US sales-tax data, contradicting the locale's own `sales_tax_jurisdictions=false` / `sales_tax_nexus=false` flags | ✅ **Live on server** (`c3986d40e`) |
-| `5c8b16e3-3761-4fa3-b482-9d486c977411` | **N127** | 67 of 100 `Tax` rows have `is_group=false` while carrying `group_taxes` children; child `tax_type` unvalidated (0 of 88 valid) while the parent enforces the enum | ✅ **Live on server** (`92682d0a3`, `4c812eb0f`) |
-| `84955e11-7f36-4fc5-bb85-7bba1d7a3257` | **N127** | Tax Summary renders product names as tax heads and folds non-tax amounts into the OUTPUT TAX total | ✅ merged into N127 |
-| *(filed by hand)* | **N128** | Documents can store tax lines the tax calculator would never produce | 🔴 **Open** (Medium) |
-| *(filed by hand)* | **N173** | Feature requests F1–F5 bundled | ⚪ Low · Carbon upgrade · not scheduled |
-
-None appeared in the platform's self-documented `not_yet_supported` list (§2), so
-they were genuinely new. None carries a `job_id` — all were found by direct REST/MCP
-inspection rather than an agent run.
-
-### 9a. Post-fix verification (re-run against live data 2026-09-22)
-
-The board says "Live on server," but N126's note reads *"existing records are
-corrected when the next release goes out"* and N127's says the sweep was rehearsed
-*"on copies of the live data."* Neither phrasing guarantees our instance is clean,
-so every claim was re-checked:
-
-| Check | Before | Now | Verdict |
-|---|---|---|---|
-| `TaxJurisdiction` rows on India co. | 100, all `country="US"` | **total = 0** | ✅ Fixed — bogus US jurisdictions removed entirely, correct for a GST regime |
-| `Tax.tax_name` | `"Scriber 5169"` (tool names) | `"Tax — Machining"`, `"Tax — Inspection"` | ✅ Fixed |
-| `Tax.is_group` vs `group_taxes` children | 67 of 100 contradictory | **0 of 100** | ✅ Fixed |
-| **`group_taxes[].tax_type`** | 0 of 88 valid enum values | **still 0 of 88** — `"Angle Plate 5091"`, `"Punch Set 5158"`, `"Scriber 5162"` | ❌ **NOT fixed** |
-| `CreditNote.taxes[].tax_type` | product names | **still 26 product names** | ❌ Not fixed (consistent with N128 Open) |
-| `CreditNote.taxes[]` rate=0 carrying tax | present | **still 5 rows** | ❌ Not fixed (N128 Open) |
-
-**The N127 fix is incomplete.** The sweep corrected *parent* `Tax` records — names
-and the `is_group` flag — but the nested `group_taxes[].tax_type` child field still
-holds tool names on every populated row. The fix note claimed "8,535 tool-named
-values across 85 fields, all corrected"; this nested child field was evidently not
-among those 85, or the correction did not descend into child tables.
-
-This is precisely the parent-validated / child-unvalidated asymmetry the original
-report called out, and it survived the fix. **Worth reporting back as a follow-up
-(tracked as B6 in `docs/agentswitch_submissions.md`)** — reporting that a shipped
-fix is incomplete is cheap to verify and demonstrates the verification discipline
-the bug bar asks for.
-
-**Net effect on our agent:** the §7a rule is unchanged. Compute tax from item-level
-`items[].cgst_amount` / `sgst_amount` / `igst_amount` only. `TaxJurisdiction` is now
-clean but empty, `Tax` master is usable for names/flags but not for
-`group_taxes[].tax_type`, and `CreditNote.taxes[]` remains unusable.
-
-## 8. Open questions for next session
-
-- Why do both `Invoice(direction=payable)` (165 records) and `Bill` (101 records)
-  exist as separate AP-document types? Is one legacy, or do they represent different
-  AP flows (e.g., `Bill` = vendor-submitted, `Invoice(payable)` = something else)?
-  Need a few real samples compared side by side.
-- What's the intended way our agent's run ties to a gradable `job_id`
-  (`TestDuplicatePaymentGoal.check(self, db, company_id, job_id)` takes one) — do we
-  create an `AgentSession`/`AgentTask` ourselves, or does the grading harness supply
-  the `job_id` externally? `AgentJob` itself has no `.create` tool for us.
-- Is the `agent_authority_unresolved` failure pattern on scheduled `AgentJob`s (§6) a
-  platform bug worth filing, or expected behavior for jobs not addressed to our seat?
+- **India now has 100 `TaxNexus` rows** although its locale says `sales_tax_nexus=false`.
+  This is the same shape as B1/N126 (US data on the India company). Verify the content
+  before filing.
+- **India Bill count is still rising:** 254 (30 Sep) → 281 (3 Oct). Check whether the
+  recurring catch-up (N220, "live in R7") is still generating.
+- **AgentJob:** all 1,000 sampled jobs on India have failed: 773 with
+  `agent_authority_unresolved`, 171 with "Gemini rejected the request (HTTP 400)".
+  Possibly a bug, possibly expected for jobs not addressed to our seat. Unfiled.
+- Why do both `Bill` and `Invoice(direction=payable)` exist? Which is the AP source of
+  truth?
+- How does a run get a gradable `job_id` (create an `AgentSession`, or does the grader
+  supply one)?
+- **`SKILL.md` and the legacy playbooks are still on the brief's illustrative model.**
+  They name `TaxLine`, `Vendor`, `Invoice.update(hold_payment)` and
+  `AgentMessage.create`, none of which exist; Journal/Payment should be read-only.
+  Fix with the UC-05 and period-liability playbooks (harness_plan.md §9).
+- `postman/` bug-report template body does not match the real `BugReport.create`
+  schema (§7).

@@ -230,7 +230,7 @@ notification (per `spec.md` §8's disclaimer) before being relied on.
   confidence) from `"playbook_rate_on_taxable_value"` (estimated — lower
   confidence, must be labelled as such per §5 step 6). This use case's finding is
   conceptually a "liability owed" finding like UC-01's reversal, but is **not**
-  wired to the shared reversal row schema ([UC-01 §7](uc-01-rule-37-itc-reversal.md#7-output-contract-the-shared-reversal-row-schema)):
+  wired to the shared reversal row schema ([UC-01 §7](uc-01-rule-37-itc-reversal.md#7-output-contract--the-shared-reversal-row-schema)):
   that schema is for "credit that must be given back" (ITC reversal); this is
   "liability that was never assessed in the first place" — a different finding
   shape (no `interest_amount` concept the same way, since RCM interest only starts

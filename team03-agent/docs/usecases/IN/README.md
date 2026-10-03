@@ -2,8 +2,8 @@
 
 **Team 03 · Seat 03 Payables & Tax · live evidence pulled 2026-09-28**
 
-One file per use case from [`../spec.md`](../../spec.md), written to the ten-section
-template in [`../assignment.md`](../../assignment.md) §3, with [`uc-01`](uc-01-rule-37-itc-reversal.md)
+One file per use case from [`../spec.md`](../../planning/spec.md), written to the ten-section
+template in [`../assignment.md`](../../planning/assignment.md) §3, with [`uc-01`](uc-01-rule-37-itc-reversal.md)
 as the reference. Each file adds **§11 Live evidence**: the actual MCP/REST calls made
 against the live instance, trimmed real responses, and what they prove.
 
@@ -15,9 +15,10 @@ receivable) · 195 Party · 134 PaymentMade · 215 PaymentReceived · 172 Approv
 RetainerInvoice · 100 RecurringBill · 232 PurchaseOrder · 8 TaxExemption. MCP exposes
 **494 tools** to this account.
 
-**Every call in these specs is reproducible from Postman:**
-[`../../postman/AgentSwitch-UseCases.postman_collection.json`](../../../postman/AgentSwitch-UseCases.postman_collection.json),
-one folder per use case. Setup is in [`../../postman/README.md`](../../../postman/README.md).
+**Reproducing the calls.** Each spec's §11 gives the exact MCP/REST call and its
+arguments. The per-use-case Postman collection was planned but not built. Use the
+generic collection's `tools/call` request in
+[`postman/`](../../../postman/README.md), with the tool name and arguments from §11.
 
 ---
 
@@ -55,7 +56,7 @@ changed verdict is explained in that file's §11.
 
 ## Shared rules — every spec applies these
 
-Rules 1–5 are carried from [`../assignment.md`](../../assignment.md) §8. **Rule 0 is new,
+Rules 1–5 are carried from [`../assignment.md`](../../planning/assignment.md) §8. **Rule 0 is new,
 forced by the 2026-09-28 data, and overrides the old wording of Rule 1.**
 
 > **Correction 2026-09-30 — pick the tax source per document, not per rule.** The
@@ -75,7 +76,7 @@ forced by the 2026-09-28 data, and overrides the old wording of Rule 1.**
 >
 > Recurring-generated invoices (69) are the reverse case: `items[]` sums to
 > `total_tax`, but the lines are impossible and `taxes[]` has blank types. They fall to
-> "none" (see [`../bugs_to_file_2026-09-30.md`](../../bugs_to_file_2026-09-30.md) N10).
+> "none" (see [`../bugs_to_file_2026-09-30.md`](../../submissions/bugs_to_file_2026-09-30.md) N10).
 > Rule 1 below is superseded for Bill and Invoice, and still holds for CreditNote.
 > Figures corrected under this rule are marked *Correction 2026-09-30* in UC-01, UC-03,
 > UC-04, UC-08 and UC-17.
@@ -167,7 +168,7 @@ relies on in its §10.
 
 ## Shared contracts
 
-As [`../assignment.md`](../../assignment.md) §7. The **reversal row schema** is defined in
+As [`../assignment.md`](../../planning/assignment.md) §7. The **reversal row schema** is defined in
 [UC-01 §7](uc-01-rule-37-itc-reversal.md), and UC-08, UC-15 and UC-16 emit it unchanged.
 
 Two more row types appear, both first defined in these specs:

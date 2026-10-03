@@ -1,6 +1,6 @@
 # Bugs to file — 2026-09-30
 
-**Source:** a sweep of the 22 use-case specs in [`usecases/IN/`](usecases/IN/) against
+**Source:** a sweep of the 22 use-case specs in [`usecases/IN/`](../usecases/IN/) against
 [`agentswitch_submissions.md`](agentswitch_submissions.md), with every candidate
 re-verified on live Suryodaya data on 2026-09-30.
 **Duplicate check:** against `GET /api/bug-report/mine` — **27 reports** on the

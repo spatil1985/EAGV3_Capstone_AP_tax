@@ -3,7 +3,7 @@
 Consolidated, submission-ready list of everything we've found on the AgentSwitch
 platform: confirmed defects, plus feature gaps from two sources — comparison against
 real competitor products, and the multi-vertical requirements in
-[`spec.md`](spec.md) (school, manufacturing, clinic, retail, agency under Indian tax
+[`spec.md`](../planning/spec.md) (school, manufacturing, clinic, retail, agency under Indian tax
 law).
 
 **Submission channel:** `POST /api/bug-report` (per the brief, §Week 4 Milestone 2 —
@@ -194,7 +194,7 @@ obvious precedent to attach it to.
 
 ### C.1 · NEW BUGS TO FILE — verified 2026-10-03
 
-Found while writing the US use cases ([`usecases/US/`](usecases/US/README.md)) and
+Found while writing the US use cases ([`usecases/US/`](../usecases/US/README.md)) and
 re-verified on live Keystone data on 2026-10-03. Each was checked against all 33
 reports in `bug-report/mine` **and all 428 rows of the class board (every team)**:
 none duplicates an existing report.
@@ -410,7 +410,7 @@ needed.
 **Two sources, kept separate because they argue differently:**
 
 - **D.1 — competitor gaps (F9–F17).** "A competitor ships this and we don't."
-- **D.2 — multi-vertical gaps (F18–F22).** From [`spec.md`](spec.md): "Indian tax
+- **D.2 — multi-vertical gaps (F18–F22).** From [`spec.md`](../planning/spec.md): "Indian tax
   law requires this and we cannot represent it." These are **statutory**, not
   competitive — the argument is compliance exposure, not feature parity, which is a
   stronger case to make to a platform team.
@@ -1603,8 +1603,8 @@ platform's own ticket ids. Re-filing risks rejection as already-known.
 
 ## 4. Feature requests
 
-Derived from the competitor analysis in [`gap_report.md`](gap_report.md) and
-[`razorpay_gap_report.md`](razorpay_gap_report.md). These are gaps, not defects —
+Derived from the competitor analysis in [`gap_report.md`](../gapreports/gap_report.md) and
+[`razorpay_gap_report.md`](../gapreports/razorpay_gap_report.md). These are gaps, not defects —
 submit separately from bugs, since the bug bounty is for defects.
 
 **Each entry states how we proved the gap exists here and how we proved a

@@ -23,7 +23,7 @@ Companies Act citations.
   unchanged from the filing, so this is a fix, not a re-stamp (contrast N8 on India).
 - Keep UC-06's "recompute, never trust the stored flag" rule anyway. It is now the
   regression guard.
-- `ApprovalPolicy` is still unreadable for `finance_user` (`../../requested_tools.md`
+- `ApprovalPolicy` is still unreadable for `finance_user` (`../../submissions/requested_tools.md`
   T2.1), so self-approvals cannot be judged against policy.
 
 ## 9. Validation (US)

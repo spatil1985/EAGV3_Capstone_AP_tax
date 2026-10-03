@@ -38,7 +38,7 @@
 | `TaxJurisdiction.list` | `{"limit": 100}` | rates, `filing_frequency`, `liability_account_id` |
 | **Oracle** | `GET /api/accounting/reports/sales-tax-liability?from_date&to_date&basis=accrual` | per-jurisdiction `tax_billed / tax_credited / tax_collected`, `taxable_sales`, `exempt_sales` |
 
-The oracle is REST-only (`../../requested_tools.md` T1). It also accepts `basis=cash`,
+The oracle is REST-only (`../../submissions/requested_tools.md` T1). It also accepts `basis=cash`,
 which prorates tax by the share of each invoice paid — the one place the platform
 honours cash basis (`not_yet_supported.cash_basis`).
 

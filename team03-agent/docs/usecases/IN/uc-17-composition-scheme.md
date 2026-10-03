@@ -189,7 +189,7 @@ No tax-mode, GSTIN or registration-type field exists. **GAP-3 confirmed.**
 > (one blank-typed row plus IGST and CESS of equal amount), `total_tax` ₹7,828.60.
 > Report `total_tax` as the exposure and emit a `data_quality` row for the
 > disagreement. This inconsistency is evidence for N128 (see
-> `../bugs_to_file_2026-09-30.md`).
+> `../../submissions/bugs_to_file_2026-09-30.md`).
 
 **Call 4 — `Party.list {"limit":1000}`** → `gst_treatment`: blank 139 · consumer 40 ·
 business_gst 15 · sez 1 · **business_composition 0**.

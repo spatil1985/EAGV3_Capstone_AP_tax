@@ -3,7 +3,7 @@
 **Team 03 · Seat 03 Payables & Tax · live evidence pulled 2026-10-03**
 
 US counterparts of the India use cases in [`../IN/`](../IN/README.md). They use the
-same ten-section template ([`../../assignment.md`](../../assignment.md) §3) plus
+same ten-section template ([`../../assignment.md`](../../planning/assignment.md) §3) plus
 **§11 Live evidence**, and the same finding row (IN UC-01 §7).
 
 **Tenant at pull time.** Keystone Precision Works LLC
@@ -36,7 +36,7 @@ Records: 101 Bill · 158 Invoice (all receivable) · 120 Party · 67 PaymentMade
 | [10](us-10-credit-memo-refund-window.md) | Sales tax on credit memos & refund windows | UC-19 (credit-note time limit) | Sandip | ⚪ spec | No CreditNote exists on the tenant; the liability report shows `credited_sales: 0` |
 
 **Owners are a proposal.** They follow the IN workstream that owns each counterpart
-([`../../assignment.md`](../../assignment.md)). WS-B (Geetha) is mostly GST
+([`../../assignment.md`](../../planning/assignment.md)). WS-B (Geetha) is mostly GST
 input-credit work with no US equivalent, so US-01 and US-04 move to her to balance
 the load.
 
@@ -88,7 +88,7 @@ the load.
 4. **The platform's own reports are the oracles:**
    `GET /api/accounting/reports/sales-tax-liability?from_date&to_date&basis` (US-01)
    and `GET /api/cpa/reports/1099-summary?year` (US-06). Neither is an MCP tool yet
-   (`../../requested_tools.md` T1).
+   (`../../submissions/requested_tools.md` T1).
 5. **Platform-documented US gaps are not bugs.** `not_yet_supported` lists
    `tax_rate_service`, `form_1099_filing` ("no W-9 capture, no TIN matching, no box
    mapping, no e-file"), `asc_606`, `cash_basis` (except the liability report's
@@ -101,7 +101,7 @@ the load.
 
 Tallied with the class bug board on 2026-10-03; the board status is authoritative.
 The full Team 3 mapping is in
-[`../../agentswitch_submissions.md` §A](../../agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03).
+[`../../agentswitch_submissions.md` §A](../../submissions/agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03).
 
 | Filed | Board | Board status | Observed on Keystone, 3 Oct |
 |---|---|---|---|
@@ -114,7 +114,7 @@ The full Team 3 mapping is in
 | **B9** flags vs tools | N227 | Fixed, ships next release | not re-checked |
 
 New US bugs from these use cases, verified and not on the board: **N14–N16**
-([`../../agentswitch_submissions.md` §C.1](../../agentswitch_submissions.md#c1--new-bugs-to-file--verified-2026-10-03)).
+([`../../agentswitch_submissions.md` §C.1](../../submissions/agentswitch_submissions.md#c1--new-bugs-to-file--verified-2026-10-03)).
 US-06's W-9 finding is already on the board as **N398** (team07).
 
 ## Statutory caveats (flagged, not asserted)

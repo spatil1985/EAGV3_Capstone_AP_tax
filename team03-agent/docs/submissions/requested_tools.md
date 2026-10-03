@@ -18,7 +18,7 @@ REST endpoint in T4.1 turns out to be the posting path we need.
 | **3** | Add an argument or action to an existing tool | 5 | Medium |
 | **4** | New capability | 7 | High — most are already filed as feature requests |
 
-`UC-nn` refers to our use-case specs in [`usecases/IN/`](usecases/IN/). Each spec states the
+`UC-nn` refers to our use-case specs in [`usecases/IN/`](../usecases/IN/). Each spec states the
 statute behind the need.
 
 ---
