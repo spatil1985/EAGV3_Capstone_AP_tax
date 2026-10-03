@@ -39,9 +39,12 @@ locale endpoint's `not_yet_supported` list and would likely be rejected as known
 > - **F18 is on the board as N273 (To do, backlog).** Our earlier note "not on the
 >   platform, re-file" was **wrong**: `bug-report/mine` didn't show it, but the board
 >   has it, attributed to Team 3 by F-series numbering. **Do not re-file F18.**
-> - **Three new bugs are verified and ready to file: N14–N16**, all on Keystone (US).
->   No board row duplicates them. Full texts are in
->   **[§C.1 New bugs to file](#c1--new-bugs-to-file--verified-2026-10-03)**.
+> - ✅ **N14–N16 are FILED** — 3 Oct 2026, 06:40 UTC, **from the Keystone (US)
+>   account**, so they appear in Keystone's `bug-report/mine`, not India's. Ids:
+>   `cedc1791…` (N14), `d3961e4e…` (N15), `0fa45f74…` (N16). **Not yet on the board**
+>   (board unchanged at 428 rows when checked at 12:46 IST). Texts are in
+>   [§C.1](#c1--new-bugs--filed-2026-10-03).
+> - **Totals now: 36 reports.** 33 on the India account, 3 on Keystone.
 
 **Verified against `GET /api/bug-report/mine`, 2026-09-23:** 25 reports on the India
 account, 0 on Keystone. Every report was **fingerprinted by description content**,
@@ -94,6 +97,9 @@ position and got one item wrong.
 | N11 | Credit notes far above the invoice, and against purchase invoices | India | 30 Sep `de773f35…` | **N416** | 🟣 In review, High · "forward transaction guard and MCP race are fixed" · **open question** | — |
 | N12 | Bill and template `tax_id` holds GSTIN strings | India | 30 Sep `d1af1860…` | **N417** | 🟣 In review, Medium (area: Demo data) · **open question** | — |
 | N13 | E-way bills never expire; active ones lack numbers | India | 30 Sep `230450f3…` | **N418** | 🟣 In review, Medium · **open question** | — |
+| N14 | `indirect-tax/determinations` returns HTTP 500 on US | US | 3 Oct `cedc1791…` *(Keystone account)* | — | ⏳ Filed, awaiting triage | Verified 3 Oct: 500 on every input; India returns 404 |
+| N15 | Exempt rows on a county jurisdiction labelled "state"; Stark County count 102 vs 71 | US | 3 Oct `d3961e4e…` *(Keystone account)* | — | ⏳ Filed, awaiting triage | Verified 3 Oct |
+| N16 | Liability report drops `liability_account_id` | US | 3 Oct `0fa45f74…` *(Keystone account)* | — | ⏳ Filed, awaiting triage | Verified 3 Oct |
 
 **Feature requests**
 
@@ -192,7 +198,15 @@ obvious precedent to attach it to.
 
 ---
 
-### C.1 · NEW BUGS TO FILE — verified 2026-10-03
+<a id="c1--new-bugs-to-file--verified-2026-10-03"></a>
+
+### C.1 · NEW BUGS — FILED 2026-10-03
+
+> ✅ **All three filed** on 2026-10-03 at 06:40 UTC from the **Keystone** account
+> (`page: "Dashboard"`): N14 `cedc1791-d8b1-431e-bbe2-f502d1e4691c`, N15
+> `d3961e4e-04ee-418f-8500-e9b8ae822c18`, N16 `0fa45f74-cbc3-4a8a-bde3-38d787bab799`.
+> All `status: new`; not yet on the class board. **Do not file again.** The texts below
+> are kept as the record of what was submitted.
 
 Found while writing the US use cases ([`usecases/US/`](../usecases/US/README.md)) and
 re-verified on live Keystone data on 2026-10-03. Each was checked against all 33
@@ -1971,19 +1985,16 @@ route around.
 
 ## 5. Suggested submission order
 
-> **Updated 2026-10-03.** Everything in §A is filed, including B8, B9 and N9–N13.
-> The new defects to file are in §C.1:
+> **Updated 2026-10-03 (afternoon).** Everything in §A is filed, **including N14–N16**
+> (filed 06:40 UTC from the Keystone account). Remaining:
 >
-> 1. **N14** — `indirect-tax/determinations` returns HTTP 500 on US. A deterministic
->    crash with a clean India control; the strongest of the three.
-> 2. **N15** — exempt rows labelled "state" against a county jurisdiction; Stark
->    County invoice count 102 vs 71.
-> 3. **N16** — liability report drops `liability_account_id`.
-> 4. **B5** — only after reproducing against a concrete `JournalEntry.id`.
+> 1. **Answer the five open questions on N414–N418 (§A.1)** — triage is waiting on us.
+> 2. Post the two §C.1 comments (N220, N128).
+> 3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
+> 4. **Re-check the board** for N14–N16's board ids once triaged.
 >
-> Then **answer the five open questions on N414–N418 (§A.1)**, which triage is
-> waiting on, and post the two §C.1 comments (N220, N128). **Do not re-file F18**:
-> it is board N273. The list below is the 23 Sep plan, kept for history.
+> **Do not re-file F18** (board N273) or N14–N16. The list below is the 23 Sep plan,
+> kept for history.
 
 **As of 23 Sep (historical):** *Everything in §A is already filed. Only three defects
 remain (§C).*

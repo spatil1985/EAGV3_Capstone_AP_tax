@@ -20,8 +20,14 @@ tables below, not by re-reading prose.
 > and statuses, in
 > [`agentswitch_submissions.md` §A](agentswitch_submissions.md#a--filed--tallied-with-the-class-bug-board-2026-10-03):
 > 8 Live · 5 Fixed (ships in next release) · 5 In review (N9–N13 = N414–N418, each with
-> an open question for us) · 3 To do. **New, unfiled: N14–N16** (§C.1). The board
-> status columns in the tables below predate this tally; §A is authoritative.
+> an open question for us) · 3 To do. The board status columns in the tables below
+> predate this tally; §A is authoritative.
+>
+> **Filed 2026-10-03, 06:40 UTC, from the Keystone account:** N14 `cedc1791…`
+> (determinations endpoint HTTP 500), N15 `d3961e4e…` (exempt rows labelled "state"),
+> N16 `0fa45f74…` (liability report drops the account). All `new`, not yet on the
+> board. **Totals: 36 reports** — 33 India, 3 Keystone. Check *both* accounts'
+> `bug-report/mine` when refreshing this tracker.
 
 > **Re-verified 2026-09-30 — two changes.**
 > 1. ~~**F18 is not on the platform.**~~ **Corrected 2026-10-03: F18 is board N273
