@@ -61,7 +61,7 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
 | `harness/` | The agent harness: `core/` (context, playbook, registry, runner), `access/` (transport, policy gateway), `tracking/` (state, trace), `output/` (reports), `__main__.py` (CLI). Guide: [`harness/README.md`](harness/README.md) |
 | `scripts/` | Client, `fetch.py` (paging + quarantine), `findings.py` (output contract), `money.py`, `uc/` (one module per use case; UC-12 so far). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
 | `playbooks/` | Use-case manifests (`uc-12-eway-bill.md`) and `constants.yaml`. `duplicate_audit.md` / `tax_audit.md` are legacy SOPs (no manifest), to be replaced by UC-05 and period-liability playbooks |
-| `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (owners), `harness_plan.md` (design), `architecture.md` (as built) |
+| `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (workstreams), `agent_design.md` (design of record), `harness_plan.md` (superseded), `architecture.md` (as built) |
 | `docs/usecases/` | `IN/` UC-01…22 and `US/` US-01…10, each with live evidence |
 | `docs/submissions/` | Bugs and feature requests: `agentswitch_submissions.md` (master, tallied with the board), `submission_tracker.md`, `requested_tools.md`, `bugs_to_file_2026-09-30.md` |
 | `docs/gapreports/` | Competitor analyses (RazorpayX, Clear, Mysa, overall) |

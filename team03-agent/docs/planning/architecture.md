@@ -2,8 +2,9 @@
 
 **Team 03 · Seat 03 (Payables & Tax) · as of 2026-10-03**
 
-[`harness_plan.md`](harness_plan.md) is the design. This document describes **what
-exists in the code today**: every module, what it is for, who calls it, and when you
+[`agent_design.md`](agent_design.md) is the design of record (its §2a maps this code
+onto it); [`harness_plan.md`](harness_plan.md) is the earlier, superseded design. This
+document describes **what exists in the code today**: every module, what it is for, who calls it, and when you
 would change it. For the hands-on guide (commands, adding a playbook, test ideas) see
 [`../../harness/README.md`](../../harness/README.md).
 
@@ -243,8 +244,9 @@ make zero transport calls, and the existing suite passes (10 passed, 5 skipped).
 ## What is not built
 
 From harness_plan.md: the LLM loop and `LLMGateway` (§4.1, §4.4) · untrusted-data
-wrapping of model-facing results · event triggers with `updated_at` watermarks (needs
-the `updated_since` list filter requested in
-[`../submissions/requested_tools.md`](../submissions/requested_tools.md) T3.1) · the
+wrapping of model-facing results · event triggers with `updated_at` watermarks (no
+`updated_since` filter exists, requested in
+[`../submissions/requested_tools.md`](../submissions/requested_tools.md) T3.1; sorting by
+`updated_at` descending works instead) · the
 `AgentMemory` store · `scripts/vertical.py` (the vertical defaults to manufacturing) ·
 re-read-before-write · the GitHub Actions cron · playbooks beyond UC-12.

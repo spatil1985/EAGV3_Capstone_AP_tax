@@ -2,9 +2,23 @@
 
 **Team 03 · Seat 03 · 2026-10-03**
 Companion to [`spec.md`](spec.md) (what the agent must answer) and
-[`assignment.md`](assignment.md) (who specifies which use case).
+[`assignment.md`](assignment.md) (how the use cases group into workstreams).
 It supersedes [`harness_plan.md`](harness_plan.md) as the design of record, and keeps
 that file's policy rules, field quarantine and finding schema.
+
+> **Revision 2026-10-03 (afternoon) — facts updated, design unchanged.** This design was
+> written on top of commit `3e09de6` (30 Sep). Since then: the US use cases were added,
+> the docs and harness were reorganised, and the Phase 0 contract questions were checked
+> live on both tenants. The architecture, components and phases below are **as
+> designed**. What changed is marked *(updated 2026-10-03)*:
+> - **§2a (new):** what already exists in `harness/` and `scripts/`, mapped onto this
+>   design's components;
+> - **§4.3, §4.7, §4.9, §4.10:** live contract facts — no `updated_at` filter but
+>   `sort_by=updated_at` works; **`Notification.create` is not exposed**;
+>   **`AgentEscalation.create` requires `session_id`**; the observed escalation
+>   resolution fields; the corrected tax quarantine rule;
+> - **§10:** Q1–Q4 answered or narrowed, and three new questions;
+> - owner names removed, per the team's one-team decision (`d1b4a32`).
 
 Every component below is **ours**. There are no agent frameworks and no harness
 dependency, which the capstone rules require.
@@ -24,7 +38,10 @@ the Seat 03 question:
 > *"What is our tax liability this period, what is unclaimed, and is any vendor being
 > paid twice?"*
 
-…plus the 22 use cases in `spec.md`. It runs in three modes:
+…plus the 22 India use cases in `spec.md` (detailed specs in
+[`../usecases/IN/`](../usecases/IN/README.md)) and the 10 US use cases in
+[`../usecases/US/`](../usecases/US/README.md) *(updated 2026-10-03)*. It runs in three
+modes:
 
 | Mode | Who starts it | Example |
 |---|---|---|
@@ -66,6 +83,35 @@ the Seat 03 question:
    are never registered. *(S17 `capabilities.py` + planner authority filter.)*
 7. **Everything is replayable.** An append-only journal records triggers, decisions,
    tool calls, refusals and outputs. *(S17 live-graph journal, glc `audit/store.py`.)*
+
+---
+
+## 2a. Starting point: what already exists *(updated 2026-10-03)*
+
+`aptax/` is still built from scratch, but some of its parts already exist as working,
+validated code in [`../../harness/`](../../harness/README.md) and `../../scripts/`. The
+as-built reference is [`architecture.md`](architecture.md). UC-12 runs end to end on
+Suryodaya: its five rules match an independent recomputation (167/80/69/52/0 findings).
+Port or rework this code rather than rewriting it blind.
+
+| Built today | Becomes in `aptax/` | Notes |
+|---|---|---|
+| `harness/access/transport.py` (Live, Recording, Replay transports) | `agentswitch/client.py` | Already parses `isError`/`content[]` and does record/replay. Still missing: retry with backoff, and a semaphore |
+| `harness/access/gateway.py` (Prohibited → WriteTier → Allowlist → DryRun) | `agentswitch/policy.py` | Same T0–T3 tiers as §4.10 |
+| `scripts/fetch.py` (paging + quarantine) | `agentswitch/fetch.py` + `quarantine.py` | Quarantine rules as corrected in §4.10 |
+| `harness/core/registry.py` + `playbooks/*.md` (YAML front matter, `compute: module:Class`) | `capabilities/registry.py` + `playbooks/manifests/*.yaml` | Same idea; only the manifest file format differs |
+| `harness/core/playbook.py` (Template Method `run`, Strategy rules) | `playbooks/` | Its `evaluate` is this design's pure `compute` |
+| `harness/core/runner.py` (Facade) | subset of `runtime/pipeline.py` | Covers run → diff → escalate → report; no triggers or steps DSL |
+| `harness/tracking/state.py` | `store/` `findings` table | Same fingerprint, `hash(rule\|entity_id\|period\|exposure_bucket)`. Because the period is the month, a finding that persists re-escalates once a month — decide whether that is wanted |
+| `harness/tracking/trace.py` (EventBus → JSONL, call counter) | `store/` `journal` + `anomalies` | |
+| `harness/output/report.py` | `runtime/render.py` + `escalate` action | Its escalation payload lacks the now-required `session_id` (§4.7) |
+| `harness/core/context.py` (`RunContext.build`) | `as_context` | |
+| `scripts/findings.py`, `money.py`, `playbooks/constants.yaml` | `domain/` | |
+| `scripts/uc/uc12_eway_bill.py` | `playbooks/` `eway_coverage` | Known gaps: no coverage for `not_generated`-only invoices; validity rule applies to non-live EWBs; a malformed date aborts the run |
+
+**Not built yet:** trigger envelope, scheduler, watcher, governor, subscriptions and
+safe evaluator, agent loop, LLM gateway, approvals, SQLite store, HTTP API, and every
+playbook except UC-12.
 
 ---
 
@@ -179,9 +225,11 @@ class TriggerEnvelope(BaseModel):
 AgentSwitch has no webhooks, so the agent **creates events by polling for changes**.
 Every `WATCH_SECONDS` (default 300), for each tenant and each watched entity:
 
-1. `list` records with `updated_at > watermark`. If server-side filtering isn't
-   supported, sort by `updated_at` descending and stop at the watermark (Phase 0
-   decides).
+1. `list` with `sort_by=updated_at, sort_order=desc` and stop at the first record whose
+   `updated_at` ≤ watermark. *(Updated 2026-10-03: there is **no** server-side
+   `updated_at`/`updated_since` filter on either tenant, but descending sort on
+   `updated_at` works and was verified. Pages are limited to 1000, and `limit=1001` is
+   rejected. Filters are flat and single-valued.)*
 2. Emit one envelope per change. `data` holds **ids and enums only**. Free text never
    enters an envelope, so a vendor's `notes` can't influence routing.
 3. Advance the watermark **only after** the envelope is persisted, so a crash means
@@ -297,9 +345,9 @@ It executes a subscription's `steps` in order:
 |---|---|
 | `run: <playbook>` | Calls the playbook capability and collects finding rows |
 | `diff: findings` | Fingerprints each row as `hash(rule, entity_id, period, exposure_bucket)`, compares against the `findings` table, and keeps `new` and `changed` |
-| `escalate` | `AgentEscalation.create`, once per fingerprint, re-checked against `AgentEscalation.list` before writing |
-| `add_todo` | `AgentTodo.create` |
-| `notify` | `Notification.create` on AgentSwitch, so the human sees it **inside the platform**. An optional `narrate: true` phrases it with one economy-tier LLM call |
+| `escalate` | `AgentEscalation.create`, once per fingerprint, re-checked against `AgentEscalation.list` before writing. *(Updated 2026-10-03: `session_id` and `reason` are **required**, so every run that may escalate first creates one `AgentSession` with `channel: api` and `actor_kind: system`, which has no required fields, and stores its id on the run. `reason_code` is an enum: `unresolved_after_retries`, `customer_asked_for_a_person`, `policy_refusal`, `sensitive_topic`, `agent_error`, `needs_another_app`, `other`.)* |
+| `add_todo` | `AgentTodo.create`. Only `title` is required; status is `open/in_progress/done/cancelled`; priority is `low/normal/high/urgent` |
+| `notify` | *(Updated 2026-10-03: **`Notification.create` is not exposed** on either tenant.)* The human sees our work inside the platform through the escalation itself, plus an `AgentTodo` with priority mapped from severity. `notify` is therefore an alias for `add_todo` until a notification tool exists (ask in `requested_tools.md`). An optional `narrate: true` phrases the title with one economy-tier LLM call |
 | `request_approval` | Creates an escalation with explicit choices, sets the run to `waiting`, and stores `run_id ↔ escalation_id` (§4.9) |
 | `hold_for_review` | T2 action. Allowed only if a preceding approval returned `hold`; re-reads the bill first |
 | `report` | Renders a report run (monthly liability pack) to `runs/<id>/report.md` and a notification |
@@ -367,8 +415,28 @@ finance staff can see and resolve.
 4. Escalations with no response after N days expire the waiting run as `expired`,
    which is recorded. Nothing is acted on by default.
 
-A local fallback, `POST /v1/approvals/{run_id}`, exists for demos. The exact
-`AgentEscalation` resolution fields are checked in Phase 0.
+A local fallback, `POST /v1/approvals/{run_id}`, exists for demos.
+
+**Phase 0 finding *(updated 2026-10-03)*.** Escalation records carry `status`,
+`resolution_outcome`, `resolution_note`, `resolved_at`, `resolved_by`,
+`acknowledged_at` and `sla_breached`. On Suryodaya there are 70 escalations, all from
+other teams through the `api` channel; Team 3 has none. Observed values:
+- `status`: 69 `withdrawn`, 1 `open`;
+- `resolution_outcome`: only ever `withdrawn`.
+
+There is **no structured choice field**, and `AgentEscalation.update` can't set status
+or outcome. A human's "hold" / "ignore" could only arrive in the free-text
+`resolution_note`. That conflicts with principle 4: free text never routes.
+
+**Decision needed** — pick one:
+- **(a)** Accept an exact-match token in `resolution_note` (`HOLD` / `IGNORE`). Any other
+  text expires the run. The token is matched, never interpreted by a model.
+- **(b)** Treat any resolution by a non-self actor as "approved", with `ignore` meaning
+  "withdraw".
+- **(c)** Use the local `/v1/approvals` endpoint as the primary path, and ask the
+  platform for a choice field.
+
+The recommendation is (a), with a request for a structured field filed alongside.
 
 ### 4.10 AgentSwitch gateway: the policy layer (`aptax/agentswitch/`)
 
@@ -377,17 +445,17 @@ from `harness_plan.md` §4.3 / §6.3.
 
 | Concern | Rule |
 |---|---|
-| Transport | MCP JSON-RPC 2.0 (`initialize` → `tools/list` → `tools/call`), Bearer per tenant (`AGENTSWITCH_*` / `US_AGENTSWITCH_*`). Reuses `scripts/agentswitch_client.py`, adding `isError`/`content[]` parsing, retry with backoff on 5xx and timeouts, and a concurrency semaphore |
-| Allowlist | About 25 read tools + `AgentEscalation/AgentTodo/Notification` writes + `Bill.approval.submit`. **Everything else is refused before the network** |
-| Write tiers | T0 read · T1 annotate (escalation, todo, notification) · T2 workflow (`Bill.approval.submit`, approval-gated) · T3 mutate (never) |
+| Transport | MCP JSON-RPC 2.0 (`initialize` → `tools/list` → `tools/call`), Bearer per tenant (`AGENTSWITCH_*` / `US_AGENTSWITCH_*`). Reuses `scripts/agentswitch_client.py` and `harness/access/transport.py`, which already parse `isError`/`content[]` and record/replay; still to add: retry with backoff on 5xx and timeouts, and a concurrency semaphore. Errors arrive as JSON-RPC `-32602` or `isError` |
+| Allowlist | About 25 read tools + `AgentSession/AgentEscalation/AgentTodo` writes + `Bill.approval.submit`. *(`Notification.create` removed 2026-10-03: not exposed.)* **Everything else is refused before the network** |
+| Write tiers | T0 read · T1 annotate (session, escalation, todo; suppressed in dry-run) · T2 workflow (`Bill.approval.submit`, approval-gated) · T3 mutate (never) |
 | Prohibited | `SalarySlip`, `Contract`, `EsignDocument`, CRM: refused with a recorded reason |
-| Quarantine | Document `taxes[]`, `group_taxes`, `CreditNote.taxes[]`, `Bill.match_status` stripped; `tds_amount`, `is_overdue` renamed `_suspect_*` and recomputed; disagreements go to `anomalies` (bug-bounty leads) |
+| Quarantine | *(Corrected 2026-10-03.)* `CreditNote.taxes[]` (N128), `Tax.group_taxes`, `Bill.match_status`/`match_detail` stripped; `Bill.tds_amount` and `ApprovalRequest.is_overdue` renamed `_suspect_*` and recomputed. **Bill and Invoice `taxes[]` are kept**: they reconcile to `total_tax` (401/401 invoices, 63/64 bills) and are the tax source for those documents. Item-level tax on recurring-generated invoices is unreliable. Disagreements go to `anomalies` (bug-bounty leads). Implemented in `scripts/fetch.py` |
 | Untrusted data | Free-text fields wrapped `{"untrusted": …}` before reaching any model; never in a system prompt |
 | Paging | Auto-paged fetchers for playbooks; capped rows plus `truncated` for `as_query` |
 | Shared ledger | Re-read before any T1/T2 write; abort if the record changed |
 | Trace | Every call journaled: run, tool, args hash, tier, latency, rows, result hash |
 
-### 4.11 LLM gateway (`aptax/llm/`, built by Geetha)
+### 4.11 LLM gateway (`aptax/llm/`)
 
 Built from scratch, following glc_v5's ideas (`providers.py`, `economics/budget.py`,
 `routing/`) but sized to this agent:
@@ -405,13 +473,18 @@ Built from scratch, following glc_v5's ideas (`providers.py`, `economics/budget.
 
 ### 4.12 Playbooks: the domain (`aptax/playbooks/`)
 
-Each use case is three files with one owner (see `assignment.md`):
+Each use case is three files, worked on by the team as one workstream (see
+`assignment.md`):
 
 ```
-manifests/uc-01-rule-37.yaml   # id, question, status, regimes, verticals, args, triggers, owner
+manifests/uc-01-rule-37.yaml   # id, question, status, regimes, verticals, args, triggers
 uc01_rule37.py                 # def compute(records: Records, ctx: Ctx) -> list[Finding]   ← PURE
-docs/specs/uc-01-….md          # the ten-section spec (statute, method, limits)
+docs/usecases/IN/UC-01-….md    # the spec (statute, method, live data, limits); US specs in docs/usecases/US/
 ```
+
+*(Updated 2026-10-03: specs live in `docs/usecases/IN|US/`, not `docs/specs/`. The
+built harness keeps manifests as YAML front matter in `playbooks/uc-NN-*.md`; either
+format works if the registry reads it.)*
 
 `compute` takes records the gateway already fetched and quarantined, and does **no
 I/O**. That makes it trivially hand-testable. A thin `fetch()` beside it declares
@@ -539,7 +612,7 @@ team03-agent/
 │   ├── domain/                # findings.py, money.py, constants.yaml, pos.py, vertical.py
 │   └── store/                 # db.py, schema.sql
 ├── config/
-│   ├── charter.md             # today's SKILL.md, corrected (CURRENT_STATUS §7)
+│   ├── charter.md             # today's SKILL.md, corrected (CURRENT_STATUS §8)
 │   ├── schedules.yaml
 │   └── subscriptions/*.yaml
 ├── tests/                     # HAND-WRITTEN graded tests
@@ -549,7 +622,8 @@ team03-agent/
 
 The existing `scripts/tax_math.py` and `invoice_matcher.py` are reworked into
 `playbooks/`, and `scripts/agentswitch_client.py` into `agentswitch/client.py`.
-`run_agent.py` becomes `aptax/cli.py`.
+`run_agent.py` becomes `aptax/cli.py`. The `harness/` package and its UC-12 playbook
+are ported as mapped in §2a.
 
 **Dependencies:** `fastapi`, `uvicorn`, `httpx`, `pydantic`, `pyyaml`, plus stdlib
 `sqlite3`/`asyncio`. Provider HTTP is called directly with httpx. **No agent
@@ -559,14 +633,14 @@ framework, no scheduler library, no ORM.**
 
 ## 8. Build phases
 
-| Phase | Build | Owner (proposal) | Done when |
+| Phase | Build | Status *(2026-10-03)* | Done when |
 |---|---|---|---|
-| **0 · Contracts** | Real `inputSchema` for the allowlist on both tenants: paging, `updated_at` filter, `AgentEscalation` resolution fields, `Notification.create`, `Bill.approval.submit`, US use-tax fields → `docs/tool_contracts.md` | all | every field named here confirmed or struck |
-| **1 · Skeleton** | store, envelope, governor, AgentSwitch gateway, registry, `as_context`, `as_query`, LLM gateway + `ScriptedLLM`, agent loop, `/v1/ask`, CLI | Geetha (loop + LLM), Sandip (gateway) | "how many unpaid bills?" answered on both tenants; "show salary slips" can't be called; full journal |
-| **2 · Core Challenge** | `Finding`/money/constants, manifest-generated playbooks, `tax_liability` (IN + US), `itc_unclaimed`, `ap_duplicate_check`, `itc_rule37_exposure`, evidence check, renderer | Sudip (contracts, UC-01/05), Geetha (liability, ITC) | the core prompt runs three concurrent playbooks; every number traces to a row |
-| **3 · Scheduled** | cron + scheduler + lease, pipeline runner, fingerprint diff, escalate/notify, report step, `/v1/report`, `/v1/liveness` | Sandip | second daily run: 0 new escalations, 0 LLM calls |
-| **4 · On event** | watcher + watermarks, bill-intake / payment-guard subscriptions, approval through `AgentEscalation`, resume, `hold_for_review` | Geetha | a duplicate bill created on the instance is escalated within one poll; approve → hold; our hold doesn't retrigger |
-| **5 · Use cases + hardening** | workstream playbooks per `assignment.md` order; anomaly → bug-report drafts; injection and boundary scenarios | each owner | each new use case = one PR touching only `playbooks/` (+ a subscription) |
+| **0 · Contracts** | Real `inputSchema` for the allowlist on both tenants: paging, `updated_at` filter, `AgentEscalation` resolution fields, `Notification.create`, `Bill.approval.submit`, US use-tax fields → `docs/platform/tool_contracts.md` | **Mostly done**: see §10. Left: write up `tool_contracts.md`, US use-tax fields, Q1 | every field named here confirmed or struck |
+| **1 · Skeleton** | store, envelope, governor, AgentSwitch gateway, registry, `as_context`, `as_query`, LLM gateway + `ScriptedLLM`, agent loop, `/v1/ask`, CLI | Gateway, registry and context exist in `harness/` (§2a); the rest is not started | "how many unpaid bills?" answered on both tenants; "show salary slips" can't be called; full journal |
+| **2 · Core Challenge** | `Finding`/money/constants, manifest-generated playbooks, `tax_liability` (IN + US), `itc_unclaimed`, `ap_duplicate_check`, `itc_rule37_exposure`, evidence check, renderer | `Finding`, money, constants and manifest playbooks exist; the core playbooks are not started | the core prompt runs three concurrent playbooks; every number traces to a row |
+| **3 · Scheduled** | cron + scheduler + lease, pipeline runner, fingerprint diff, escalate/todo, report step, `/v1/report`, `/v1/liveness` | Fingerprint diff, escalate (dry-run) and report exist for UC-12; the escalation needs `session_id` | second daily run: 0 new escalations, 0 LLM calls |
+| **4 · On event** | watcher + watermarks, bill-intake / payment-guard subscriptions, approval through `AgentEscalation`, resume, `hold_for_review` | Not started; blocked on the §4.9 decision | a duplicate bill created on the instance is escalated within one poll; approve → hold; our hold doesn't retrigger |
+| **5 · Use cases + hardening** | workstream playbooks per `assignment.md` order; anomaly → bug-report drafts; injection and boundary scenarios | UC-12 done; specs ready for UC-01…22 and US-01…10 | each new use case = one PR touching only `playbooks/` (+ a subscription) |
 
 ---
 
@@ -596,11 +670,16 @@ framework, no scheduler library, no ORM.**
 
 ## 10. Open questions
 
-| # | Question | Affects |
-|---|---|---|
-| Q1 | Does our run id satisfy the grader's `job_id`, or must each run create an `AgentSession` on AgentSwitch? | Goal-predicate tests |
-| Q2 | Does `*.list` support server-side `updated_at >` filtering, and what is the page limit? | Watcher cost, fetchers |
-| Q3 | Can a human resolve an `AgentEscalation` with a choice, and which field carries it? | Approval flow (§4.9) |
-| Q4 | Is `Bill.approval.submit` available to `finance_user` on both tenants, and is it the right "hold"? | `hold_for_review` |
-| Q5 | `Invoice(direction=payable)` vs `Bill`: which is the AP source of truth? | UC-05, UC-01, liability |
-| Q6 | Where does `aptax serve` run unattended for the demo (laptop vs cloud)? | Phases 3–4 |
+Q1–Q4 were checked live on both tenants on 2026-10-03, read-only.
+
+| # | Question | Answer / status | Affects |
+|---|---|---|---|
+| Q1 | Does our run id satisfy the grader's `job_id`, or must each run create an `AgentSession` on AgentSwitch? | **Partly answered.** Every escalating run must create an `AgentSession` anyway, because `AgentEscalation.create` requires `session_id`. Whether the grader keys on it is still unknown; ask the instructors | Goal-predicate tests |
+| Q2 | Does `*.list` support server-side `updated_at >` filtering, and what is the page limit? | **Answered.** No filter. `sort_by=updated_at sort_order=desc` works. The page maximum is 1000 | Watcher cost, fetchers |
+| Q3 | Can a human resolve an `AgentEscalation` with a choice, and which field carries it? | **Answered: no choice field.** Only `status`, `resolution_outcome` (observed: `withdrawn`) and free-text `resolution_note`. Decision needed (§4.9) | Approval flow (§4.9) |
+| Q4 | Is `Bill.approval.submit` available to `finance_user` on both tenants, and is it the right "hold"? | **Available** on both tenants (arg `id`, permission `Bill.submit`); `Invoice.approval.submit` too. Bills currently show `approval_status: not_required`. It submits for approval and does not hold, so a dedicated `Bill.hold` is requested (`requested_tools.md` T3.3) | `hold_for_review` |
+| Q5 | `Invoice(direction=payable)` vs `Bill`: which is the AP source of truth? | Open | UC-05, UC-01, liability |
+| Q6 | Where does `aptax serve` run unattended for the demo (laptop vs cloud)? | Open | Phases 3–4 |
+| Q7 | Should a persisting finding re-escalate monthly (period in the fingerprint), or only on exposure-bucket change? | Open; new | `diff`, escalation noise |
+| Q8 | Ask the platform for `Notification.create` and a structured escalation resolution choice? | Open; new. Add to `requested_tools.md` | `notify`, §4.9 |
+| Q9 | Rising India bill count, 100 `TaxNexus` rows on an India tenant, 1000 failed `AgentJob`s: are any of these other teams' writes that our watcher will see as events? | Open; new | watcher volume, governor rate |
