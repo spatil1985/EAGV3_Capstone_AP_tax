@@ -35,6 +35,25 @@ Records: 101 Bill · 158 Invoice (all receivable) · 120 Party · 67 PaymentMade
 | [09](us-09-three-way-match.md) | Three-way match | UC-11 (same check) | 🟢 | 81/81 PO bills within tolerance; `recorded_status` **now persisted** (filed N2 had null ×81, so it **appears fixed**) |
 | [10](us-10-credit-memo-refund-window.md) | Sales tax on credit memos & refund windows | UC-19 (credit-note time limit) | ⚪ spec | No CreditNote exists on the tenant; the liability report shows `credited_sales: 0` |
 
+### Added 2026-10-04: US-11 … US-22, from the full catalogue
+
+From the catalogue in [`../README.md`](../README.md); live evidence pulled 2026-10-04.
+
+| US | Title | IN counterpart | Verdict | Headline from live data |
+|---|---|---|---|---|
+| [11](us-11-sales-tax-on-exempt-purchases.md) | Sales tax paid on exempt purchases (refunds) | UC-34, UC-32 | 🟢 | 0 bills or expenses carry vendor tax, so nothing to refund. US-02 found the opposite problem |
+| [12](us-12-marketplace-facilitator-sales.md) | Marketplace facilitator sales | UC-36 | ⚪ spec | No sales channel on `Invoice`; Keystone sells direct |
+| [13](us-13-taxability-services-digital-holidays.md) | Taxability by state: services, digital, medical, shipping, holidays | UC-18 | ⚪ spec / 🟢 goods | All 28 items are goods (taxable in OH/MI/PA), `tax_code` null; no services sold |
+| [14](us-14-sales-tax-filing-calendar.md) | Filing calendar and timeliness | UC-27 | 🟡 | MI/PA Q3 due 2026-10-20, OH September due 2026-10-23. **No filing record exists**; `next_filing_due` null on 4 of 4 |
+| [15](us-15-late-entered-documents.md) | Documents entered late into past periods | UC-28 | 🟢 | **147 invoices ($220,089.85 tax) entered 2026-09-16 for January–August.** 0 periods ever closed |
+| [16](us-16-vendor-master-audit.md) | Vendor master audit (TIN, W-9, 1099 flags) | UC-40 | 🟢 | `tin` empty in list output on 8 of 8; 1 W-9 missing; Hartville set to box MISC-1 (Rents) |
+| [17](us-17-unapplied-vendor-credits.md) | Unapplied vendor credits and advances | UC-41 | 🟢 | 0 vendor credits, 0 advances → 0 findings |
+| [18](us-18-payment-run-prioritisation.md) | Payment run prioritisation | UC-42 | 🟢 | 14 open ($115,392.56); **13 overdue**, the oldest 141 days |
+| [19](us-19-bank-to-payables-reconciliation.md) | Bank-to-payables reconciliation | UC-43 | 🟢 | **6 of 9 payments in the bank window ($45,825) have no matching debit**; 1 unidentified $3,000 debit |
+| [20](us-20-approval-threshold-splitting.md) | Approval threshold splitting | UC-44 | 🟢 | Threshold **inferred at $10,000** from two policy bands; 0 candidates (standing orders excluded) |
+| [21](us-21-unclaimed-property-escheat.md) | Unclaimed property (escheat) on vendor payments | — | 🟢 | 0 candidates: all payments are bank transfers in 2026; earliest dormancy 2029 |
+| [22](us-22-foreign-vendor-withholding.md) | Foreign vendors: Chapter 3 withholding, Form 1042-S | UC-37 | ⚪ spec | All 8 vendors are in Ohio; the INR bills are the B8 defect, not foreign vendors |
+
 ---
 
 ## Mapping from the India use cases
@@ -64,6 +83,29 @@ Records: 101 Bill · 158 Invoice (all receivable) · 120 Party · 67 PaymentMade
 | UC-21 | Import of services RCM | **US-02** | Use tax on untaxed purchases |
 | UC-22 | Advance-receipt GST | — | Sales tax generally attaches at sale or delivery, and ASC 606 is platform-documented as unsupported |
 | *(period liability)* | | **US-01** | harness_plan.md §6.1, US column |
+| UC-23 | Period GST liability (GSTR-3B) | **US-01** | Same question; one playbook, two regime strategies |
+| UC-24 | Unclaimed credit (IMS / GSTR-2B) | **US-11** | No credit in US sales tax; the US "unclaimed" money is tax overpaid on exempt purchases |
+| UC-25 | Inward credit and debit notes (credit effect) | — | No input credit to reduce. The cash side is US-17 |
+| UC-26 | GSTR-1 readiness | (US-05, US-13) | No outward statement; rate and taxability correctness cover the same risk |
+| UC-27 | Return filing timeliness | **US-14** | State filing calendar instead of GSTR-1/3B |
+| UC-28 | Late-entered documents | **US-15** | Regime-agnostic; on Keystone no period is closed and no return is recorded |
+| UC-29 | Turnover-based obligations | (US-03) | Economic-nexus thresholds are the US turnover lines |
+| UC-30 | Multiple registrations | — | A state sales-tax permit is not a distinct-person regime; no ISD analogue |
+| UC-31 | Annual return (GSTR-9/9C) | — | Most states have no annual sales-tax reconciliation return |
+| UC-32 | Credit refunds (Rule 89) | **US-11** | Refund of overpaid tax instead of accumulated credit |
+| UC-33 | Expense claims, GST credit | (US-02) | US-02 extends to `Expense` for use tax (no credit to block) |
+| UC-34 | School exempt inward services | **US-11** | Nonprofit/government purchase exemption |
+| UC-35 | Pure-agent recharges | (US-13) | Taxability of recharged services and pass-through costs by state |
+| UC-36 | E-commerce TCS | **US-12** | Marketplace facilitator laws |
+| UC-37 | Non-resident payments (s.195) | **US-22** | Chapter 3 withholding and Form 1042-S |
+| UC-38 | Cash payment limits (s.40A(3)) | — | No US payer-side cash-deduction limit (Form 8300 concerns cash *received*) |
+| UC-39 | TDS deductor setup | (US-06) | 1099 and backup-withholding setup |
+| UC-40 | Vendor master audit | **US-16** | TIN / W-9 instead of GSTIN / PAN |
+| UC-41 | Unapplied vendor credits | **US-17** | Regime-agnostic |
+| UC-42 | Payment run prioritisation | **US-18** | Terms, discounts and backup withholding instead of MSME/Rule 37 |
+| UC-43 | Bank-to-payables reconciliation | **US-19** | Regime-agnostic |
+| UC-44 | Approval threshold splitting | **US-20** | Regime-agnostic; the threshold is inferable on Keystone |
+| — | | **US-21** | Unclaimed property has no India analogue for vendor payables |
 
 ---
 

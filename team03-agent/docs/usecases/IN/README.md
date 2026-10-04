@@ -52,6 +52,60 @@ changed verdict is explained in that file's §11.
 | [21](uc-21-import-of-services-rcm.md) | Import of services RCM | 🟢 → 🟡 | 12 bills tagged `overseas`, **all INR from Indian vendors**. No genuine overseas vendor in the data |
 | [22](uc-22-advance-receipt-gst.md) | Advance-receipt GST | 🟡 → 🟡 | `RetainerInvoice` has **no tax fields**. Real case: RET-2026-00002, ₹6,00,000 advance held, unapplied |
 
+### Added 2026-10-04: UC-23 … UC-44, from the full catalogue
+
+These come from the catalogue in [`../README.md`](../README.md), and have no `spec.md` entry. They use the
+same eleven sections, with live evidence pulled on **2026-10-04**. Record counts on that date:
+- 281 Bill · 487 Invoice · 230 Party · 134 PaymentMade · 100 VendorCredit · 120 Expense;
+- 62 BankTransaction · 9 TransactionLock · 26 AccountingPeriod · 6 Location · 5 GSTReturn.
+
+| UC | Title | Verdict | Headline from live data |
+|---|---|---|---|
+| [23](uc-23-period-gst-liability.md) | Period GST liability and credit utilisation (GSTR-3B) | 🟡 | August cash payable **₹5,72,073.68**. July triggers Rule 86B. Return rows don't reconcile (July filed ₹2.49 Cr vs ledger ₹1.35 Cr) |
+| [24](uc-24-unclaimed-itc-ims-2b.md) | Unclaimed and at-risk credit (IMS / GSTR-2B / s.16(4)) | 🟡 | **10 IMS-rejected bills still credit-eligible (₹41,226.79)**. ₹18.70 lakh pending IMS action. No GSTR-2B line data |
+| [25](uc-25-vendor-credit-debit-notes-itc.md) | Inward credit and debit notes: credit adjustment | 🟢 | ₹63,956.20 of credit to reduce for 20 supplier credit notes. 21 credits carry GST from suppliers who can't charge it |
+| [26](uc-26-gstr1-readiness.md) | GSTR-1 readiness: classification and tax head | 🟡 | **12 inter-state invoices charged CGST+SGST instead of IGST (₹45,152.62)**. Split: 208 B2B, 27 B2CS, 15 SEZ |
+| [27](uc-27-return-filing-timeliness.md) | Return filing timeliness, late fee and interest | 🟢 | **August GSTR-1 23 days late, GSTR-3B 14 days**: ₹1,850 late fee + ₹3,949.66 interest so far. E-way bills blocked if September GSTR-3B is missed |
+| [28](uc-28-late-entered-documents.md) | Documents entered late into filed or locked periods | 🟢 | 0 breaches. But July was filed 8 Aug and locked only 12 Sep, a 35-day unprotected window |
+| [29](uc-29-turnover-based-obligations.md) | Turnover-based obligations (AATO) | 🟢 | Turnover of at least ₹6.71 Cr → **e-invoicing mandatory. 108 B2B/SEZ invoices (₹7.55 Cr) carry no IRN** (GST-28) |
+| [30](uc-30-multiple-registrations.md) | Multiple registrations: transfers and ISD | 🟡 | **No location GSTIN belongs to the company's PAN.** Transfer and ISD checks are blocked |
+| [31](uc-31-annual-return-reconciliation.md) | Annual return reconciliation (GSTR-9/9C) | 🔴 (compute 🟡) | FY 2025-26 due 31 Dec 2026. FY credit is absent from the ledger. The March `total_income` looks cumulative |
+| [32](uc-32-itc-refund-zero-rated-inverted.md) | Refund of accumulated credit (Rule 89(4)/(5)) | 🟡 | SEZ supplies under LUT → **indicative refund ₹37,758.92**. No inverted duty |
+| [33](uc-33-expense-claims-itc.md) | Expense claims: GST credit eligibility | 🟢 | **18 personal expenses claim ₹7.74 lakh of credit.** 56 expenses carry tax above 40% of the amount |
+| [34](uc-34-school-exempt-inward-services.md) | School: GST on exempt inward services (entry 66(b)) | ⚪ spec | No education tenant |
+| [35](uc-35-agency-pure-agent-reimbursements.md) | Agency: recharges and the pure-agent test (Rule 33) | 🟡 | 15 invoiced billable expenses; **0 invoices carry `expense_id`** |
+| [36](uc-36-ecommerce-tcs-s52.md) | Retail: e-commerce TCS (s.52) and s.9(5) | 🔴 F22 | No sales channel or TCS-credit record |
+| [37](uc-37-non-resident-payments-tds-195.md) | Non-resident payments: s.195 TDS, 15CA/CB | 🟡 | 38 "overseas" documents are all INR from Indian vendors |
+| [38](uc-38-cash-payment-limits.md) | Cash payments: s.40A(3) | 🟢 | **13 cash payments above ₹10,000 (₹7,02,867.40).** 4 open bills set to cash |
+| [39](uc-39-tds-deductor-setup.md) | TDS deductor setup and section coverage | 🟢 | **TDS on, TAN null.** 0 of 9 valid section codes. ₹2.60 lakh MSME interest without 194A |
+| [40](uc-40-vendor-master-audit.md) | Vendor master data audit | 🟢 | **0 of 88 vendors have a GSTIN, PAN or bank details.** 76 aren't typed as vendors |
+| [41](uc-41-unapplied-vendor-credits.md) | Unapplied vendor credits before payment | 🟢 | **₹4,91,099.27 applicable now** across 7 vendors |
+| [42](uc-42-payment-run-prioritisation.md) | Payment run prioritisation | 🟢 | 100 open bills (₹1.41 Cr); 52 overdue; 55 MSME bills (₹84.0 lakh) |
+| [43](uc-43-bank-to-payables-reconciliation.md) | Bank-to-payables reconciliation | 🟢 | **₹56.21 lakh of vendor debits have no AP payment**; 77 AP payments aren't in the bank |
+| [44](uc-44-approval-threshold-splitting.md) | Approval threshold splitting | 🟡 | 2 candidate groups at an assumed ₹1 lakh threshold. `ApprovalPolicy` 403 |
+
+### New observations from the 2026-10-04 pull: candidates for the bug board
+
+None of these is filed. Each is verified in the named spec's §11, and none is on the platform's
+`not_yet_supported` list.
+
+| # | Observation | Spec |
+|---|---|---|
+| 1 | `GSTReturn` figures don't reconcile to the ledger (August GSTR-1: ₹2.63 Cr / 161 vs ₹46.4 lakh / 14 invoices); `net_tax_payable` null on all | UC-23, UC-26 |
+| 2 | `VendorCredit.taxes[].tax_type` holds product names: N128's pattern on a third entity | UC-25 |
+| 3 | 14 bank debits `matched` with no voucher type or id (on Keystone the same field is populated) | UC-43 |
+| 4 | Location GSTINs carry PANs other than the company's; the primary location GSTIN ≠ `OrgProfile.gstin` | UC-30 |
+| 5 | 100 `TaxNexus` and 100 `ExemptionCertificate` rows (US constructs) on the India tenant, the class of N126 | UC-36 |
+| 6 | `OrgProfile.enable_e_invoicing = 1` vs `EInvoicingPreferences.enabled = 0` | UC-29 |
+| 7 | `tds_section_code` seeded strings on every TDS-bearing bill; the rates (12/15/5%) match no section | UC-39 |
+| 8 | March 2026 `AccountingPeriod.total_income` equals the full-year invoice turnover | UC-31 |
+| 9 | `Invoice.expense_id` never set, although 15 expenses are `invoiced` | UC-35 |
+| 10 | 56 of 120 expenses carry tax above 40% of the amount | UC-33 |
+| 11 | 12 inter-state invoices taxed as intra-state | UC-26 |
+
+E-invoicing (GST-28), GSTR-9 (GST-39), amendments (GST-32) and TDS challans (GST-18) are
+platform-documented gaps. They are **not** to be filed.
+
 ---
 
 ## Shared rules — every spec applies these
@@ -178,6 +232,10 @@ Two more row types appear, both first defined in these specs:
 | `itc_reversal` | UC-01 §7 | UC-08, UC-15, UC-16, UC-17 |
 | `data_quality` | this README, Rule 0 | every spec |
 | `rcm_undeclared_liability` | UC-03 §7 | UC-21, UC-22 |
+
+**UC-23 … UC-44** each define one `finding_type`, named in that spec's §7. Where credit is reversed or
+reduced, they reuse the UC-01 reversal fields (`reversal_base_amount`, `interest_amount`,
+`total_exposure`): UC-24, UC-25, UC-33. Every one emits `data_quality` rows for records it can't trust.
 
 `data_quality` row, fixed fields:
 
