@@ -16,9 +16,9 @@ five domains. Each is one specification file. Every use case is either:
 
 **How the two folders relate.** A use case is written once per jurisdiction where it applies.
 Regime-agnostic checks get a short US file that records only what differs. The IN→US mapping is in
-[`US/README.md`](US/README.md#mapping-from-the-india-use-cases). In the harness, a manifest declares
+[`US/README.md`](US/README.md#mapping-from-the-india-use-cases). In the agent, a manifest declares
 `tax_regimes: [gst]`, `[sales_use_tax]` or `[all]`, and the router picks by the tenant's locale
-([`../../harness/README.md`](../../harness/README.md)).
+([`agent_design.md` §4.12](../planning/agent_design.md)).
 
 **Feasibility per use case:** achievable?, MCP tools present?, already requested?, sample question, mode
 and playbook, grouped by similar use cases, are in

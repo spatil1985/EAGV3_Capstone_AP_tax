@@ -136,8 +136,12 @@ event.**
 
 ## 2a. Starting point: what already exists *(2026-10-03)*
 
+*(2026-10-07: every part below has been ported into `aptax/` and the `harness/` folder has been retired; it remains in
+git history. UC-12 gives identical findings and fingerprints through `aptax`. The table is kept as the record of
+where each part came from; the "Not built yet" list is superseded by the Phase 1 build.)*
+
 `aptax/` is still built from scratch, but some of its parts already exist as working, validated code in
-[`../../harness/`](../../harness/README.md) and `../../scripts/`. The as-built reference is
+`harness/` and `../../scripts/`. The as-built reference is
 [`architecture.md`](architecture.md). UC-12 runs end to end on Suryodaya: its five rules match an
 independent recomputation (167/80/69/52/0 findings). Port or rework this code rather than rewriting it
 blind.
@@ -186,7 +190,7 @@ statutory checks, no LLM in unattended runs) differs from a general agent.
 | Playbook SOP text (§4.6) | S17 `skills/manager.py`, `load_skill` | `SKILL.md` discovery; an always-on charter; injected text capped at **12,000 chars**; **skills never grant authority**; full text loaded on demand | `load_playbook` loads a playbook's SOP text; only a one-line index sits in the prompt |
 | Budgets (§4.11) | S17 `config/budgets.yaml`; glc `economics/budget.py` | **Admission before the call** on worst-case cost (chars ÷ 4 × 1.25 safety + `max_tokens`); **reserve 20%** for the terminal answer; **downgrade** a rung at 50% spend, **refuse** at 90%, 2% headroom; **≤ 60 calls/run, ≤ 6/node**; refusal is a 402-style error carrying limit, spend and projection, never silent truncation | Ceilings per run, per subscription and per day in our SQLite ledger |
 | Tiers and routing (§4.11) | S17 `config/tiers.yaml`; glc `routing/routing.yaml`, `agent_routing.yaml` | A cross-model **economy / standard / frontier** ladder as config; role → tier; cascade one rung up on structural failure (empty, schema-invalid, truncated) | Our roles: `planner`, `answer`, `narrator` |
-| LLM transport (§4.11) | S17 `gateway.py`; glc `llm_schemas.py` `ChatRequest` | One chat contract (`messages`, cacheable `system`, `tools`, `tool_choice`, `response_format`, `reasoning`, `max_tokens`, `temperature`, attribution `tenant/project/user/agent/session`); retry 429/502/503 ×5 with 0.5·2ⁿ s backoff (≤ 4 s); ordered provider fallback **dropping the model pin**; usage returned | An in-process module (`aptax/llm/`), not a separate service. Only it reads provider keys |
+| LLM transport (§4.11) | S17 `gateway.py`; glc `llm_schemas.py` `ChatRequest` | One chat contract (`messages`, cacheable `system`, `tools`, `tool_choice`, `response_format`, `reasoning`, `max_tokens`, `temperature`, attribution `tenant/project/user/agent/session`); retry 429/502/503 ×5 with 0.5·2ⁿ s backoff (≤ 4 s); ordered provider fallback **dropping the model pin**; usage returned | *(2026-10-07)* glc_v5 itself is reused as a separate service (§4.11); aptax keeps only the contract and a plug-in adapter. Only glc reads provider keys |
 | Key pools (§4.11) | glc `providers.py` | A logical provider expands to a key pool (`gemini` → `gemini_1..N`), each metered, with cooldown on 429 | Same |
 | Caching (§4.11) | glc `cache/cache.yaml`, `cache/semantic.py` | Prompt caching of system blocks. The semantic cache is opt-in (threshold 0.95, `skip_when_tools: true`) | Prompt caching for charter and tool schemas. **The semantic cache stays off**: a fuzzy hit must never serve a tax number |
 | Policy engine (§4.10) | glc `policy/engine.py`, `policy.yaml` | First match wins, ties deny, unreadable file → deny everything, hot reload | Rules over tool name, our risk tier, arguments (e.g. `check_sla` needs `dry_run: true`) and authority |
@@ -699,6 +703,18 @@ rules:
 ```
 
 ### 4.11 LLM gateway (`aptax/llm/`)
+
+> **Decision (2026-10-07): reuse glc_v5 as the LLM gateway.** It already provides every part in the table
+> below except `scripted.py`, so the table now describes what glc_v5 supplies rather than what we build.
+> - **Runs as its own service.** aptax calls it over HTTP; provider keys live only in glc's configuration.
+> - **aptax keeps only the boundary:** `aptax/llm/contract.py` (the `LLMGateway` protocol) and the loader in
+>   `aptax/llm/__init__.py`. A small team-written adapter module implements `complete(...)` against glc's chat
+>   endpoint, and `APTAX_LLM=package.module:factory` plugs it in.
+> - **Budget split, so nothing is capped twice:** glc_v5 does per-call admission, the 50% downgrade and 90%
+>   refusal, and must surface a refusal as `BudgetRefused` so the loop stops cleanly. The aptax governor keeps the
+>   per-subscription daily windows and passes the run budget to the loop.
+> - **To confirm with the instructors:** that glc_v5, a course-provided gateway, is allowed under the
+>   "no third-party agent frameworks" rule.
 
 Built from scratch, following glc_v5's ideas (`providers.py`, `economics/budget.py`, `routing/`) and S17's
 client (`gateway.py`, `config/budgets.yaml`, `config/tiers.yaml`), but sized to this agent. **Only this

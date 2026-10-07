@@ -10,12 +10,11 @@
 
 Project-level documents stay one level up: [`../SKILL.md`](../SKILL.md) (agent charter,
 loaded by `run_agent.py`), [`../DESIGN.md`](../DESIGN.md) and
-[`../CURRENT_STATUS.md`](../CURRENT_STATUS.md). Harness code and its guide are in
-[`../harness/`](../harness/README.md).
+[`../CURRENT_STATUS.md`](../CURRENT_STATUS.md). The agent's code is in [`../aptax/`](../aptax/).
 
 ## Capstone overview
 
-Team 3's role, approach and scope, and how the harness sits between AgentSwitch
+Team 3's role, approach and scope, and how the agent sits between AgentSwitch
 (MCP, API, DB) and the LLM gateway. The open to-dos are access to the non-manufacturing
 domains, and choosing our own LLM. The detailed design is in
 [`planning/agent_design.md`](planning/agent_design.md).

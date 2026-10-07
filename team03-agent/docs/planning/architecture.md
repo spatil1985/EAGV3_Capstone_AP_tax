@@ -1,5 +1,9 @@
 # architecture.md — the harness as built
 
+> **Historical (2026-10-07).** The `harness/` package described here has been retired and removed; its
+> parts were ported into `aptax/` (mapping in [`agent_design.md`](agent_design.md) §2a). Kept as a record; links
+> to `harness/` files point into git history.
+
 **Team 03 · Seat 03 (Payables & Tax) · as of 2026-10-03**
 
 [`agent_design.md`](agent_design.md) is the design of record (its §2a maps this code

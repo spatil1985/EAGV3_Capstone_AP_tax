@@ -24,7 +24,7 @@ dicts and call `EWayBillAudit().evaluate(dataset, ctx)`.
 import math
 from datetime import date
 
-from harness.core.playbook import Dataset, Playbook, PlaybookOutcome, RecordRule, Rule
+from aptax.playbooks.base import Dataset, Playbook, PlaybookOutcome, RecordRule, Rule
 from scripts.findings import Finding
 from scripts.money import fmt, money
 

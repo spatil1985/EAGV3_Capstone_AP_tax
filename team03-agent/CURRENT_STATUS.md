@@ -14,10 +14,10 @@ re-checked against both tenants on 2026-10-03. Earlier verification logs
 
 1. **Read in this order:** this file → [`../README.md`](../README.md) (mission and
    grading) → [`docs/README.md`](docs/README.md) (doc map) →
-   [`docs/planning/architecture.md`](docs/planning/architecture.md) (harness as built)
+   [`docs/planning/agent_design.md`](docs/planning/agent_design.md) (design of record, implemented in `aptax/`)
    → the use case you're working on in [`docs/usecases/`](docs/usecases/README.md).
 2. **The ledger is live and shared** with Teams 01 and 02. Never write to it unless the
-   user explicitly asks. The harness defaults to **dry-run**, and T3 writes (ledger
+   user explicitly asks. The agent (`aptax`) defaults to **dry-run**, and T3 writes (ledger
    mutations) are refused in code.
 3. **Never commit credentials.** They live in `.env` and
    `postman/*.postman_environment.json`, both gitignored. Never echo passwords.
@@ -46,8 +46,9 @@ cd team03-agent
 cp .env.example .env            # fill AGENTSWITCH_* (India) and US_AGENTSWITCH_* (US)
 py -3 -m pip install -r requirements.txt     # requests, pytest, pyyaml
 py -3 -m pytest -q                            # expect 10 passed, 5 skipped (live tests skip without creds)
-py -3 -m harness routes --tenant in           # needs AGENTSWITCH_* in the environment
-py -3 -m harness run --tenant in --playbook uc-12        # dry-run; writes runs/<run_id>/
+py -3 -m aptax routes --tenant in             # reads AGENTSWITCH_* from the environment or .env
+py -3 -m aptax run --tenant in --playbook uc-12          # dry-run; writes runs/<run_id>/
+py -3 -m aptax --help                         # call, ask (needs APTAX_LLM), policy, journal, serve, kill
 ```
 
 On this Windows machine Python is `py -3` (3.14); `python` is not on PATH. Postman
@@ -58,10 +59,11 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
 
 | Path | What |
 |---|---|
-| `harness/` | The agent harness: `core/` (context, playbook, registry, runner), `access/` (transport, policy gateway), `tracking/` (state, trace), `output/` (reports), `__main__.py` (CLI). Guide: [`harness/README.md`](harness/README.md) |
-| `scripts/` | Client, `fetch.py` (paging + quarantine), `findings.py` (output contract), `money.py`, `uc/` (one module per use case; UC-12 so far). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
+| `aptax/` | The agent (agent_design.md §7): `agentswitch/` (transport, policy gateway, risk tiers, fetch + quarantine), `capabilities/` (registry, built-ins), `runtime/` (agent loop, evidence check, runner, outbox, render), `triggers/` (envelope, subscriptions, governor), `playbooks/` (manifests, base classes), `store/` (SQLite), `llm/` (contract; the gateway plugs in via `APTAX_LLM`), `api.py`, `cli.py`. The earlier `harness/` was retired on 2026-10-07 (git history keeps it) |
+| `config/` | `policy.yaml` (tool policy, default deny), `charter.md` (the agent's corrected charter) |
+| `scripts/` | Client, `findings.py` (output contract), `money.py`, `uc/` (one module per use case; UC-12 so far). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
 | `playbooks/` | Use-case manifests (`uc-12-eway-bill.md`) and `constants.yaml`. `duplicate_audit.md` / `tax_audit.md` are legacy SOPs (no manifest), to be replaced by UC-05 and period-liability playbooks |
-| `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (workstreams), `agent_design.md` (design of record), `harness_plan.md` (superseded), `architecture.md` (as built) |
+| `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (workstreams), `agent_design.md` (design of record), `harness_plan.md` (superseded), `architecture.md` (the retired harness, historical) |
 | `docs/usecases/` | `IN/` UC-01…22 and `US/` US-01…10, each with live evidence |
 | `docs/submissions/` | Bugs and feature requests: `agentswitch_submissions.md` (master, tallied with the board), `submission_tracker.md`, `requested_tools.md`, `bugs_to_file_2026-09-30.md` |
 | `docs/gapreports/` | Competitor analyses (RazorpayX, Clear, Mysa, overall) |
@@ -131,7 +133,7 @@ Always check the board.
   field. MSME fields live on `Party`. US 1099 fields (`tin`, `w9_on_file`,
   `form_1099_box`, `backup_withholding`) are also on `Party`.
 - **Prohibited (absent from `tools/list`):** SalarySlip, Contract, EsignDocument. CRM is
-  readable through `sales_viewer`, but the harness doesn't expose it.
+  readable through `sales_viewer`, but the agent's policy denies it.
 
 ## 6. Data-trust rules — what we learned
 
