@@ -73,6 +73,13 @@ class AgentSwitchClient:
         response.raise_for_status()
         return response.json()
 
+    def rest_post(self, path: str, body: dict | None = None) -> dict:
+        """POST to a REST path and return JSON. Callers must allowlist only endpoints
+        verified not to persist (e.g. /api/accounting/tax/compute)."""
+        response = self._session.post(f"{self.base_url}{path}", json=body or {}, timeout=30)
+        response.raise_for_status()
+        return response.json()
+
     # -- MCP (JSON-RPC 2.0 over POST /api/mcp) ---------------------------
 
     def mcp_rpc(self, method: str, params: dict | None = None) -> dict:

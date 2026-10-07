@@ -1,0 +1,35 @@
+# aptax tool policy (agent_design.md §4.10). Evaluated before EVERY AgentSwitch call.
+#
+#   first match wins · no match → deny · unreadable file → deny everything
+#
+# Fields: tool (glob; REST calls appear as "GET /api/..."), tier (T0 read, T1 annotate,
+# T2 workflow, T3 mutate — from aptax/agentswitch/risk.py, never the server's tag),
+# require_args (exact values), when (allowlisted | subscription_allows | approval_granted).
+# Changing what the agent may do is a reviewed edit to this file.
+
+rules:
+  # Seat 03 charter: prohibited entities, whatever the role grants.
+  - {tool: "SalarySlip.*",    action: deny, reason: "prohibited entity (charter): route to Admin/Human"}
+  - {tool: "Contract.*",      action: deny, reason: "prohibited entity (charter): route to Admin/Human"}
+  - {tool: "EsignDocument.*", action: deny, reason: "prohibited entity (charter): route to Admin/Human"}
+
+  # Least privilege: our role can read CRM, the agent never does.
+  - {tool: "Lead.*",          action: deny, reason: "CRM is outside Seat 03"}
+  - {tool: "Deal.*",          action: deny, reason: "CRM is outside Seat 03"}
+  - {tool: "Pipeline.*",      action: deny, reason: "CRM is outside Seat 03"}
+  - {tool: "Campaign*",       action: deny, reason: "CRM is outside Seat 03"}
+
+  # Argument guards (G3).
+  - {tool: "endpoint.approvals.process_decision", action: deny, reason: "approval decisions are human-only"}
+  - {tool: "endpoint.approvals.check_sla", require_args: {dry_run: true}, when: [allowlisted], action: allow}
+  - {tool: "endpoint.approvals.check_sla", action: deny, reason: "check_sla only with dry_run: true"}
+
+  # Write tiers.
+  - {tier: T3, action: deny, reason: "T3 mutate: the agent never changes ledger documents"}
+  - {tier: T2, when: [subscription_allows, approval_granted], action: allow}
+  - {tier: T2, action: deny, reason: "T2 workflow needs the subscription and a human approval"}
+  - {tier: T1, when: [subscription_allows], action: allow}
+  - {tier: T1, action: deny, reason: "T1 annotate not allowed for this run's subscription"}
+  - {tier: T0, when: [allowlisted], action: allow}
+
+  - {tool: "*", action: deny, reason: "not on the allowlist"}

@@ -1,6 +1,13 @@
 ---
 id: uc-12
 title: E-way bill coverage and expiry audit
+capability: eway
+description: >-
+  UC-12 (India, GST): e-way bill coverage and expiry audit. Finds outward invoices and
+  delivery challans above the Rule 138 threshold that moved without an e-way bill, e-way
+  bills with no EWB number, expired bills still in transit, missing Part B vehicle details
+  and wrong validity periods. Returns counts and exposure by rule, the top 10 rows and a
+  run_ref for get_findings.
 questions:
   - "Is anything moving on the road right now without valid documentation?"
 status: live

@@ -19,3 +19,6 @@ venv/
 # Harness run output: traces, reports, anomalies, recordings and finding state.
 # Contains live business data -- never commit.
 team03-agent/runs/
+
+# aptax kill switch: an operational flag on one machine, never shared.
+team03-agent/config/kill
