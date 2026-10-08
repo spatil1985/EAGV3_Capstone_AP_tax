@@ -323,3 +323,29 @@ company_tax_rate_pct:
   unit: percent effective company tax (s.115BAA 22% + 10% surcharge + 4% cess) used for the tax effect of a disallowance
   source: s.115BAA Income-tax Act 1961 (rate depends on the regime chosen — confirm)
   verified: null
+
+# --- UC-39 TDS section coverage (FY thresholds per payee; Finance Act 2025 values — confirm) ---------
+tds_194a_threshold_inr:
+  - {value: 5000, effective_to: 2025-03-31, source: "s.194A(3)(i) before Finance Act 2025 (non-bank interest)"}
+  - {value: 10000, effective_from: 2025-04-01, source: "s.194A(3)(i) as amended by Finance Act 2025 (confirm)"}
+tds_194a_rate_pct:
+  value: 10
+  unit: percent TDS on interest other than on securities
+  source: s.194A Income-tax Act 1961
+  verified: null
+tds_194h_threshold_inr:
+  - {value: 15000, effective_to: 2025-03-31, source: "s.194H before Finance Act 2025"}
+  - {value: 20000, effective_from: 2025-04-01, source: "s.194H as amended by Finance Act 2025 (confirm)"}
+tds_194h_rate_pct:
+  - {value: 5, effective_to: 2024-09-30, source: "s.194H before Finance (No. 2) Act 2024"}
+  - {value: 2, effective_from: 2024-10-01, source: "s.194H as amended by Finance (No. 2) Act 2024"}
+tds_194r_threshold_inr:
+  value: 20000
+  unit: INR per recipient per FY of business benefits or perquisites
+  source: s.194R Income-tax Act 1961
+  verified: null
+tds_194r_rate_pct:
+  value: 10
+  unit: percent TDS on business benefits / perquisites
+  source: s.194R Income-tax Act 1961
+  verified: null
