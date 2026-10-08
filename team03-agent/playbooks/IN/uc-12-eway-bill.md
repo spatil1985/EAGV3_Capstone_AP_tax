@@ -18,7 +18,7 @@ requires_features: [eway_bill]
 triggers:
   - {kind: scheduled, cadence: daily}
   - {kind: on_request}
-compute: scripts.uc.uc12_eway_bill:EWayBillAudit
+compute: scripts.uc.IN.uc12_eway_bill:EWayBillAudit
 tools: [EWayBill.list, Invoice.list, DeliveryChallan.list]
 escalate: new_findings
 spec: docs/usecases/IN/uc-12-eway-bill-coverage.md
@@ -26,8 +26,8 @@ spec: docs/usecases/IN/uc-12-eway-bill-coverage.md
 
 # UC-12 · E-way bill coverage and expiry audit — SOP
 
-**Full spec:** [`docs/usecases/IN/uc-12-eway-bill-coverage.md`](../docs/usecases/IN/uc-12-eway-bill-coverage.md)
-**Code:** [`scripts/uc/uc12_eway_bill.py`](../scripts/uc/uc12_eway_bill.py)
+**Full spec:** [`docs/usecases/IN/uc-12-eway-bill-coverage.md`](../../docs/usecases/IN/uc-12-eway-bill-coverage.md)
+**Code:** [`scripts/uc/IN/uc12_eway_bill.py`](../../scripts/uc/IN/uc12_eway_bill.py)
 
 ## When it runs
 Daily (scheduled), and on request. Only for tenants whose locale has

@@ -1,6 +1,7 @@
 """Playbook manifests and routing (agent_design.md §4.8, §4.12).
 
-Manifests are YAML front matter in playbooks/*.md — the format the harness already uses
+Manifests are YAML front matter in playbooks/IN/*.md and playbooks/US/*.md (one per use
+case, by jurisdiction) — the format the harness already uses
 — plus optional fields this agent adds:
 
     capability: eway_coverage        # the name the LLM sees (default: id with '-' → '_')
@@ -98,8 +99,9 @@ def from_front_matter(meta: dict, body: str, source: Path) -> Manifest:
 
 
 def load_manifests(directory: Path = PLAYBOOK_DIR) -> list[Manifest]:
+    """Every manifest under playbooks/, including the IN/ and US/ jurisdiction folders."""
     manifests = []
-    for path in sorted(Path(directory).glob("*.md")):
+    for path in sorted(Path(directory).rglob("*.md")):
         meta, body = _split(path)
         if meta and meta.get("id"):
             manifests.append(from_front_matter(meta, body, path))

@@ -27,6 +27,7 @@ from datetime import date
 from aptax.playbooks.base import Dataset, Playbook, PlaybookOutcome, RecordRule, Rule
 from scripts.findings import Finding
 from scripts.money import fmt, money
+from scripts.uc.common.dates import day
 
 LIVE_STATUSES = {"active", "generated"}
 NOT_MOVED = {"draft", "void", "cancelled"}
@@ -34,7 +35,8 @@ FINDING_TYPE = "eway_bill"
 
 
 def _day(value) -> date | None:
-    return date.fromisoformat(str(value)[:10]) if value else None
+    """Malformed dates become None (common.dates.day) instead of aborting the run."""
+    return day(value)
 
 
 def _is_goods_line(line: dict) -> bool:
