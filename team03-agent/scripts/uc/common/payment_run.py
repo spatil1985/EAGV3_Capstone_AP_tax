@@ -46,7 +46,8 @@ def common_holds(bill, data, ctx):
     return None
 
 
-def plan(data, ctx, scorers, holds):
+def plan(data, ctx, scorers, holds, withhold=None):
+    """withhold(bill, data, ctx) -> (amount, reason) | None reduces the amount to pay (US backup withholding)."""
     pairs, _ = suspicious_pairs(candidates(data.get("bills", [])))
     data["_duplicate_ids"] = {max((a, b), key=lambda x: x.get("created_at") or "")["id"] for a, b, *_ in pairs}
     credit_left: dict = {}
@@ -72,8 +73,10 @@ def plan(data, ctx, scorers, holds):
         else:
             quiet.append(bill)
             continue
-        rows.append({"bill": bill, "action": action, "hold_reason": reason, "net_off": net,
-                     "amount_to_pay": Decimal("0") if action in ("hold", "net_off") else balance - net,
+        withheld, why = (withhold(bill, data, ctx) if withhold else None) or (Decimal("0"), None)
+        to_pay = Decimal("0") if action in ("hold", "net_off") else balance - net - withheld
+        rows.append({"bill": bill, "action": action, "hold_reason": reason, "net_off": net, "withheld": withheld,
+                     "withholding_reason": why, "amount_to_pay": to_pay,
                      "cost": cost, "reasons": reasons, "due": due_date(bill, ctx)})
     rows.sort(key=lambda r: ({"pay_now": 0, "net_off": 1, "hold": 2}[r["action"]], -r["cost"], r["due"] or ctx.as_of))
     return rows, quiet
@@ -96,8 +99,10 @@ def plan_findings(rows, ctx):
             counterparty_id=bill.get("vendor_id"), counterparty_name=name,
             summary=f"#{rank} {number} ({name}, {fmt(money(bill.get('balance_due')), ctx.currency)} due {r['due']}): "
                     + text + (f"; {fmt(r['net_off'], ctx.currency)} of credit applied first" if r["net_off"] and
-                              r["action"] == "pay_now" else "") + ".",
-            details={"action": r["action"], "rank": rank, "pay_by_date": str(r["due"]) if r["due"] else None,
+                              r["action"] == "pay_now" else "")
+                    + (f"; withhold {fmt(r['withheld'], ctx.currency)} ({r['withholding_reason']})" if r.get("withheld") else "")
+                    + ".",
+            details={"action": r["action"], "rank": rank, "withheld": str(r.get("withheld", Decimal("0"))), "pay_by_date": str(r["due"]) if r["due"] else None,
                      "amount_to_pay": str(r["amount_to_pay"]), "credit_applied": str(r["net_off"]),
                      "cost_of_delay_7d": str(r["cost"]), "reasons": [x[0] for x in r["reasons"] if x[1]],
                      "hold_reason": r["hold_reason"]})
