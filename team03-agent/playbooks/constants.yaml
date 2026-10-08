@@ -306,3 +306,20 @@ form_15cb_threshold_inr:
   unit: INR remittance in an FY above which a CA certificate (Form 15CB) is needed with Form 15CA
   source: Rule 37BB Income-tax Rules 1962
   verified: null
+
+# --- UC-38 cash payments (Income-tax Act 1961 numbering) ---------------------------------------
+cash_payment_limit_inr:
+  value: 10000
+  unit: INR per person per day paid otherwise than by account-payee cheque/draft/electronic mode
+  source: s.40A(3) Income-tax Act 1961
+  verified: null
+cash_payment_limit_transport_inr:
+  value: 35000
+  unit: INR per day for payments to transporters for plying, hiring or leasing goods carriages
+  source: s.40A(3A) proviso; Rule 6DD
+  verified: null
+company_tax_rate_pct:
+  value: 25.17
+  unit: percent effective company tax (s.115BAA 22% + 10% surcharge + 4% cess) used for the tax effect of a disallowance
+  source: s.115BAA Income-tax Act 1961 (rate depends on the regime chosen — confirm)
+  verified: null
