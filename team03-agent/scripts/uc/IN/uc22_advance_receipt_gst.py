@@ -111,7 +111,10 @@ class AdvanceReceiptGst(Playbook):
         if not outcome.findings:
             return "No advance is being held unadjusted."
         held = sum((money(f.details["held_amount"]) for f in outcome.findings), Decimal("0"))
-        tax = sum((f.total_exposure for f in outcome.findings), Decimal("0"))
-        return (f"{len(outcome.findings)} advance(s) held unadjusted ({fmt(held, ctx.currency)}); GST exposure if "
-                f"they are for services: up to {fmt(tax, ctx.currency)}. The platform records neither the supply "
-                f"type nor the tax on advances, so confirm both.")
+        likely = sum((f.total_exposure for f in outcome.findings), Decimal("0"))
+        ceiling = sum((money(f.details["tax_if_services"]) for f in outcome.findings), Decimal("0"))
+        goods = sum(1 for f in outcome.findings if f.details["supply_type"] == "goods")
+        return (f"{len(outcome.findings)} advance(s) held unadjusted ({fmt(held, ctx.currency)}). GST exposure: "
+                f"{fmt(likely, ctx.currency)} on the supply types the invoices suggest ({goods} look like goods, "
+                f"which carry no GST on advances), up to {fmt(ceiling, ctx.currency)} if all are for services. "
+                f"The platform records neither the supply type nor the tax on advances, so confirm both.")
