@@ -31,11 +31,13 @@ WARN_DAYS = 90
 
 
 def population(data):
+    """Posted, ITC-eligible bills with tax. Where the tax lines don't reconcile, the stored total_tax
+    is used and labelled: a "don't claim this" warning doesn't need the head split."""
     for bill in data.get("bills", []):
         if (bill.get("status") or "").lower() in NOT_POSTED or bill.get("itc_eligibility") == "ineligible":
             continue
-        tax = doc_tax(bill)
-        if tax and tax["total"] > 0:
+        tax = doc_tax(bill) or {"total": money(bill.get("total_tax")), "source": "stored total_tax (unreconciled)"}
+        if tax["total"] > 0:
             yield bill, tax
 
 
@@ -79,7 +81,8 @@ class ItcEntitlement(Rule):
                     summary=f"{ref(bill, 'number')} ({vname}) was rejected in IMS but is still marked ITC-eligible: "
                             f"{fmt(tax['total'], ctx.currency)} must not be claimed (reverse it with 18% interest if "
                             f"it was).",
-                    details={"ims_status": ims, "itc_eligibility": bill.get("itc_eligibility")})
+                    details={"ims_status": ims, "itc_eligibility": bill.get("itc_eligibility"),
+                             "tax_source": tax["source"]})
             elif ims == "pending" and period_of(bill.get("date")):
                 period = period_of(bill["date"])
                 if ctx.as_of < twob_date(period, ctx):
@@ -138,7 +141,9 @@ class ItcEntitlementAudit(Playbook):
             by.setdefault(k, [0, Decimal("0")])
             by[k][0] += 1
             by[k][1] += t["total"]
-        return {"credit-bearing bills": len(pop), "by IMS status": {k: f"{n} bills, {v}" for k, (n, v) in by.items()},
+        return {"credit-bearing bills": len(pop),
+                "… tax from stored total_tax (lines don't reconcile)": sum(1 for _, t in pop if t["source"].startswith("stored")),
+                "by IMS status": {k: f"{n} bills, {v}" for k, (n, v) in by.items()},
                 "claimed per document": "not recorded on the platform; see UC-23 for the period claim"}
 
     def summary(self, outcome, ctx):
