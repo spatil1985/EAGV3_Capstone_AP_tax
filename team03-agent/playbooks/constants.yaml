@@ -294,3 +294,15 @@ recharge_service_rate_pct:
   unit: percent GST on a recharged cost that fails the Rule 33 pure-agent test (the supplier's own service rate)
   source: s.15(2)(c) CGST Act; Rule 33; typical rate for professional/agency services (SAC 9983)
   verified: null
+
+# --- UC-37 s.195 non-resident payments -----------------------------------------------------------
+tds_195_rate_fts_royalty_pct:
+  value: 20.8
+  unit: percent on fees for technical services and royalty to a non-resident (20% s.115A + 4% cess; surcharge extra above thresholds)
+  source: s.195 read with s.115A Income-tax Act 1961 (renumbered under the 2025 Act — confirm)
+  verified: null
+form_15cb_threshold_inr:
+  value: 500000
+  unit: INR remittance in an FY above which a CA certificate (Form 15CB) is needed with Form 15CA
+  source: Rule 37BB Income-tax Rules 1962
+  verified: null

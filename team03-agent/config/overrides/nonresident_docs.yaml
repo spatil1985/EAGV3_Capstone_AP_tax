@@ -1,0 +1,11 @@
+# Documents for non-resident vendors that are not in the AgentSwitch data model (UC-37).
+# Read by scripts/uc/IN/uc37_nonresident_payments.py.
+#
+#   - vendor_id: <Party.id>
+#     trc_valid_to: 2027-03-31        # tax residency certificate
+#     form_10f: true
+#     no_pe_declaration: true
+#     treaty_rate_pct: 15
+#     form_15ca: ["ACK-…"]            # acknowledgement numbers
+#     form_15cb: ["UDIN-…"]
+vendors: []
