@@ -215,3 +215,13 @@ gstr3b_due_day:
   unit: day of the following month on which monthly GSTR-3B is due
   source: s.39(1) CGST Act; Rule 61(5)
   verified: null
+
+# --- UC-24 ITC entitlement ------------------------------------------------------------------
+itc_claim_cutoff_month_day:
+  - {value: "09-30", effective_to: 2022-09-30, source: "s.16(4) CGST Act before Finance Act 2022"}
+  - {value: "11-30", effective_from: 2022-10-01, source: "s.16(4) as amended by Finance Act 2022 (30 Nov after FY end, or annual return if earlier)"}
+gstr2b_generation_day:
+  value: 14
+  unit: day of the following month on which GSTR-2B is generated (IMS actions close)
+  source: Rule 60(7) CGST Rules; IMS advisory (Oct 2024)
+  verified: null
