@@ -35,7 +35,9 @@ def fetch_matches(fetcher, bills) -> tuple[dict, int]:
 def classify(match: dict) -> tuple[str | None, list]:
     live = (match or {}).get("live") or {}
     lines = live.get("lines") or []
-    not_received = [l for l in lines if money(l.get("received_qty")) == 0 and money(l.get("billed_qty")) > 0]
+    # received_qty None means bill_match had no receipt basis (two-way match), not "0 received"
+    not_received = [l for l in lines if l.get("received_qty") is not None
+                    and money(l.get("received_qty")) == 0 and money(l.get("billed_qty")) > 0]
     if live.get("receipt_problem") or not_received:
         return "billed_not_received", not_received or lines
     over = [l for l in lines if "qty_over_ordered" in (l.get("flags") or [])

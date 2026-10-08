@@ -32,3 +32,10 @@ def test_price_variance_beyond_tolerance(make_ctx, ds):
     priced = {"live": {"price_tolerance_pct": 2, "lines": [{"ordered_qty": 2, "received_qty": 2, "billed_qty": 2,
                                                             "billed_to_date_qty": 2, "price_variance_pct": 7}]}}
     assert [f.rule for f in run(make_ctx, ds, priced)] == ["price_variance"]
+
+
+def test_no_receipt_basis_is_not_billed_not_received(make_ctx, ds):
+    two_way = {"live": {"status": "within_tolerance", "price_tolerance_pct": 2,
+                        "lines": [{"ordered_qty": 2, "received_qty": None, "billed_qty": 2,
+                                   "billed_to_date_qty": 2, "price_variance_pct": 0}]}}
+    assert run(make_ctx, ds, two_way) == []
