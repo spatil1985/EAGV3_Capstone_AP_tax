@@ -1,0 +1,7 @@
+# Customers with a written pure-agent clause (Rule 33 condition 1). Not in the AgentSwitch data
+# model, so a person records them here. Read by scripts/uc/IN/uc35_pure_agent_recharges.py.
+#
+#   - customer_id: <Party.id>
+#     contract_ref: "MSA 2026-04 clause 7.2"
+#     verified_by: <name>, <date>
+customers: []

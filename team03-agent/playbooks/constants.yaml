@@ -287,3 +287,10 @@ registration_threshold_goods_inr:
   unit: INR aggregate turnover above which a goods supplier must register (Rs 20 lakh services; lower in special-category states)
   source: s.22 CGST Act; Notification 10/2019-CT
   verified: null
+
+# --- UC-35 recharges ------------------------------------------------------------------------
+recharge_service_rate_pct:
+  value: 18
+  unit: percent GST on a recharged cost that fails the Rule 33 pure-agent test (the supplier's own service rate)
+  source: s.15(2)(c) CGST Act; Rule 33; typical rate for professional/agency services (SAC 9983)
+  verified: null
