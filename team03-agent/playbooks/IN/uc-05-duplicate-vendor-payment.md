@@ -11,7 +11,7 @@ questions:
   - "Is any vendor being paid twice?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [Bill.list, Party.list, PaymentMade.list, endpoint.accounting.bill_match]
 triggers:

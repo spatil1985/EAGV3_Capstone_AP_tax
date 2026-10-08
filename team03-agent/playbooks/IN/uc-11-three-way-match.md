@@ -11,7 +11,7 @@ questions:
   - "Were the goods we're being billed for actually received?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [Bill.list, Party.list, endpoint.accounting.bill_match]
 triggers:

@@ -10,7 +10,7 @@ questions:
   - "Are we about to pay vendors in full while they owe us money from credit notes or advances?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [VendorCredit.list, Bill.list, PaymentMade.list]
 triggers:

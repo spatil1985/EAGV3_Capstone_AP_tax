@@ -117,12 +117,15 @@ class Route:
 
 def route(m: Manifest, ctx, *, available_tools: set[str], trigger: str | None = None,
           cadence: str | None = None) -> Route:
+    # The regime comes first: another jurisdiction's blocked or spec-only use case is simply not ours.
+    if "all" not in m.tax_regimes and ctx.tax_regime not in m.tax_regimes:
+        return Route(m, "skip", f"tax_regime {ctx.tax_regime} not in {list(m.tax_regimes)}")
     if m.status == "blocked":
         return Route(m, "blocked", f"blocked by {m.blocked_by or 'a platform gap'}")
     if m.status == "spec":
-        return Route(m, "spec", f"spec only — no {'/'.join(m.requires.verticals)} tenant or data yet")
-    if "all" not in m.tax_regimes and ctx.tax_regime not in m.tax_regimes:
-        return Route(m, "skip", f"tax_regime {ctx.tax_regime} not in {list(m.tax_regimes)}")
+        verticals = [v for v in m.requires.verticals if v != "all"]
+        return Route(m, "spec", m.blocked_by or ("spec only — no " + "/".join(verticals) + " tenant or data yet"
+                                                 if verticals else "spec only — no data of this kind on the tenant yet"))
     if "all" not in m.requires.verticals and ctx.vertical not in m.requires.verticals:
         return Route(m, "skip", f"vertical {ctx.vertical} not in {list(m.requires.verticals)}")
     off = [f for f in m.requires.features if not ctx.features.get(f)]

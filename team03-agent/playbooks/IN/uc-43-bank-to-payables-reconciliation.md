@@ -10,7 +10,7 @@ questions:
   - "Does every vendor payment in the bank match a payment in our books, and the other way round?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [BankTransaction.list, PaymentMade.list, Party.list, Bill.list]
 triggers:

@@ -11,7 +11,7 @@ questions:
   - "Is anyone splitting purchases into smaller bills so each one stays under the approval limit?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [Bill.list, PurchaseOrder.list]
 triggers:

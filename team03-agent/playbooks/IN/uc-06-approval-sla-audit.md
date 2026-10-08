@@ -11,7 +11,7 @@ questions:
   - "Who approved what, was it within policy, and did anyone approve their own bill?"
 status: live
 blocked_by: null
-tax_regimes: [all]
+tax_regimes: [gst]          # the US tenant runs its own US-xx instance
 requires:
   tools: [ApprovalRequest.list, ApprovalLog.list, endpoint.approvals.check_sla]
 triggers:
