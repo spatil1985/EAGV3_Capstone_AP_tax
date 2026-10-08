@@ -225,3 +225,13 @@ gstr2b_generation_day:
   unit: day of the following month on which GSTR-2B is generated (IMS actions close)
   source: Rule 60(7) CGST Rules; IMS advisory (Oct 2024)
   verified: null
+
+# --- UC-26 GSTR-1 ---------------------------------------------------------------------------
+gstr1_b2cl_threshold_inr:
+  - {value: 250000, effective_to: 2024-07-31, source: "Rule 59 / GSTR-1 Table 5 before Notification 12/2024-CT"}
+  - {value: 100000, effective_from: 2024-08-01, source: "Notification 12/2024-CT (B2CL threshold lowered to Rs 1 lakh; confirm)"}
+hsn_min_digits_above_5cr:
+  value: 6
+  unit: minimum HSN digits on B2B invoices for a taxpayer with AATO above Rs 5 crore (4 below)
+  source: Notification 78/2020-CT
+  verified: null
