@@ -257,3 +257,33 @@ gst_late_fee_cap_inr:
   unit: INR cap per return for aggregate turnover above Rs 5 crore (Rs 2,000 up to 1.5 Cr; Rs 5,000 up to 5 Cr)
   source: Notifications 19/2021 and 20/2021-CT (confirm); turnover band from UC-29
   verified: null
+
+# --- UC-29 turnover-based obligations (aggregate annual turnover, previous FY) -------------------
+aato_einvoice_inr:
+  - {value: 100000000, effective_to: 2023-07-31, source: "Notification 17/2022-CT (Rs 10 crore)"}
+  - {value: 50000000, effective_from: 2023-08-01, source: "Notification 10/2023-CT (Rs 5 crore)"}
+aato_qrmp_max_inr:
+  value: 50000000
+  unit: INR, AATO up to which quarterly filing (QRMP) is allowed
+  source: Rule 61A CGST Rules
+  verified: null
+aato_gstr9_optional_inr:
+  value: 20000000
+  unit: INR, AATO up to which GSTR-9 is optional (notified each year)
+  source: s.44 proviso; annual notifications (confirm for the FY)
+  verified: null
+aato_gstr9c_inr:
+  value: 50000000
+  unit: INR, AATO above which the self-certified GSTR-9C is required
+  source: Rule 80(3) CGST Rules
+  verified: null
+aato_composition_max_inr:
+  value: 15000000
+  unit: INR, preceding-FY turnover up to which the composition scheme is available
+  source: s.10(1) CGST Act; Notification 14/2019-CT
+  verified: null
+registration_threshold_goods_inr:
+  value: 4000000
+  unit: INR aggregate turnover above which a goods supplier must register (Rs 20 lakh services; lower in special-category states)
+  source: s.22 CGST Act; Notification 10/2019-CT
+  verified: null
