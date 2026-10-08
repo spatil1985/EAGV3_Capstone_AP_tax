@@ -88,6 +88,19 @@ class Fetcher:
                     or (total is not None and offset >= total) or len(rows) >= self.max_rows):
                 return rows[: self.max_rows]
 
+    def call(self, tool: str, args: dict) -> dict:
+        """One read endpoint (e.g. endpoint.accounting.bill_match). The policy decides whether
+        the tool may run; a refusal or error raises FetchError like any other read."""
+        return self._unwrap(tool, self._gw.call_tool(tool, args))
+
+    def rest_get(self, path: str, params: dict | None = None):
+        """An allowlisted REST read (aptax/agentswitch/risk.py REST_READS)."""
+        return self._gw.rest("GET", path, params)
+
+    def rest_post(self, path: str, body: dict):
+        """An allowlisted REST POST that does not persist (e.g. the tax/compute oracle)."""
+        return self._gw.rest("POST", path, None, body)
+
     def get(self, entity: str, record_id: str) -> dict:
         tool = f"{entity}.get"
         return quarantine(entity, self._unwrap(tool, self._gw.call_tool(tool, {"id": record_id})))
