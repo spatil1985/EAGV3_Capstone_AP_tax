@@ -361,3 +361,13 @@ default_payment_terms_days:
   unit: days after the bill date when neither payment_terms nor due_date is set
   source: team choice (UC-42 §6)
   verified: null
+
+# --- US-06 / US-16 Form 1099 and backup withholding --------------------------------------------
+form_1099_threshold_usd:
+  - {value: 600, effective_to: 2025-12-31, source: "IRC 6041 / 6041A before OBBBA 2025"}
+  - {value: 2000, effective_from: 2026-01-01, source: "OBBBA 2025 (indexed after 2026 — confirm); the platform's report uses 2000"}
+backup_withholding_rate_pct:
+  value: 24
+  unit: percent of reportable payments withheld when the payee has given no TIN
+  source: IRC 3406
+  verified: null
