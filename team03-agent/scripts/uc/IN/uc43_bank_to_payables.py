@@ -44,8 +44,12 @@ class BankToPayables(Playbook):
         c = outcome.context
         if not unrec and not missing:
             return f"Bank and payables reconcile over {c['bank window']}."
-        return (f"Over {c['bank window']}: {fmt(out, ctx.currency)} left the bank to {len(unrec)} vendor payee(s) with no "
-                f"payment in AP (those bills may be paid again)"
-                + (f", and {fmt(missing.total_exposure, ctx.currency)} of AP payments ({missing.details['count']}) never "
-                   f"appear in the bank" if missing else "")
+        parts = []
+        if unrec:
+            parts.append(f"{fmt(out, ctx.currency)} left the bank to {len(unrec)} vendor payee(s) with no payment in AP "
+                         f"(those bills may be paid again)")
+        if missing:
+            parts.append(f"{fmt(missing.total_exposure, ctx.currency)} of AP payments ({missing.details['count']}) never "
+                         f"appear in the bank")
+        return (f"Over {c['bank window']}: " + ", and ".join(parts)
                 + (f". {nv.details['count']} debit(s) are 'matched' to no voucher." if nv else "."))
