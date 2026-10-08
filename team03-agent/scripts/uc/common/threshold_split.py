@@ -94,3 +94,18 @@ def split_findings(docs, doc_type: str, limit: dict | None, ctx):
             details={"vendor_id": vendor, "window_days": WINDOW_DAYS, "documents": refs, "sum": str(total),
                      "threshold": str(threshold), "threshold_source": limit.get("source"), "strength": level,
                      "strength_reasons": reasons})
+
+
+def infer_threshold(requests, doc_type: str):
+    """Approval-history edge (UC-44 step 1): the highest amount under one policy when the next policy's
+    amounts all lie above it. Returns (edge, bands) or (None, bands) when the bands overlap or are single."""
+    bands: dict = {}
+    for r in requests:
+        if r.get("document_type") == doc_type and r.get("policy_id") and r.get("document_amount") is not None:
+            bands.setdefault(r["policy_id"], []).append(money(r["document_amount"]))
+    ranges = sorted((min(v), max(v), pid, len(v)) for pid, v in bands.items())
+    summary = [{"policy_id": pid, "count": n, "from": str(lo), "to": str(hi)} for lo, hi, pid, n in ranges]
+    for (lo1, hi1, _, n1), (lo2, _, _, n2) in zip(ranges, ranges[1:]):
+        if n1 > 1 and n2 > 1 and hi1 < lo2:
+            return hi1, summary
+    return None, summary
