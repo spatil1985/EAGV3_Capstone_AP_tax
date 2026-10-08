@@ -1,0 +1,9 @@
+# Approval thresholds per document type, maintained by finance (UC-44, US-20).
+# ApprovalPolicy is 403 for finance_user (N426 T2.1), so the real limits can't be read.
+# `source: assumed` marks a value nobody has confirmed against the policy.
+in:
+  Bill: {threshold: 100000, currency: INR, source: assumed}
+  PurchaseOrder: {threshold: 100000, currency: INR, source: assumed}
+us:
+  Bill: {threshold: 10000, currency: USD, source: inferred from approval requests (US-20 §11)}
+  PurchaseOrder: {threshold: 10000, currency: USD, source: inferred from approval requests (US-20 §11)}
