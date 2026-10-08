@@ -371,3 +371,10 @@ backup_withholding_rate_pct:
   unit: percent of reportable payments withheld when the payee has given no TIN
   source: IRC 3406
   verified: null
+
+# --- US-11 purchase-side refund windows ----------------------------------------------------------
+sales_tax_refund_window_years_oh:
+  value: 4
+  unit: years from payment to apply for a refund of Ohio sales tax paid in error
+  source: R.C. 5739.07 (confirm; other states commonly 3-4 years)
+  verified: null

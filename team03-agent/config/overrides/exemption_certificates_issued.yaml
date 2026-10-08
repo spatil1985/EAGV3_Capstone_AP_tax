@@ -1,0 +1,8 @@
+# Exemption certificates WE gave to vendors (US-11). The platform's ExemptionCertificate records only
+# certificates received from customers, so a person records ours here.
+#
+#   - vendor_id: <Party.id>
+#     certificate: "OH STEC B — manufacturing"
+#     state_code: OH
+#     issued: 2026-01-15
+certificates: []
