@@ -149,3 +149,25 @@ job_work_warning_days:
   unit: days before the deadline a challan is listed as due soon
   source: team choice (UC-10 §5 step 5)
   verified: null
+
+# --- UC-13 194Q (s.206C(1H) understood omitted from 1 April 2025 — confirm) ------------
+tds_194q_threshold_inr:
+  value: 5000000
+  unit: INR, FY-cumulative goods purchases from one seller above which 194Q applies
+  source: s.194Q(1) Income-tax Act 1961
+  verified: null
+tds_194q_rate_pct:
+  value: 0.1
+  unit: percent of the purchase value above the threshold
+  source: s.194Q(1) Income-tax Act 1961
+  verified: null
+tds_194q_buyer_turnover_inr:
+  value: 100000000
+  unit: INR, buyer's preceding-FY turnover above which it must deduct 194Q
+  source: s.194Q(3)(a) Income-tax Act 1961
+  verified: null
+tds_194q_approaching_pct:
+  value: 80
+  unit: percent of the threshold at which a vendor is listed as approaching
+  source: team choice (UC-13 §5 step 5)
+  verified: null
