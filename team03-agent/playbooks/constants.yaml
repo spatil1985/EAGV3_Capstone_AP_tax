@@ -390,3 +390,20 @@ sales_tax_timely_discount_pct:
   unit: percent vendor's discount for filing and paying on time (caps apply — not modelled)
   source: "state statutes (confirm; caps by frequency not modelled)"
   verified: null
+
+# --- US-21 unclaimed property (vendor payments; confirm per state) --------------------------------
+escheat_dormancy_years:
+  value: {OH: 5, PA: 3, MI: 3, IL: 3, default: 3}
+  unit: years after which an uncashed or returned vendor payment is presumed abandoned
+  source: "OH R.C. 169.02; PA, MI, IL unclaimed property acts (confirm per state and property type)"
+  verified: null
+escheat_due_diligence_days:
+  value: 120
+  unit: days before dormancy when due-diligence notices to the owner should go out
+  source: RUUPA 2016 (60-120 days before the report; states vary)
+  verified: null
+escheat_clearing_grace_days:
+  value: 60
+  unit: days after issue before an uncleared payment is treated as outstanding
+  source: team choice (US-21 §5 step 1)
+  verified: null
