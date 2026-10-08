@@ -135,7 +135,17 @@ class HsnRateConsistency(Playbook):
         return {"sale lines with an HSN and a rate": len(lines),
                 "… rate basis": {b: sum(1 for *_, basis in lines if basis == b) for b in ("effective", "tax_percentage")},
                 "distinct HSNs": len({code for _, _, _, code, _, _ in lines}),
+                "HSNs with several rates on cancelled/void invoices only (no liability, but a master-data signal)":
+                    self.cancelled_spread(data["invoices"]),
                 "authoritative rate table": "none on the platform (N426 T3.4)"}
+
+    @staticmethod
+    def cancelled_spread(invoices) -> dict:
+        dead = [{**i, "status": "sent"} for i in invoices if (i.get("status") or "").lower() in DEAD]
+        groups: dict = {}
+        for _, _, _, code, rate, _ in sale_lines(dead):
+            groups.setdefault(code, set()).add(_num(rate))
+        return {code: sorted(r, key=Decimal) for code, r in sorted(groups.items()) if len(r) > 1}
 
     def summary(self, outcome, ctx):
         n = lambda rule: sum(1 for f in outcome.findings if f.rule == rule)  # noqa: E731
