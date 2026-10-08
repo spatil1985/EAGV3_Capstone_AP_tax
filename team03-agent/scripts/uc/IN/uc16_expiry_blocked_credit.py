@@ -74,6 +74,7 @@ class ExpiryWarning(Rule):
                 details={"item_id": item["id"], "expiry_estimate": str(expiry), "days_to_expiry": left, "qty": str(qty),
                          "itc_at_risk": str(itc), "per_unit_tax": str((itc / qty).quantize(CENTS)) if qty else None,
                          "basis": "bill_date_proxy", "bill": bill.get("number"),
+                         "tax_source": "trusted" if shares is not None else "unsourced (tax lines inconsistent)",
                          "shelf_life_days": item.get("shelf_life_days")})
 
 
@@ -118,6 +119,9 @@ class ExpiryBlockedCredit(Playbook):
         itc = sum((f.total_exposure for f in warn), Decimal("0"))
         expired = sum(1 for f in warn if f.details["days_to_expiry"] < 0)
         dq = len(outcome.findings) - len(warn)
+        unsourced = sum(1 for f in warn if f.details.get("tax_source", "").startswith("unsourced"))
         return (f"{len(warn)} lot(s) expired or expiring within {WARN_DAYS} days ({expired} already expired); "
-                f"{fmt(itc, ctx.currency)} ITC to reverse if they are written off. {dq} item(s) can't be dated or "
+                f"{fmt(itc, ctx.currency)} ITC to reverse if they are written off"
+                + (f" ({unsourced} lot(s) on bills whose tax can't be sourced)" if unsourced else "")
+                + f". {dq} item(s) can't be dated or "
                 f"are mis-typed. Dates are estimates from bill dates.")
