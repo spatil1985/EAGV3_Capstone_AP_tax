@@ -171,3 +171,15 @@ tds_194q_approaching_pct:
   unit: percent of the threshold at which a vendor is listed as approaching
   source: team choice (UC-13 §5 step 5)
   verified: null
+
+# --- UC-14 clinic room rent ----------------------------------------------------------
+clinic_room_rent_threshold_inr:
+  value: 5000
+  unit: INR per day per patient; non-ICU room rent above this is taxable
+  source: Notification 4/2022-CT(R), amending 12/2017-CT(R) entry 46 (from 18 July 2022)
+  verified: null
+clinic_room_rent_rate_pct:
+  value: 5
+  unit: percent GST on taxable room rent, without ITC
+  source: Notification 3/2022-CT(R)
+  verified: null
