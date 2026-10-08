@@ -188,3 +188,13 @@ clinic_room_rent_rate_pct:
 gst_rate_slabs_pct:
   - {value: [0, 0.1, 0.25, 1.5, 3, 5, 6, 12, 18, 28], effective_to: 2025-09-21, source: "Notification 1/2017-CT(R) schedules (pre-rationalisation)"}
   - {value: [0, 0.1, 0.25, 1.5, 3, 5, 18, 40], effective_from: 2025-09-22, source: "GST Council 56th meeting; Notification 9/2025-CT(R) (confirm)"}
+
+# --- UC-19 credit-note window -----------------------------------------------------------
+credit_note_cutoff_month_day:
+  - {value: "09-30", effective_to: 2022-09-30, source: "s.34(2) CGST Act before Finance Act 2022"}
+  - {value: "11-30", effective_from: 2022-10-01, source: "s.34(2) as amended by Finance Act 2022 (30 Nov after FY end, or annual return if earlier)"}
+credit_note_window_warning_days:
+  value: 90
+  unit: days before the cutoff when still-eligible invoices are listed
+  source: team choice (UC-19 §5 step 4)
+  verified: null
