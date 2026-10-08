@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from scripts.uc.IN.uc21_import_of_services_rcm import ImportOfServicesRcm
 
-INDIAN = {"id": "bosch", "gst_treatment": "business_gst", "gst_no": "27AAACB1234C1Z5"}
+INDIAN = {"id": "bosch", "gst_treatment": "business_gst", "gst_no": None}   # GSTINs are blank live
 FOREIGN = {"id": "aws", "gst_treatment": "overseas", "gst_no": None}
 
 

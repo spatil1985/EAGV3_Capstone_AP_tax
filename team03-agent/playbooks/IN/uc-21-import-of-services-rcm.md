@@ -39,7 +39,8 @@ Monthly, before a foreign bill is approved, and on request.
 | `rcm_double_tax` | Import of services with RCM on, but the supplier charged GST |
 | `classification_conflict` (data_quality) | Tagged overseas on one signal only: fix the tag |
 
-Signals: bill tag, vendor tag, non-INR currency, vendor with no Indian GSTIN. Imported
+Signals: bill tag, vendor tag, non-INR currency, vendor with no Indian GSTIN; a vendor
+registered as an Indian taxpayer (e.g. `business_gst`) overrides them. Imported
 goods are customs IGST and out of scope.
 
 ## How to explain the result

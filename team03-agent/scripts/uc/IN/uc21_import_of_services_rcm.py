@@ -8,8 +8,9 @@ from a supplier outside India is paid by the recipient under reverse charge. Goo
 customs IGST at the border, not RCM.
 
 Step 1 needs two agreeing "overseas" signals (Bill.gst_treatment, Party.gst_treatment, non-INR
-currency, no Indian GSTIN), because the bill-level tag is unreliable on this tenant (all 12
-`overseas` bills are Indian vendors in INR — spec §6).
+currency, no Indian GSTIN) and no contrary one (a vendor registered as business_gst etc.), because
+the bill-level tag is unreliable on this tenant (all 12 `overseas` bills are Indian vendors in INR —
+spec §6) and GSTINs are blank on every vendor, so "no GSTIN" alone proves nothing.
 
 Rules:
   rcm_import_of_services   genuine overseas service bill, is_reverse_charge off → liability =
@@ -66,7 +67,9 @@ class ImportOfServices(Rule):
                 continue
             number = ref(bill, "number", "bill_number")
             vid, vname = party_of(bill, data)
-            if len(found) < 2:
+            vendor_says = ((party or {}).get("gst_treatment") or "").lower()
+            contradicted = vendor_says not in ("", "overseas")   # e.g. business_gst: an Indian registrant
+            if len(found) < 2 or contradicted:
                 yield Finding(
                     finding_type=DATA_QUALITY, rule="classification_conflict", entity_type="Bill",
                     entity_id=bill["id"], entity_ref=number, status=DATA_QUALITY, severity=15,
@@ -74,7 +77,8 @@ class ImportOfServices(Rule):
                     summary=f"{number} is tagged overseas, but nothing else agrees (vendor "
                             f"{(party or {}).get('gst_treatment') or 'untagged'}, {bill.get('currency_code') or 'INR'}); "
                             f"no import-of-services liability is assumed. Fix the tag.",
-                    details={"signals": found, "is_reverse_charge": bill.get("is_reverse_charge"),
+                    details={"signals": found, "contradicted_by": f"vendor gst_treatment {vendor_says}" if contradicted else None,
+                             "is_reverse_charge": bill.get("is_reverse_charge"),
                              "service": is_service(bill, items)})
                 continue
             if not is_service(bill, items):
