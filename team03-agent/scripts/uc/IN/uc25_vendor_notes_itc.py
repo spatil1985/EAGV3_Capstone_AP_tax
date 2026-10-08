@@ -95,7 +95,7 @@ class VendorNotes(Rule):
                           summary=f"{len(unlinked)} vendor credit(s) can't be tied to an original bill ({blank} have no "
                                   f"reference; the rest reference codes that match no bill). s.34 requires the link, or "
                                   f"they are unlinked discounts (s.15(3)(b)).",
-                          details={"vendor_credits": [ref(v, "number") for v in unlinked][:50],
+                          details={"count": len(unlinked), "vendor_credits": [ref(v, "number") for v in unlinked][:50],
                                    "sample_references": [v.get("reference_number") for v in unlinked[:5]]})
         invoices = data.index("invoices", "id")
         for cn in data.get("credit_notes", []):
@@ -133,7 +133,7 @@ class VendorNotesItc(Playbook):
         n, due = agg("itc_reduction_due")
         r, rcm = agg("rcm_liability_reduction")
         i, imp = agg("credit_tax_impossible")
-        u = next((len(f.details["vendor_credits"]) for f in outcome.findings if f.rule == "credit_unlinked"), 0)
+        u = next((f.details["count"] for f in outcome.findings if f.rule == "credit_unlinked"), 0)
         m, _ = agg("misfiled_vendor_credit")
         return (f"{fmt(due, ctx.currency)} of input credit must be reduced for {n} supplier credit note(s); "
                 f"{r} reverse-charge credit(s) reduce RCM by {fmt(rcm, ctx.currency)}. {i} credit note(s) carry GST "
