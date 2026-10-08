@@ -159,7 +159,7 @@ blind.
 | `harness/output/report.py` | `runtime/render.py` + `escalate` action | Its escalation payload lacks the now-required `session_id` (§4.7) |
 | `harness/core/context.py` (`RunContext.build`) | `as_context` | Add `OrgProfile.industry` for the vertical |
 | `scripts/findings.py`, `money.py`, `playbooks/constants.yaml` | `domain/` | `constants.yaml` grows into the effective-dated rulebook (§4.12) |
-| `scripts/uc/uc12_eway_bill.py` | `playbooks/` `eway` | Known gaps: no coverage for `not_generated`-only invoices; validity rule applies to non-live EWBs; a malformed date aborts the run |
+| `scripts/uc/IN/uc12_eway_bill.py` (now one of 56 live playbooks in `scripts/uc/IN|US/`, 2026-10-08) | `playbooks/` `eway` | Known gaps: no coverage for `not_generated`-only invoices; validity rule applies to non-live EWBs; a malformed date aborts the run |
 
 **Not built yet:**
 - trigger envelope, scheduler and calendar, watcher, governor;

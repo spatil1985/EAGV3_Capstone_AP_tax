@@ -61,8 +61,10 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
 |---|---|
 | `aptax/` | The agent (agent_design.md §7): `agentswitch/` (transport, policy gateway, risk tiers, fetch + quarantine), `capabilities/` (registry, built-ins), `runtime/` (agent loop, evidence check, runner, outbox, render), `triggers/` (envelope, subscriptions, governor), `playbooks/` (manifests, base classes), `store/` (SQLite), `llm/` (contract; the gateway plugs in via `APTAX_LLM`), `api.py`, `cli.py`. The earlier `harness/` was retired on 2026-10-07 (git history keeps it) |
 | `config/` | `policy.yaml` (tool policy, default deny), `charter.md` (the agent's corrected charter) |
-| `scripts/` | Client, `findings.py` (output contract), `money.py`, `uc/` (one module per use case; UC-12 so far). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
-| `playbooks/` | Use-case manifests (`uc-12-eway-bill.md`) and `constants.yaml`. `duplicate_audit.md` / `tax_audit.md` are legacy SOPs (no manifest), to be replaced by UC-05 and period-liability playbooks |
+| `scripts/` | Client, `findings.py` (output contract), `money.py`, `uc/IN/` and `uc/US/` (one module per use case — 56 live), `uc/common/` (logic shared across use cases: tax source, duplicates, approvals, payment run, …). `invoice_matcher.py` and `tax_math.py` are legacy, used by existing tests |
+| `playbooks/` | One manifest per use case in `IN/` (UC-01…44) and `US/` (US-01…22): 56 live, 5 blocked, 5 spec only — index in [`playbooks/README.md`](playbooks/README.md). `constants.yaml` holds the statutory numbers (effective-dated). `duplicate_audit.md` / `tax_audit.md` are legacy SOPs |
+| `config/overrides/` | Facts not in the data model, kept by a person: pure-agent contracts, non-resident documents, certificates we issue, approval limits |
+| `tests_generated/` | **LLM-generated, ungraded** offline checks per playbook (`IN/`, `US/`). Kept out of `tests/` because only hand-written tests are graded (rule 4) |
 | `docs/planning/` | `spec.md` (22 use cases), `assignment.md` (workstreams), `agent_design.md` (design of record), `harness_plan.md` (superseded), `architecture.md` (the retired harness, historical) |
 | `docs/usecases/` | `IN/` UC-01…22 and `US/` US-01…10, each with live evidence |
 | `docs/submissions/` | Bugs and feature requests: `agentswitch_submissions.md` (master, tallied with the board), `submission_tracker.md`, `requested_tools.md`, `bugs_to_file_2026-09-30.md` |
@@ -83,13 +85,14 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
   outside the county (seed data).
 
 ### 4.2 Harness
-- **Built and verified live:** the deterministic path (registry → gateway → runner →
-  state → reports) and **one live playbook, UC-12** (e-way bill audit). On India
-  (2026-09-30): 367 findings from 3 MCP calls; a second run reports 0 new; replay is
-  identical; on US it is skipped by locale with 0 MCP calls.
-- **Not built:** the LLM loop (LLM gateway), event polling, the `AgentMemory`
-  store, vertical detection, cron, and every playbook except UC-12. Next playbooks
-  per the plan: UC-05 (duplicates), UC-01 (Rule 37), period liability IN + US.
+- **Playbooks (2026-10-08): all 66 use cases have a manifest; 56 run live.** Each was
+  run in dry-run on its tenant before it was committed, and checked against its spec's
+  worked example where one exists (e.g. UC-23 August cash ₹5,72,073.68, UC-26 ₹45,152.62
+  wrong-head tax, UC-41 ₹4,91,099.27, UC-43 ₹56,20,600, US-01 $226,488.27, US-05
+  $7,919.93 — all exact). Routing: Suryodaya runs 36 (UC-07/14 need a school/clinic
+  tenant), Keystone runs the 18 live US playbooks. The 10 blocked/spec-only manifests
+  answer through `explain_use_case`. Index: [`playbooks/README.md`](playbooks/README.md).
+- **Not built yet:** event polling (watcher), cron, the LLM gateway behind `APTAX_LLM`.
 
 ### 4.3 Bug bounty — tallied with the class bug board
 The board is a Claude artifact (`claude.ai/artifact/6LvLawFFUXGoRHUQKbPg9h`). Its rows

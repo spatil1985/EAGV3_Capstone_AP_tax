@@ -5,8 +5,9 @@
 # Each entry: value · unit · source (statute / notification) · verified (date a human
 # last checked the source; null = not yet checked).
 #
-# Seeded with UC-12's constants only. Add the rest (180 d, 45 d, ₹50 lakh, ₹5,000/day,
-# 1 yr / 3 yr, 30 Nov, 18% p.a.) as their playbooks land.
+# One section per use case (or family). Where the law changed, an entry is a list of
+# effective-dated versions; ctx.rule(name, on=date) returns the one in force. Values marked
+# "confirm" or verified: null still need a person to check the source.
 
 eway_bill_threshold_inr:
   value: 50000
