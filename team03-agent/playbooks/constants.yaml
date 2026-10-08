@@ -132,3 +132,20 @@ tds_threshold_194j_inr:
 tds_threshold_194i_monthly_inr:
   - {value: 20000, effective_to: 2025-03-31, source: "s.194I, Rs 2,40,000 a year before Finance Act 2025"}
   - {value: 50000, effective_from: 2025-04-01, source: "s.194I as amended by Finance Act 2025: Rs 50,000 a month (confirm)"}
+
+# --- UC-10 job work (s.143 CGST Act) -------------------------------------------------
+job_work_return_days_inputs:
+  value: 365
+  unit: days for inputs sent to a job worker to come back before the send is a deemed supply
+  source: s.143(1)(a) and s.143(3) CGST Act 2017
+  verified: null
+job_work_return_days_capital_goods:
+  value: 1095
+  unit: days for capital goods (moulds, dies, jigs, fixtures, tools are exempt from the limit)
+  source: s.143(1)(a) and s.143(3) CGST Act 2017
+  verified: null
+job_work_warning_days:
+  value: 60
+  unit: days before the deadline a challan is listed as due soon
+  source: team choice (UC-10 §5 step 5)
+  verified: null
