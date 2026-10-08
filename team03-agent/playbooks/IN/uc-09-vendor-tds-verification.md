@@ -3,7 +3,7 @@ id: uc-09
 title: Vendor TDS verification
 capability: tds
 description: >-
-  UC-09 (India): recomputes TDS on every posted supplier bill from its lines (section from
+  UC-09 (India): recomputes TDS on every open or draft supplier bill from its lines (section from
   the SAC: 194C contracts, 194J professional/technical, 194I rent; goods attract none) and
   flags TDS above the bill (negative payable), wrong arithmetic, TDS on goods, a missing
   section, the wrong rate, and service bills above the threshold with no TDS.
@@ -52,5 +52,5 @@ Lead with bills that would go out with a negative payable. Note that vendor PANs
 blank, so s.206AA (20%) may apply; the rate used is the section rate.
 
 ## Limits
-Citations are Income-tax Act 1961 numbering; confirm under the 2025 Act. Void and draft
-bills are not checked (the count is in the run context).
+Citations are Income-tax Act 1961 numbering; confirm under the 2025 Act. Drafts are checked (fix them before approval); void
+bills are not (the count is in the run context).

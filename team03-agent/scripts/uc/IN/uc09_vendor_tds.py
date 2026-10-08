@@ -32,7 +32,9 @@ SEVERITY = {"tds_exceeds_bill": 90, "tds_arithmetic_wrong": 75, "tds_on_goods": 
 
 
 def posted(bills):
-    return [b for b in bills if (b.get("status") or "").lower() not in NOT_POSTED]
+    """Open and draft bills: a draft with phantom TDS is the one to fix before it is approved.
+    Void, cancelled and rejected bills will never be paid."""
+    return [b for b in bills if (b.get("status") or "").lower() not in NOT_POSTED - {"draft"}]
 
 
 def fy_totals(bills, ctx) -> dict:
@@ -135,11 +137,11 @@ class VendorTdsVerification(Playbook):
     def context(self, data, findings, ctx):
         bills = posted(data["bills"])
         with_tds = [b for b in bills if stored(b)[0] > 0]
-        return {"posted bills": len(bills), "bills with TDS": len(with_tds),
+        return {"open and draft bills": len(bills), "bills with TDS": len(with_tds),
                 "sum of stored TDS": str(sum((stored(b)[0] for b in with_tds), Decimal("0"))),
                 "bills with a negative payable": sum(1 for b in bills if money(b.get("grand_total")) < 0),
                 "vendors with a PAN on file": sum(1 for p in data["parties"] if p.get("pan")),
-                "void/draft bills carrying TDS (not checked)": sum(
+                "void bills carrying TDS (not checked)": sum(
                     1 for b in data["bills"] if b not in bills and stored(b)[0] > 0)}
 
     def summary(self, outcome, ctx):
@@ -147,7 +149,7 @@ class VendorTdsVerification(Playbook):
         missing = [f for f in outcome.findings if f.rule == "tds_not_deducted"]
         phantom = sum((money(f.details["stored_tds_amount"]) for f in wrong), Decimal("0"))
         neg = sum(1 for f in outcome.findings if f.rule == "tds_exceeds_bill")
-        return (f"{outcome.context.get('bills with TDS', 0)} posted bill(s) carry TDS; {len(wrong)} wrong "
+        return (f"{outcome.context.get('bills with TDS', 0)} open or draft bill(s) carry TDS; {len(wrong)} wrong "
                 f"({fmt(phantom, ctx.currency)} stored); {neg} with TDS above the bill; {len(missing)} possibly "
-                f"missing TDS. {outcome.context.get('void/draft bills carrying TDS (not checked)', 0)} void or "
-                f"draft bills also carry TDS and were not checked.")
+                f"missing TDS. {outcome.context.get('void bills carrying TDS (not checked)', 0)} void "
+                f"bills also carry TDS and were not checked.")
