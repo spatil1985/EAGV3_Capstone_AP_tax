@@ -57,3 +57,24 @@ rcm_rate_services_pct:
   unit: percent GST payable under reverse charge on legal, sponsorship and director services
   source: Notification 13/2017-CT(R) entries 2, 4, 6; 11/2017-CT(R) standard rate
   verified: null
+
+# --- UC-04 / UC-42 MSME --------------------------------------------------------------
+msme_payment_days:
+  value: 45
+  unit: maximum days from acceptance to pay a micro or small enterprise (agreed period can't exceed it)
+  source: s.15 MSMED Act 2006; s.43B(h) Income-tax Act 1961 (renumbered under the 2025 Act — confirm)
+  verified: null
+
+msme_interest_multiple:
+  value: 3
+  unit: times the RBI bank rate, compounded monthly, on late payment to an MSE
+  source: s.16 MSMED Act 2006
+  verified: null
+
+# RBI bank rate (= MSF rate). Effective-dated; confirm each change against the RBI press release.
+rbi_bank_rate_pct:
+  - {value: 6.75, effective_from: 2023-02-08, effective_to: 2025-02-06, source: "RBI MPC 8 Feb 2023"}
+  - {value: 6.50, effective_from: 2025-02-07, effective_to: 2025-04-08, source: "RBI MPC 7 Feb 2025"}
+  - {value: 6.25, effective_from: 2025-04-09, effective_to: 2025-06-05, source: "RBI MPC 9 Apr 2025"}
+  - {value: 5.75, effective_from: 2025-06-06, effective_to: 2025-12-04, source: "RBI MPC 6 Jun 2025"}
+  - {value: 5.50, effective_from: 2025-12-05, source: "RBI MPC 5 Dec 2025 (confirm)", review_by: 2026-12-31}
