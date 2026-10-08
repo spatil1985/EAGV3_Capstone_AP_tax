@@ -198,3 +198,20 @@ credit_note_window_warning_days:
   unit: days before the cutoff when still-eligible invoices are listed
   source: team choice (UC-19 §5 step 4)
   verified: null
+
+# --- UC-23 GSTR-3B -----------------------------------------------------------------------
+rule_86b_turnover_inr:
+  value: 5000000
+  unit: INR of taxable outward supplies (excluding exempt and zero-rated) in a month above which Rule 86B applies
+  source: Rule 86B CGST Rules 2017
+  verified: null
+rule_86b_cash_floor_pct:
+  value: 1
+  unit: percent of output tax that must be paid in cash when Rule 86B applies
+  source: Rule 86B CGST Rules 2017
+  verified: null
+gstr3b_due_day:
+  value: 20
+  unit: day of the following month on which monthly GSTR-3B is due
+  source: s.39(1) CGST Act; Rule 61(5)
+  verified: null

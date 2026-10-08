@@ -87,6 +87,18 @@ def doc_tax(doc: dict) -> dict | None:
     return {**split, "total": sum(split.values(), Decimal("0.00")), "source": source}
 
 
+def clean_heads(doc: dict) -> dict | None:
+    """Head split from the rows that survived quarantine (VendorCredit keeps only real GST heads,
+    UC-25 §6), else valid item lines. Unlike doc_tax it doesn't require the total to reconcile,
+    because the product-named rows were removed from it."""
+    split = _taxes_split(doc)
+    if split is None:
+        split = _items_split(doc)
+    if split is None:
+        return None
+    return {**split, "total": sum(split.values(), Decimal("0.00"))}
+
+
 def untrusted_tax(doc: dict, entity_type: str, *, blocks: str, currency: str = "INR") -> Finding:
     """The shared data_quality row for a document whose tax can't be sourced."""
     item_sum = sum((sum(line_tax(l).values()) for l in doc.get("items") or []), Decimal("0"))
