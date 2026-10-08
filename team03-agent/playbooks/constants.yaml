@@ -183,3 +183,8 @@ clinic_room_rent_rate_pct:
   unit: percent GST on taxable room rent, without ITC
   source: Notification 3/2022-CT(R)
   verified: null
+
+# --- UC-18 GST rate slabs (rationalised 22 Sep 2025 — confirm) -------------------------
+gst_rate_slabs_pct:
+  - {value: [0, 0.1, 0.25, 1.5, 3, 5, 6, 12, 18, 28], effective_to: 2025-09-21, source: "Notification 1/2017-CT(R) schedules (pre-rationalisation)"}
+  - {value: [0, 0.1, 0.25, 1.5, 3, 5, 18, 40], effective_from: 2025-09-22, source: "GST Council 56th meeting; Notification 9/2025-CT(R) (confirm)"}
