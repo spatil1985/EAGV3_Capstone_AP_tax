@@ -49,7 +49,9 @@ class VendorNotes(Rule):
 
     def evaluate(self, data: Dataset, ctx):
         bills = data.get("bills", [])
-        refs = {str(b.get(k)).strip().upper() for b in bills for k in ("bill_number", "number") if b.get(k)}
+        refs = {str(b.get(k)).strip().upper() for b in bills for k in ("bill_number", "number", "reference_number")
+                if b.get(k)}
+        unlinked = []
         for vc in credits(data):
             tax, source = vc_tax(vc)
             treatment = (vc.get("gst_treatment") or "").lower()
@@ -78,13 +80,7 @@ class VendorNotes(Rule):
                               details={"gst_treatment": treatment, "tax_source": source})
             reference = str(vc.get("reference_number") or "").strip().upper()
             if not reference or reference not in refs:
-                yield Finding(finding_type="itc_adjustment", rule="credit_unlinked", severity=30, **base,
-                              summary=f"{number} ({vname}) " + ("has no reference to the original invoice"
-                                                                 if not reference else
-                                                                 f"references '{vc.get('reference_number')}', which "
-                                                                 f"matches no bill") +
-                                      "; s.34 requires the link (or it is an unlinked discount, s.15(3)(b)).",
-                              details={"reference_number": vc.get("reference_number")})
+                unlinked.append(vc)
             if vc.get("_suspect_taxes"):
                 bad = [r.get("tax_type") or r.get("tax_name") for r in vc["_suspect_taxes"]]
                 yield Finding(finding_type=DATA_QUALITY, rule="stored_value_mismatch", status=DATA_QUALITY,
@@ -92,6 +88,15 @@ class VendorNotes(Rule):
                               summary=f"{number}: taxes[] rows named after products ({', '.join(map(str, bad[:3]))}) "
                                       f"were set aside; only real GST heads are used.",
                               details={"field": "taxes[].tax_type", "observed": bad, "pattern": "N127/N128 seeder"})
+        if unlinked:
+            blank = sum(1 for v in unlinked if not v.get("reference_number"))
+            yield Finding(finding_type="itc_adjustment", rule="credit_unlinked", severity=30, entity_type="VendorCredits",
+                          entity_id="unlinked", entity_ref=f"{len(unlinked)} vendor credits", currency=ctx.currency,
+                          summary=f"{len(unlinked)} vendor credit(s) can't be tied to an original bill ({blank} have no "
+                                  f"reference; the rest reference codes that match no bill). s.34 requires the link, or "
+                                  f"they are unlinked discounts (s.15(3)(b)).",
+                          details={"vendor_credits": [ref(v, "number") for v in unlinked][:50],
+                                   "sample_references": [v.get("reference_number") for v in unlinked[:5]]})
         invoices = data.index("invoices", "id")
         for cn in data.get("credit_notes", []):
             original = invoices.get(cn.get("invoice_id")) or {}
@@ -128,7 +133,7 @@ class VendorNotesItc(Playbook):
         n, due = agg("itc_reduction_due")
         r, rcm = agg("rcm_liability_reduction")
         i, imp = agg("credit_tax_impossible")
-        u, _ = agg("credit_unlinked")
+        u = next((len(f.details["vendor_credits"]) for f in outcome.findings if f.rule == "credit_unlinked"), 0)
         m, _ = agg("misfiled_vendor_credit")
         return (f"{fmt(due, ctx.currency)} of input credit must be reduced for {n} supplier credit note(s); "
                 f"{r} reverse-charge credit(s) reduce RCM by {fmt(rcm, ctx.currency)}. {i} credit note(s) carry GST "
