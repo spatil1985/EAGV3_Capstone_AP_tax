@@ -235,3 +235,25 @@ hsn_min_digits_above_5cr:
   unit: minimum HSN digits on B2B invoices for a taxpayer with AATO above Rs 5 crore (4 below)
   source: Notification 78/2020-CT
   verified: null
+
+# --- UC-27 return timeliness ------------------------------------------------------------------
+gstr1_due_day:
+  value: 11
+  unit: day of the following month on which monthly GSTR-1 is due
+  source: s.37 CGST Act; Rule 59
+  verified: null
+gst_late_fee_per_day_inr:
+  value: 50
+  unit: INR per day per return (Rs 25 CGST + Rs 25 SGST), reduced from Rs 100 by notification
+  source: s.47 CGST Act; Notifications 19/2021 and 20/2021-CT (confirm)
+  verified: null
+gst_late_fee_nil_per_day_inr:
+  value: 20
+  unit: INR per day for a nil return
+  source: Notifications 19/2021 and 20/2021-CT (confirm)
+  verified: null
+gst_late_fee_cap_inr:
+  value: 10000
+  unit: INR cap per return for aggregate turnover above Rs 5 crore (Rs 2,000 up to 1.5 Cr; Rs 5,000 up to 5 Cr)
+  source: Notifications 19/2021 and 20/2021-CT (confirm); turnover band from UC-29
+  verified: null
