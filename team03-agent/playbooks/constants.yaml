@@ -44,3 +44,16 @@ itc_reversal_warning_days:
   unit: days before day 180 a bill is listed as "about to cross" (context, not a finding)
   source: team choice (UC-01 §10 near-miss window)
   verified: null
+
+# --- UC-03 / UC-21 reverse charge ---------------------------------------------------
+rcm_rate_gta_pct:
+  value: 5
+  unit: percent GST payable by the recipient on GTA services under reverse charge (no ITC to the GTA)
+  source: Notification 13/2017-CT(R) entry 1 read with 11/2017-CT(R) item 9(iii)
+  verified: null
+
+rcm_rate_services_pct:
+  value: 18
+  unit: percent GST payable under reverse charge on legal, sponsorship and director services
+  source: Notification 13/2017-CT(R) entries 2, 4, 6; 11/2017-CT(R) standard rate
+  verified: null
