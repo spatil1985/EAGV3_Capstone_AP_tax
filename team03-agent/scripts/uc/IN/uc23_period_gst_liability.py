@@ -232,8 +232,8 @@ class PeriodGstLiability(Playbook):
         b86 = ("applies, cash below the 1% floor — see finding"
                if any(f.rule == "rule_86b_cash_floor" for f in outcome.findings)
                else ("applies, 1% cash floor met" if c["Rule 86B"] == "applies" else "not triggered"))
-        oracle = "does not reconcile" if any(f.rule == "stored_value_mismatch" for f in outcome.findings) else (
-            "agrees" if c["GSTR-3B row"].get("filing_status") else "is missing")
+        oracle = ("does not reconcile" if any(f.entity_type == "GSTReturn" for f in outcome.findings)
+                  else ("agrees" if c["GSTR-3B row"].get("filing_status") else "does not exist yet"))
         return (f"{c['return period']}: {fmt(total, ctx.currency)} payable in cash"
                 + (f" ({parts})" if parts else "") + (f", including {fmt(money(c['reverse charge (cash)']), ctx.currency)} "
                                                       f"reverse charge" if money(c['reverse charge (cash)']) else "")
