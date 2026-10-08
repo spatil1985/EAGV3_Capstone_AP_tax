@@ -25,3 +25,22 @@ eway_bill_km_per_day_odc:
   unit: km of distance per day of validity, over-dimensional cargo
   source: Rule 138(10), CGST Rules 2017
   verified: null
+
+# --- UC-01 Rule 37 ----------------------------------------------------------------
+itc_payment_window_days:
+  value: 180
+  unit: days from invoice date to pay the supplier before ITC must be reversed
+  source: s.16(2) second proviso CGST Act 2017; Rule 37 CGST Rules 2017
+  verified: null
+
+gst_interest_rate_pct:
+  value: 18
+  unit: percent per annum, simple interest on reversed ITC / late tax
+  source: s.50(1) CGST Act 2017; Notification 13/2017-CT
+  verified: null
+
+itc_reversal_warning_days:
+  value: 30
+  unit: days before day 180 a bill is listed as "about to cross" (context, not a finding)
+  source: team choice (UC-01 §10 near-miss window)
+  verified: null
