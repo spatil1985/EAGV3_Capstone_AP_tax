@@ -378,3 +378,15 @@ sales_tax_refund_window_years_oh:
   unit: years from payment to apply for a refund of Ohio sales tax paid in error
   source: R.C. 5739.07 (confirm; other states commonly 3-4 years)
   verified: null
+
+# --- US-14 state sales-tax return calendar (confirm per state) ------------------------------------
+sales_tax_return_due_day:
+  value: {OH: 23, PA: 20, MI: 20, IL: 20}
+  unit: day of the month after the period end on which the state return is due
+  source: "OH R.C. 5739.12; PA, MI, IL state rules (confirm)"
+  verified: null
+sales_tax_timely_discount_pct:
+  value: {OH: 0.75, PA: 1.0, MI: 0.5, IL: 1.75}
+  unit: percent vendor's discount for filing and paying on time (caps apply — not modelled)
+  source: "state statutes (confirm; caps by frequency not modelled)"
+  verified: null
