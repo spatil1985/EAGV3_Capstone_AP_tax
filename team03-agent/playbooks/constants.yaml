@@ -349,3 +349,15 @@ tds_194r_rate_pct:
   unit: percent TDS on business benefits / perquisites
   source: s.194R Income-tax Act 1961
   verified: null
+
+# --- UC-42 / US-18 payment run -------------------------------------------------------------------
+late_payment_nominal_rate_pct:
+  value: 12
+  unit: percent per annum used to cost a contractual late payment when the terms carry no rate
+  source: team choice (UC-42 §5 step 4) — replace with the contract's rate where known
+  verified: null
+default_payment_terms_days:
+  value: 30
+  unit: days after the bill date when neither payment_terms nor due_date is set
+  source: team choice (UC-42 §6)
+  verified: null
