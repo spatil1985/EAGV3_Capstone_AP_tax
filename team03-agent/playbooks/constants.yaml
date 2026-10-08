@@ -78,3 +78,57 @@ rbi_bank_rate_pct:
   - {value: 6.25, effective_from: 2025-04-09, effective_to: 2025-06-05, source: "RBI MPC 9 Apr 2025"}
   - {value: 5.75, effective_from: 2025-06-06, effective_to: 2025-12-04, source: "RBI MPC 6 Jun 2025"}
   - {value: 5.50, effective_from: 2025-12-05, source: "RBI MPC 5 Dec 2025 (confirm)", review_by: 2026-12-31}
+
+# --- UC-09 / UC-39 / UC-13 / UC-37 TDS (Income-tax Act 1961 numbering; the 2025 Act renumbers
+# these from 1 April 2026 — confirm citations before showing them to a user) -------------
+tds_rate_194c_individual_pct:
+  value: 1
+  unit: percent TDS on contract payments to an individual or HUF
+  source: s.194C(1) Income-tax Act 1961
+  verified: null
+tds_rate_194c_other_pct:
+  value: 2
+  unit: percent TDS on contract payments to any other person
+  source: s.194C(1) Income-tax Act 1961
+  verified: null
+tds_rate_194j_professional_pct:
+  value: 10
+  unit: percent TDS on fees for professional services
+  source: s.194J(1)(b) Income-tax Act 1961
+  verified: null
+tds_rate_194j_technical_pct:
+  value: 2
+  unit: percent TDS on fees for technical services
+  source: s.194J(1)(a) Income-tax Act 1961
+  verified: null
+tds_rate_194i_building_pct:
+  value: 10
+  unit: percent TDS on rent of land, building or furniture
+  source: s.194I(b) Income-tax Act 1961
+  verified: null
+tds_rate_194i_machinery_pct:
+  value: 2
+  unit: percent TDS on rent of plant, machinery or equipment
+  source: s.194I(a) Income-tax Act 1961
+  verified: null
+tds_rate_206aa_pct:
+  value: 20
+  unit: percent minimum TDS where the deductee has no PAN
+  source: s.206AA Income-tax Act 1961
+  verified: null
+tds_threshold_194c_single_inr:
+  value: 30000
+  unit: INR, single contract payment below which 194C TDS is not deducted
+  source: s.194C(5) first proviso
+  verified: null
+tds_threshold_194c_annual_inr:
+  value: 100000
+  unit: INR, aggregate contract payments to one contractor in an FY
+  source: s.194C(5) first proviso
+  verified: null
+tds_threshold_194j_inr:
+  - {value: 30000, effective_to: 2025-03-31, source: "s.194J(1) before Finance Act 2025"}
+  - {value: 50000, effective_from: 2025-04-01, source: "s.194J(1) as amended by Finance Act 2025 (confirm)"}
+tds_threshold_194i_monthly_inr:
+  - {value: 20000, effective_to: 2025-03-31, source: "s.194I, Rs 2,40,000 a year before Finance Act 2025"}
+  - {value: 50000, effective_from: 2025-04-01, source: "s.194I as amended by Finance Act 2025: Rs 50,000 a month (confirm)"}
