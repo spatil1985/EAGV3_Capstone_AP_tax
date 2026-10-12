@@ -68,10 +68,10 @@ def test_keystone_run(tmp_path):
     assert by_id["keystone:locale_matches_instance"]["passed"] is True
     assert by_id["keystone:us-01"]["score"] == 1.0
     assert by_id["keystone:us-02"]["passed"] is False
-    assert by_id["keystone:us-09"]["evidence"] == "blocked: blocked by N14"
-    assert "keystone:uc-05" not in by_id
+    assert "keystone:us-09" not in by_id and "keystone:uc-05" not in by_id   # blocked/other-regime: omitted
     assert by_id["keystone:routing_floor"]["passed"] is False      # 2 < 18
-    assert doc["summary"] == "keystone: 4/7 passed · goldens 1/1 exact"
+    assert by_id["keystone:routing_floor"]["evidence"].endswith("not run here (blocked/spec-only): us-09")
+    assert doc["summary"] == "keystone: 4/6 passed · goldens 1/1 exact"
     assert store.finished == [("run-1", "failed")] and store.closed
 
 

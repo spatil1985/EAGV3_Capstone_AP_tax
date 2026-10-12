@@ -18,27 +18,18 @@ def test_make_task_shape():
                  "score": 1.0, "evidence": "42"}
 
 
-def test_route_task_omits_runnable_and_other_regime():
-    assert T.route_task("suryodaya", FakeRoute(UC23, "run"), "gst") is None
-    assert T.route_task("suryodaya", FakeRoute(US01, "skip", "tax_regime gst not in"), "gst") is None
-
-
-@pytest.mark.parametrize("action, reason", [
-    ("blocked", "blocked by N14"),
-    ("spec", "spec only — no school tenant or data yet"),
-    ("skip", "vertical manufacturing not in ['school']"),
-    ("skip", "locale feature(s) off: gst_ims"),
-])
-def test_own_regime_route_that_does_not_run_fails(action, reason):
-    t = T.route_task("suryodaya", FakeRoute(UC23, action, reason), "gst")
-    assert t["passed"] is False and t["score"] == 0.0
-    assert t["evidence"] == f"{action}: {reason}"
-    assert t["id"] == "suryodaya:uc-23"
+def test_own_not_run_keeps_only_our_regime_routes_that_do_not_run():
+    us09 = FakeManifest("us-09", tax_regimes=("sales_use_tax",))
+    uc07, uc08 = FakeManifest("uc-07"), FakeManifest("uc-08")
+    routes = [FakeRoute(UC23, "run"), FakeRoute(US01, "skip", "tax_regime gst not in"),
+              FakeRoute(us09, "blocked", "x"), FakeRoute(uc07, "skip", "vertical manufacturing not in ['school']"),
+              FakeRoute(uc08, "blocked", "blocked by F18")]
+    assert [r.manifest.id for r in T.own_not_run(routes, "gst")] == ["uc-07", "uc-08"]
 
 
 def test_all_regime_manifest_is_ours():
     m = FakeManifest("uc-99", tax_regimes=("all",))
-    assert T.route_task("keystone", FakeRoute(m, "blocked", "x"), "sales_use_tax")["passed"] is False
+    assert [r.manifest.id for r in T.own_not_run([FakeRoute(m, "spec", "x")], "sales_use_tax")] == ["uc-99"]
 
 
 def test_golden_found_in_summary_scores_one():
@@ -98,6 +89,12 @@ def test_routing_floor(tenant, count, passed):
     t = T.routing_floor_task("x", tenant, count)
     assert t["passed"] is passed
     assert t["evidence"] == f"{count} playbooks routed to run (floor {T.ROUTING_FLOOR[tenant]})"
+
+
+def test_routing_floor_lists_playbooks_that_do_not_run():
+    t = T.routing_floor_task("x", "in", 36, ["uc-07", "uc-08"])
+    assert t["passed"] is True
+    assert t["evidence"] == "36 playbooks routed to run (floor 36); not run here (blocked/spec-only): uc-07, uc-08"
 
 
 def test_golden_evidence_survives_trimming():
