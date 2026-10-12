@@ -10,7 +10,8 @@ The harness runs every live aptax playbook in **dry-run**. Each playbook becomes
 `passed` means it ran with no error and no failed MCP call, and `score` is 1.0 when it
 reproduced its figure in `goldens.yaml` (0.5 when it didn't). Blocked and spec-only
 playbooks are not tasks; the `routing_floor` task lists their ids.
-Design: `docs/superpowers/specs/2026-10-12-agentswitch-harness-design.md`.
+Full explanation with diagrams: [`docs/HARNESS.md`](../docs/HARNESS.md). Design:
+`docs/superpowers/specs/2026-10-12-agentswitch-harness-design.md`.
 
 ## Run it locally (same env vars as the server)
 

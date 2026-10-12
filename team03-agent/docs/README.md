@@ -8,6 +8,8 @@
 | [`gapreports/`](gapreports/) | How AgentSwitch compares with competitor products | [`gap_report.md`](gapreports/gap_report.md) — all six · [`razorpay_gap_report.md`](gapreports/razorpay_gap_report.md) · [`clear_gap_report.md`](gapreports/clear_gap_report.md) · [`gap_report_mysa.md`](gapreports/gap_report_mysa.md) |
 | [`platform/`](platform/) | Reference material on the AgentSwitch platform itself | [`Capstone.jpg`](platform/Capstone.jpg) — overview diagram (below) · [`mcp_tool_inventory_india.md`](platform/mcp_tool_inventory_india.md) / [`_us`](platform/mcp_tool_inventory_us.md) — live tool lists · [`UI.MD`](platform/UI.MD) — screen inventory · [`screen_api_mapping.md`](platform/screen_api_mapping.md) — screens → API calls |
 
+**Harness** (AgentSwitch server runs): [`HARNESS.md`](HARNESS.md) — what it is, how it works, how we built it, how to run and submit it.
+
 Project-level documents stay one level up: [`../SKILL.md`](../SKILL.md) (agent charter,
 loaded by `run_agent.py`), [`../DESIGN.md`](../DESIGN.md) and
 [`../CURRENT_STATUS.md`](../CURRENT_STATUS.md). The agent's code is in [`../aptax/`](../aptax/).
