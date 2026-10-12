@@ -1,0 +1,11 @@
+# Playbook id -> figures its dry-run output must contain for score 1.0 (harness/tasks.py).
+# Matched as plain substrings of the playbook's summary or of its context dumped as JSON,
+# so write each figure the way it appears there: "5,72,073.68" as printed in a summary, or
+# "572073.68" as a raw context value. Always quote figures.
+# Only figures a local dry-run has reproduced belong here (spec §4.4; plan Task 7 prunes).
+uc-23: ["5,72,073.68"]
+uc-26: ["45,152.62"]
+uc-41: ["4,91,099.27"]
+uc-43: ["56,20,600"]
+us-01: ["226,488.27"]
+us-05: ["7,919.93"]
