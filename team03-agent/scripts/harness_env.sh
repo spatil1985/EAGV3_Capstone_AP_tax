@@ -22,15 +22,17 @@ if [ "$_ase_sourced" != 1 ]; then
 fi
 unset _ase_sourced
 
-_ase_dotenv() {  # _ase_dotenv KEY FILE -> KEY's value in FILE, surrounding quotes removed
-  local v
+_ase_dotenv() {  # _ase_dotenv KEY FILE -> KEY's value in FILE, read like aptax/config.py load_dotenv:
+  local v        # first occurrence wins; whitespace, then double quotes, then single quotes stripped
   { [ -n "$2" ] && [ -f "$2" ]; } || return 0
-  v=$(sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*//p" "$2" | tail -n 1)
+  v=$(sed -n "s/^[[:space:]]*$1[[:space:]]*=//p" "$2" | head -n 1)
   v=${v%$'\r'}
-  case "$v" in
-    \"*\") v=${v#\"}; v=${v%\"} ;;
-    \'*\') v=${v#\'}; v=${v%\'} ;;
-  esac
+  v="${v#"${v%%[![:space:]]*}"}"
+  v="${v%"${v##*[![:space:]]}"}"
+  while [ "${v#\"}" != "$v" ]; do v=${v#\"}; done
+  while [ "${v%\"}" != "$v" ]; do v=${v%\"}; done
+  while [ "${v#\'}" != "$v" ]; do v=${v#\'}; done
+  while [ "${v%\'}" != "$v" ]; do v=${v%\'}; done
   printf '%s' "$v"
 }
 

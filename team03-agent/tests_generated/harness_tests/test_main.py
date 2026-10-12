@@ -34,7 +34,7 @@ def raises(gw, m):
 
 
 def harness(tmp_path, routes, behaviours, *, env=None, transport=None, regime="sales_use_tax",
-            goldens=None, clock=None, open_session=None, make_store=None):
+            goldens=None, clock=None, open_session=None, make_store=None, started=None):
     session = FakeSession(regime, routes, behaviours)
     store = FakeStore()
     calls = {}
@@ -46,7 +46,7 @@ def harness(tmp_path, routes, behaviours, *, env=None, transport=None, regime="s
     deps = Deps(make_transport=lambda tenant: calls.setdefault("tenant", tenant) and (transport or FakeTransport()),
                 open_session=open_session or fake_open_session,
                 make_store=make_store or (lambda: store),
-                goldens=goldens or {}, clock=clock or (lambda: 0.0), deadline_s=100.0)
+                goldens=goldens or {}, clock=clock or (lambda: 0.0), deadline_s=100.0, started=started)
     env = dict(ENV if env is None else env)
     out = tmp_path / "results.json"
     assert main(env, deps, out) == 0
@@ -175,3 +175,17 @@ def test_results_are_checkpointed_after_every_playbook(tmp_path):
     assert "keystone:us-01" in ids and "keystone:us-02" not in ids
     assert "partial" in seen["doc"]["summary"]
     assert validate(seen["doc"]) == []
+
+
+def test_instance_name_is_case_insensitive(tmp_path):
+    _, by_id, _, _, calls, _ = harness(tmp_path, [], {}, env={**ENV, "AGENTSWITCH_INSTANCE": " KeyStone "})
+    assert calls["tenant"] == "us"
+    assert by_id["keystone:locale_matches_instance"]["passed"] is True
+
+
+def test_deadline_counts_from_process_start(tmp_path):
+    """Time spent before collect() (imports, setup) counts against the server's limit."""
+    _, by_id, session, *_ = harness(tmp_path, [FakeRoute(US01)], {"us-01": ok("a")},
+                                    clock=lambda: 1000.0, started=0.0)
+    assert by_id["keystone:us-01"]["evidence"] == "not run: harness time budget exhausted"
+    assert session.runner.ran == []

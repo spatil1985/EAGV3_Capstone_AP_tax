@@ -20,6 +20,7 @@ from typing import Callable
 from aptax.config import TENANTS
 from harness import tasks as T
 
+STARTED = time.monotonic()          # the server's clock starts with the process, not with collect()
 RESULTS_PATH = Path(__file__).resolve().parents[1] / "results.json"   # team03-agent/results.json
 DEADLINE_SECONDS = 17 * 60          # the server stops the run at timeout_minutes = 20
 REQUIRED_ENV = ("AGENTSWITCH_BASE_URL", "AGENTSWITCH_TOKEN", "AGENTSWITCH_INSTANCE")
@@ -37,6 +38,7 @@ class Deps:
     goldens: dict = field(default_factory=dict)
     clock: Callable = time.monotonic
     deadline_s: float = DEADLINE_SECONDS
+    started: float | None = None    # None: count from collect()
 
 
 def default_deps() -> Deps:
@@ -44,7 +46,7 @@ def default_deps() -> Deps:
     from aptax.config import DB_PATH
     from aptax.store import Store
     return Deps(make_transport=service.make_transport, open_session=service.open_session,
-                make_store=lambda: Store(DB_PATH), goldens=T.load_goldens())
+                make_store=lambda: Store(DB_PATH), goldens=T.load_goldens(), started=STARTED)
 
 
 def _user(me) -> str:
@@ -59,7 +61,7 @@ def collect(env, deps: Deps, out: list, checkpoint: Callable = lambda: None) -> 
 
     `checkpoint()` runs after each playbook, so a run the server kills still leaves a file.
     """
-    instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip()
+    instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip().lower()
     missing = [k for k in REQUIRED_ENV if not (env.get(k) or "").strip()]
     if missing:
         label = instance or "harness"
@@ -73,7 +75,7 @@ def collect(env, deps: Deps, out: list, checkpoint: Callable = lambda: None) -> 
     prefix = TENANTS[tenant]
     env[f"{prefix}_BASE_URL"] = env["AGENTSWITCH_BASE_URL"].strip()
     env[f"{prefix}_TOKEN"] = env["AGENTSWITCH_TOKEN"].strip()
-    start = deps.clock()
+    start = deps.started if deps.started is not None else deps.clock()
 
     transport = deps.make_transport(tenant)
     try:
@@ -154,7 +156,7 @@ def write_results(doc, path: Path) -> None:
 def main(env=None, deps: Deps | None = None, out_path: Path = RESULTS_PATH) -> int:
     env = os.environ if env is None else env
     tasks: list = []
-    instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip() or "harness"
+    instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip().lower() or "harness"
 
     def checkpoint() -> None:
         doc = T.finalize(instance, tasks)
