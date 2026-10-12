@@ -42,6 +42,7 @@ EAGV3_Capstone_AP_tax/                 git root
 └── team03-agent/
     ├── scripts/agentswitch_client.py  CHANGED: AgentSwitchClient.from_token(base_url, token)
     ├── aptax/service.py               CHANGED: make_transport() prefers {prefix}_TOKEN
+    ├── scripts/harness_env.sh         NEW: local helper, logs in and exports the server's env vars
     ├── harness/                       NEW
     │   ├── __init__.py
     │   ├── __main__.py                entry point
@@ -144,6 +145,29 @@ The runner's SQLite store is the existing default under `runs/`.
   - `summary` is a string.
 - CLI: `python -m harness.validate results.json` exits 1 and prints the problems.
 
+### 4.6 `scripts/harness_env.sh` (local runs only)
+Recreates the server's environment on a laptop. Usage, from the git root:
+
+```bash
+source team03-agent/scripts/harness_env.sh suryodaya   # or keystone
+cd team03-agent && python -m harness
+```
+
+- **Instance → URL and credentials:**
+  - `suryodaya` uses `https://agentswitch.theschoolofai.in` with `AGENTSWITCH_EMAIL` / `AGENTSWITCH_PASSWORD`.
+  - `keystone` uses `https://class.agentswitch.theschoolofai.in` with `US_AGENTSWITCH_EMAIL` / `US_AGENTSWITCH_PASSWORD`.
+- **Where credentials come from:** the shell environment first, then `team03-agent/.env`
+  (gitignored), read without overriding values that are already set.
+- **Login:** `POST $URL/api/auth/login`. The JSON body is sent to curl on stdin
+  (`--data @-`), so the password never appears on a command line.
+- **Exports:** `AGENTSWITCH_BASE_URL`, `AGENTSWITCH_TOKEN`, `AGENTSWITCH_INSTANCE`. It then
+  checks the token with `GET /api/auth/me` and prints `instance=… user=… token=<first 8 chars>…`.
+- **Secrets:** never prints the password or the full token, and never writes the token to disk.
+- **Login failure:** prints the HTTP status and the error message, exports nothing, and
+  `return`s non-zero (never `exit`, which would close the caller's shell).
+- **Not sourced:** if executed instead of sourced, it prints a usage hint and exits 1.
+- **Bad argument:** an unknown or missing instance prints usage and returns 2.
+
 ## 5. Error handling and time budget
 
 - Every HTTP call keeps the transport's existing 30-second timeout and retry-with-backoff.
@@ -182,7 +206,7 @@ None of them use the network.
 - `make_transport` prefers the token and falls back to email/password.
 
 **Live check before submitting**
-1. Run `python -m harness` with a seat token against both tenants (dry-run).
+1. `source scripts/harness_env.sh <instance>`, then `python -m harness`, for both tenants (dry-run).
 2. Time each run; it must finish well under 17 minutes.
 3. Run `validate` on both outputs.
 4. Look at every 0.5 score and resolve it (fix the golden figure, or find the drift).
