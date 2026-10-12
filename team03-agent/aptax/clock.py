@@ -6,9 +6,11 @@ Eastern time with the federal DST rule: second Sunday of March 02:00 to first Su
 of November 02:00 local.
 """
 
-from datetime import UTC, date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from aptax.config import TENANT_TIMEZONES
+
+UTC = timezone.utc   # datetime.UTC needs Python 3.11; the harness server may run 3.10
 
 IST = timezone(timedelta(hours=5, minutes=30), "IST")
 

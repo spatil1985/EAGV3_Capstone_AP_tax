@@ -54,8 +54,11 @@ def _user(me) -> str:
     return str(me.get("email") or user.get("email") or "?")
 
 
-def collect(env, deps: Deps, out: list) -> str:
-    """Append tasks to `out` as they are decided, so a crash keeps what was collected."""
+def collect(env, deps: Deps, out: list, checkpoint: Callable = lambda: None) -> str:
+    """Append tasks to `out` as they are decided, so a crash keeps what was collected.
+
+    `checkpoint()` runs after each playbook, so a run the server kills still leaves a file.
+    """
     instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip()
     missing = [k for k in REQUIRED_ENV if not (env.get(k) or "").strip()]
     if missing:
@@ -91,13 +94,13 @@ def collect(env, deps: Deps, out: list) -> str:
 
     store = deps.make_store()
     try:
-        _run_playbooks(instance, tenant, regime, transport, store, deps, start, out)
+        _run_playbooks(instance, tenant, regime, transport, store, deps, start, out, checkpoint)
     finally:
         store.close()
     return instance
 
 
-def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out) -> None:
+def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out, checkpoint) -> None:
     try:
         session = deps.open_session(store, transport, tenant=tenant, trigger="on_request",
                                     mode="pipeline", dry_run=True)
@@ -116,6 +119,7 @@ def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out)
         if task:
             out.append(task)
     out.append(T.routing_floor_task(instance, tenant, len(runnable)))
+    checkpoint()
 
     status = "completed"
     for r in runnable:
@@ -125,18 +129,19 @@ def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out)
             status = "failed"
             continue
         before = session.gateway.stats.get("failed", 0)
-        try:
+        try:  # one playbook's failure — running it or scoring it — never stops the rest
             run = session.runner.run_one(r.manifest)
             outcome = run.outcome
             error = run.error or (None if outcome is not None
                                   else f"not run: {run.route.action} {run.route.reason}".strip())
-        except Exception as exc:  # noqa: BLE001 — one playbook's failure never stops the rest
-            outcome, error = None, f"{type(exc).__name__}: {exc}"
-        delta = session.gateway.stats.get("failed", 0) - before
-        task = T.playbook_task(instance, r.manifest, outcome, error, delta, figures)
+            task = T.playbook_task(instance, r.manifest, outcome, error,
+                                   session.gateway.stats.get("failed", 0) - before, figures)
+        except Exception as exc:  # noqa: BLE001
+            task = T.playbook_task(instance, r.manifest, None, f"{type(exc).__name__}: {exc}", 0, figures)
         if not task["passed"]:
             status = "failed"
         out.append(task)
+        checkpoint()
     store.finish_run(session.run_id, status)
 
 
@@ -150,8 +155,14 @@ def main(env=None, deps: Deps | None = None, out_path: Path = RESULTS_PATH) -> i
     env = os.environ if env is None else env
     tasks: list = []
     instance = (env.get("AGENTSWITCH_INSTANCE") or "").strip() or "harness"
+
+    def checkpoint() -> None:
+        doc = T.finalize(instance, tasks)
+        doc["summary"] += " · partial (run in progress or stopped early)"
+        write_results(doc, out_path)
+
     try:
-        instance = collect(env, deps or default_deps(), tasks)
+        instance = collect(env, deps or default_deps(), tasks, checkpoint)
     except Exception:  # noqa: BLE001 — whatever happens, the server still gets a results file
         tasks.append(T.make_task(instance, "harness_crashed", "The harness finished without crashing", False, 0.0,
                                  traceback.format_exc()[-T.EVIDENCE_MAX:]))

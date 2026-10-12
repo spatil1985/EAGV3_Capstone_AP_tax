@@ -46,3 +46,12 @@ def test_runs_from_another_cwd_and_writes_the_toml_path(tmp_path):
     assert proc.returncode == 0, proc.stderr
     assert "harness:environment" in proc.stdout
     assert target.exists() and not (tmp_path / "results.json").exists()
+
+
+def test_harness_import_chain_avoids_python_311_only_names():
+    """The server's Python is unknown (>= 3.10): datetime.UTC only exists from 3.11."""
+    offenders = [f"{p.relative_to(AGENT_DIR)}:{i}"
+                 for top in ("aptax", "scripts", "harness") for p in (AGENT_DIR / top).rglob("*.py")
+                 for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1)
+                 if "import" in line and "datetime" in line and " UTC" in line.replace(",", " ")]
+    assert offenders == []

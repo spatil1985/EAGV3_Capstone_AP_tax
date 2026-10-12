@@ -15,7 +15,7 @@ machines, so this is http.server; the routes are the design's.
 import json
 import re
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -24,6 +24,8 @@ from aptax.auth import check_control, is_loopback
 from aptax.config import KILL_FILE, TENANTS, kill_switch_on
 from aptax.llm import LLMNotConfigured, load_llm
 from aptax.service import Refused, ServiceError, ask, make_transport
+
+UTC = timezone.utc   # datetime.UTC needs Python 3.11; the harness server may run 3.10
 
 MAX_BODY_BYTES = 64 * 1024
 MAX_QUESTION_CHARS = 2_000

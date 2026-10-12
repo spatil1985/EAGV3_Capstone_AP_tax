@@ -18,10 +18,12 @@ a broken one. An admitted envelope gets its run budget: min(per-run, what is lef
 """
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from aptax.clock import tenant_today
 from aptax.config import kill_switch_on, self_actors
+
+UTC = timezone.utc   # datetime.UTC needs Python 3.11; the harness server may run 3.10
 
 SOURCE_RATE_PER_MINUTE = 120
 

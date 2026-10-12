@@ -39,8 +39,11 @@ def route_task(instance, route, tax_regime) -> dict | None:
 
 
 def golden_check(figures, outcome) -> list[tuple[str, bool]]:
-    haystack = (outcome.summary or "") + "\n" + json.dumps(outcome.context or {}, default=str,
-                                                           ensure_ascii=False)
+    try:
+        context = json.dumps(outcome.context or {}, default=str, ensure_ascii=False)
+    except (TypeError, ValueError):   # e.g. non-string dict keys, which `default=` does not cover
+        context = str(outcome.context)
+    haystack = str(outcome.summary or "") + "\n" + context
     return [(f, f in haystack) for f in figures]
 
 

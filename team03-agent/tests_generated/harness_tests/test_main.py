@@ -150,3 +150,28 @@ def test_env_values_are_stripped_and_mapped_to_the_tenant_prefix(tmp_path):
     assert env_after["AGENTSWITCH_BASE_URL"] == "https://agentswitch.example/"
     assert env_after["AGENTSWITCH_TOKEN"] == "tok"
     assert "suryodaya:locale_matches_instance" in by_id
+
+
+def test_task_building_error_fails_only_that_playbook(tmp_path):
+    """A context json.dumps can't serialise (a tuple dict key) must not lose later playbooks."""
+    def odd_context(gw, m):
+        return FakeRun(FakeRoute(m), FakeOutcome("ok", context={("a", "b"): 1}))
+    _, by_id, session, *_ = harness(tmp_path, [FakeRoute(US01), FakeRoute(US02)],
+                                    {"us-01": odd_context, "us-02": ok("fine")})
+    assert by_id["keystone:us-01"]["passed"] is True
+    assert by_id["keystone:us-02"]["passed"] is True
+    assert "keystone:harness_crashed" not in by_id
+
+
+def test_results_are_checkpointed_after_every_playbook(tmp_path):
+    """If the server kills the run mid-way, the file already holds what was decided."""
+    seen = {}
+
+    def peek(gw, m):
+        seen["doc"] = json.loads((tmp_path / "results.json").read_text(encoding="utf-8"))
+        return FakeRun(FakeRoute(m), FakeOutcome("b"))
+    harness(tmp_path, [FakeRoute(US01), FakeRoute(US02)], {"us-01": ok("a"), "us-02": peek})
+    ids = [t["id"] for t in seen["doc"]["tasks"]]
+    assert "keystone:us-01" in ids and "keystone:us-02" not in ids
+    assert "partial" in seen["doc"]["summary"]
+    assert validate(seen["doc"]) == []
