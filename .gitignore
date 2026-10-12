@@ -22,3 +22,7 @@ team03-agent/runs/
 
 # aptax kill switch: an operational flag on one machine, never shared.
 team03-agent/config/kill
+
+# AgentSwitch harness output (python -m harness): live business data, regenerated each run.
+team03-agent/results.json
+team03-agent/results.json.tmp

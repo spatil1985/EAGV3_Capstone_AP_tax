@@ -1,0 +1,6 @@
+# AgentSwitch server harness (Release 8.1). See team03-agent/harness/README.md.
+install = "pip install -r team03-agent/requirements.txt"
+run     = "cd team03-agent && python -m harness"
+results = "team03-agent/results.json"
+instances = ["suryodaya", "keystone"]
+timeout_minutes = 20

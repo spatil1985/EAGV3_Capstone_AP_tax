@@ -44,6 +44,14 @@ class AgentSwitchClient:
         return cls(base_url, token)
 
     @classmethod
+    def from_token(cls, base_url: str, token: str) -> "AgentSwitchClient":
+        """Use a token the caller already holds (the AgentSwitch harness runner gives one) -- no login."""
+        base_url, token = (base_url or "").strip(), (token or "").strip()
+        if not base_url or not token:
+            raise AgentSwitchAuthError("from_token needs a base URL and a token")
+        return cls(base_url, token)
+
+    @classmethod
     def from_env(cls, prefix: str = "AGENTSWITCH") -> "AgentSwitchClient":
         """Log in using AGENTSWITCH_BASE_URL / _EMAIL / _PASSWORD env vars.
 

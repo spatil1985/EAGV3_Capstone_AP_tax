@@ -11,8 +11,10 @@ glc_v5 keeps its audit log: there is no update or delete method here at all.
 import json
 import sqlite3
 import threading
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
+
+UTC = timezone.utc   # datetime.UTC needs Python 3.11; the harness server may run 3.10
 
 SCHEMA = Path(__file__).with_name("schema.sql")
 

@@ -63,15 +63,26 @@ def load_charter() -> str:
 
 
 def make_transport(tenant: str, *, record: str | None = None, replay: str | None = None):
-    """Live by default; --replay serves a recording offline; --record saves one."""
+    """Live by default; --replay serves a recording offline; --record saves one.
+
+    A seat token (`{prefix}_TOKEN`, what the AgentSwitch harness runner provides) wins over
+    email/password login.
+    """
     if replay:
         return ReplayTransport(Path(replay))
     load_dotenv()
     prefix = TENANTS[tenant]
+    from scripts.agentswitch_client import AgentSwitchClient
+    token = os.environ.get(f"{prefix}_TOKEN", "").strip()
+    if token:
+        base_url = os.environ.get(f"{prefix}_BASE_URL", "").strip()
+        if not base_url:
+            raise ServiceError(f"{prefix}_TOKEN is set but {prefix}_BASE_URL is not")
+        live = LiveTransport(AgentSwitchClient.from_token(base_url, token))
+        return RecordingTransport(live, Path(record)) if record else live
     missing = [f"{prefix}_{k}" for k in ("EMAIL", "PASSWORD") if not os.environ.get(f"{prefix}_{k}")]
     if missing:
         raise ServiceError(f"credentials missing: set {', '.join(missing)} (see .env.example)")
-    from scripts.agentswitch_client import AgentSwitchClient
     try:
         live = LiveTransport(AgentSwitchClient.from_env(prefix))
     except Exception as exc:  # noqa: BLE001 — login failures are reported, never retried blindly

@@ -166,7 +166,8 @@ def cmd_journal(args, store) -> int:
 
 
 def cmd_refusals(args, store) -> int:
-    from datetime import UTC, datetime, timedelta
+    from datetime import datetime, timedelta, timezone
+    UTC = timezone.utc
     since = (datetime.now(UTC) - timedelta(hours=args.hours)).isoformat(timespec="seconds")
     rows = store.refusals(since)
     for r in rows:
