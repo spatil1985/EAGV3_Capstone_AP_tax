@@ -109,7 +109,7 @@ position and got one item wrong.
 | F18 Rule 42/43 apportionment | **N273** | ⚪ To do (backlog, size L, School and Clinic only). On the board although absent from `bug-report/mine` |
 | Requested tools (20) `dbfe303f…` | **N426** | ⚪ To do. "8–9 expose existing REST reads as tools; reviewed with the tool catalogue work" |
 
-**Not on the board:** B5 (never filed), and the 4 duplicate filings in §B (absorbed
+**Not on the board:** B5 and B10 (never filed), and the 4 duplicate filings in §B (absorbed
 into their originals).
 
 N9–N13 texts: [`bugs_to_file_2026-09-30.md`](bugs_to_file_2026-09-30.md).
@@ -177,13 +177,29 @@ timestamp cluster pointing at a root cause.
 > to file are **N14–N16** in **§C.1 below**. F18 is already on the board (N273): do
 > not re-file.
 
+> 🔑 **India access obtained 2026-09-23. The two instances take DIFFERENT
+> passwords for the same email, `team03@theschoolofai.in`.** The earlier `401` on
+> Suryodaya was a wrong-credential error, not a lockout. That unblocked three items
+> that had been parked as untestable:
+>
+> | Item | Outcome |
+> |---|---|
+> | **B5** | **Resolved → UI rendering bug.** 1,119 India journals + 296 US, zero data anomalies. `lines` is populated everywhere, on the UI's own REST route too. See [B5](#b5--journal-voucher-renders-000-with-no-lines-despite-non-zero-total-debit). |
+> | **B9** | Both instances expose an *identical* 490-tool set, so each "mismatch" is the other jurisdiction's features. Recorded under B9. B9 had already been filed and the board took it as N227. |
+> | Tool-count delta | **No delta exists.** 490 = 490, zero difference either way. Every earlier count was a snapshot of a growing surface. |
+>
+> It also produced one new defect, **B10**: `lines[].account` holds UUIDs and
+> display names interchangeably within one company. It is also the first concrete
+> mechanism anyone has offered for B5. **B10 is not filed.**
+
 **Three items. Everything else in this document is already on the platform.**
 
 | # | Title | Instance | Severity | Status / re-verification 2026-09-23 |
 |---|---|---|---|---|
 | **B8** | INR-denominated bills + India GST fields on the USD company | US | **Medium** | ✅ **Not filed** — 0 content matches across all 25 reports. 🔺 **Now 13 INR bills**, was 10 — growing, because the N6 scheduler defect keeps generating them |
 | **B9** | Locale feature flags contradict MCP tool exposure | US | **Low-Med** | ✅ **Not filed.** Still reproduces exactly: `eway_bill=false` → **8** EWayBill tools (was 6); `form_1099=true` → **0** tools; 490 tools visible |
-| **B5** | Journal voucher renders ₹0.00 with no line items | India | Medium | ✅ Not filed — ❗**needs reproduction** against a concrete `JournalEntry.id` first. Do not file until `JournalEntry.get` confirms whether `lines` is populated |
+| **B5** | Journal voucher renders ₹0.00 with no line items | India | Medium | ✅ Not filed. **Reproduced 2026-09-23 → UI rendering bug**: `lines` is populated on all 1,415 journals across both instances. File as UI-only, or hold until the SCR-041 journal is identified |
+| **B10** | `JournalEntry.lines[].account` mixes Account UUIDs and display names within one company | Both | **Medium-High** | ✅ Not filed. **New, 2026-09-23.** Ready now: 1,338 lines sampled, and a UUID that resolves via `Account.get` |
 
 #### Reclassified — do NOT file
 
@@ -1350,7 +1366,7 @@ No job_id -- found by direct REST/MCP inspection.
 
 ### B5 · Journal voucher renders ₹0.00 with no lines despite non-zero Total Debit
 
-**Severity:** Medium · **Area:** Accountant / Manual Journals · **Needs reproduction**
+**Severity:** Medium · **Area:** Accountant / Manual Journals · **RESOLVED 2026-09-23 → UI rendering bug, not data integrity. Both instances tested.**
 
 Observed in the UI inventory (`UI.MD` SCR-041): the Manual Journals **list** shows a
 non-zero `Total Debit`, but opening the journal renders a voucher with no line items
@@ -1361,6 +1377,165 @@ should be present.
 `tools/call JournalEntry.get` whether `lines` is populated in the API response. If
 populated → UI rendering bug (strong). If empty while `total_debit` is non-zero →
 data-integrity bug (stronger). Capture the id either way.
+
+#### Reproduction attempt — 2026-09-23, Keystone (US): **NOT REPRODUCIBLE**
+
+Full population tested, not a sample: **all 296 `JournalEntry` records** on Keystone
+(`class.agentswitch.theschoolofai.in`, company `c1e47d8d-b849-4187-9a32-4103d3dece4a`).
+
+| Check | Anomalous | Population |
+|---|---|---|
+| `total_debit != 0` and `lines` empty/absent (`.list`) | **0** | 296 |
+| `total_debit != 0` and `lines` empty/absent (`.get`) | **0** | 296 |
+| `lines` length differs between `.list` and `.get` | **0** | 296 |
+| `total_debit != total_credit` | **0** | 296 |
+| Sum of line debits/credits != header totals | **0** | 296 |
+| Submitted journals with no posted `GLEntry` rows | **0** | 294 |
+| Submitted journals where GL sums != header totals | **0** | 294 |
+
+`total_debit` ranges 183.40 – 5,132,000.00; **no** entry has `total_debit == 0`.
+`lines` length is never below 2 (2×269, 3×12, 4×6, 10×1, 14×8). The only two
+journals without GL rows are the only two in `draft` — correct, not an anomaly.
+
+Ids captured as requested (these are **negative** evidence):
+
+| JournalEntry id | number | total_debit | total_credit | `len(lines)` |
+|---|---|---|---|---|
+| `6104b911-cfc9-4a88-a9f6-085d1ae185cd` | JV-2026-00001 | 5,132,000.00 | 5,132,000.00 | 14 |
+| `19308127-a5ae-45db-b06a-5a6df83d3360` | JV-2026-00296 | 10,800.00 | 10,800.00 | 2 (draft) |
+
+**The UI's own data path was checked too**, pre-empting the obvious objection that
+MCP might use a different serializer: `GET /api/JournalEntry/{id}` — the entity REST
+route the web UI calls — returns the same populated `lines` and the same totals.
+`.get` is byte-identical to the `.list` row plus `_transitions`, so the list/detail
+split cannot itself produce a discrepancy.
+
+`JournalEntry.get` field names, for whoever writes this up:
+`book_id, company_id, created_at, created_by, date, docstatus, entry_type, id,`
+`journal_entity_type, journal_type, lines[], narration, number, reference_number,`
+`reporting_method, source_entity, source_id, status, total_credit, total_debit,`
+`updated_at, updated_by` (+ `_display`, `_permissions`, `_transitions`).
+
+#### Reproduction on Suryodaya (India) — the instance SCR-041 was actually seen on
+
+India credentials were obtained 2026-09-23 (the instance takes a **different
+password** from Keystone; the earlier `401` was a wrong-credential error, not a
+lockout). Re-tested on the correct instance:
+
+Company `5cbe5a55-af74-4363-a436-f5350593114c`, locale `IN / gst / INR`.
+**All 1,119 `JournalEntry` records** examined — not a sample.
+
+| Check | Anomalous | Population |
+|---|---|---|
+| `total_debit != 0` and `lines` empty | **0** | 1,119 |
+| `total_debit == 0` | **0** | 1,119 |
+| `total_debit != total_credit` | **0** | 1,119 |
+| `lines` length differs `.list` vs `.get` | **0** | sampled |
+
+`lines` length distribution: 2×1,089 · 3×12 · 4×13 · 7×3 · 11×1 · 22×1. Never empty.
+1,118 `submitted`, 1 `draft`.
+
+The UI's own route confirms it: `GET /api/JournalEntry/384a7e4c-256d-4771-ba2a-06bee2f2acbc`
+→ HTTP 200, `JV-2026-00643`, `lines` = 2, `total_debit` = `total_credit` = 284,312.41.
+
+#### Verdict: **UI rendering bug** — per the decision rule, `lines` is populated
+
+The data is correct on **both** instances (1,119 India + 296 US = 1,415 journals,
+zero anomalies). The backend serves populated, balanced lines to the same REST
+route the browser calls. **If SCR-041 rendered ₹0.00 with no line items against
+that payload, the defect is in the front end.**
+
+**File it as a UI-only report.** Do not file it as data integrity — the API
+contradicts that on both instances.
+
+**Honest gap before submitting:** `UI.MD` SCR-041 does not record *which* journal
+the screenshot showed, so we cannot prove the specific payload behind that render
+was populated — only that every journal in the company is. Whoever submits should
+either re-open one Manual Journal in the UI and capture its number alongside the
+screenshot, or state plainly that the specific document was not identified.
+
+**And there is now a concrete mechanism** — see **B10** below, which was found while
+chasing this. `lines[].account` holds a UUID on some rows and a display name on
+others *within the same company*. A voucher renderer that resolves `account` one way
+would fail on the rows written the other way. That is a plausible cause of SCR-041
+requiring no data corruption at all, and B10 is filable on its own evidence.
+
+*Incidental, not worth filing:* `GLEntry.list` **silently ignores** `source_id` /
+`voucher_no` filter params rather than rejecting them. The GL cross-check was done
+by paging all 2,771 rows and joining on `voucher_id` client-side. Don't rely on
+those filter args elsewhere.
+
+---
+
+### B10 · `JournalEntry.lines[].account` holds two incompatible value types, mixed within one company
+
+**Severity:** Medium-High · **Area:** Accounting / Data model · **Both instances** · **Verified 2026-09-23**
+
+> Found while reproducing B5. This is the stronger of the two — it stands on its own
+> evidence and does not depend on any screenshot.
+
+```
+The account field on journal lines is sometimes an Account UUID and sometimes a
+plain display name. Both forms occur in the SAME company, and the split differs
+between instances. Nothing in the schema distinguishes them.
+
+ENVIRONMENT
+Suryodaya Precision Works Pvt. Ltd. (5cbe5a55-af74-4363-a436-f5350593114c), IN/gst
+Keystone Precision Works LLC     (c1e47d8d-b849-4187-9a32-4103d3dece4a), US/sales_use_tax
+Both on build serving 490 MCP tools as of 2026-09-23.
+
+/api/schemas declares:  lines -> type "children", account -> type "text", required.
+Declared as free text, NOT as a link to Account. So nothing validates it and
+nothing tells a consumer which form to expect.
+
+ACTUAL -- 300 journals sampled per instance
+
+  Suryodaya (618 lines):   498 UUID  (80.6%)  +  120 plain text  (19.4%)   <- MIXED
+  Keystone  (720 lines):     0 UUID  ( 0.0%)  +  720 plain text (100.0%)
+
+  Suryodaya UUID sample:
+    account "bcaeac7d-047b-4a17-8459-47bdf4a94035"
+    remark  "Repairs & Maintenance: Maintenance: MNT-2026-00100"
+    -> Account.get("bcaeac7d-047b-4a17-8459-47bdf4a94035") resolves to
+       "Repairs & Maintenance", confirming it IS a real account reference
+       stored in a field typed as text.
+
+  Suryodaya text sample:
+    account "Work In Progress"      remark null
+
+  Keystone text sample:
+    account "Legal & Professional Fees"   remark "6140"   <- and here the account
+                                          CODE is in remark, a third convention
+
+Concrete ids: JV-2026-00643 (384a7e4c-256d-4771-ba2a-06bee2f2acbc) on Suryodaya
+carries the UUID form.
+
+EXPECTED
+One representation. Either type the field as a link to Account and store ids
+consistently, or store display text consistently and expose the id in a separate
+account_id field -- which is what every other link field on this platform does
+(Bill.vendor_id + _vendor_id_display, lines[].party_id + _party_id_display). The
+account field is the only reference on JournalEntry.lines that does neither.
+
+IMPACT
+1. Any consumer -- the platform's own voucher renderer included -- must regex-sniff
+   each value to know whether to resolve it or print it. Resolve-by-id fails on
+   19.4% of Suryodaya lines and 100% of Keystone lines; print-as-label shows a raw
+   UUID on 80.6% of Suryodaya lines.
+2. This is a plausible mechanism for the SCR-041 voucher rendering 0.00 with no
+   line items (B5), which is otherwise unexplained given the API data is correct.
+3. Grouping or summing journal lines by account -- a basic trial-balance operation,
+   and something our agent would need for any GL question -- silently splits one
+   account into two buckets when both forms are present for it.
+4. remark carries a narration on Suryodaya and an account CODE on Keystone, so it
+   cannot be used to disambiguate either.
+
+NOT A LOCALE ISSUE
+The two instances expose an identical 490-tool surface with zero difference in
+tool names, so this is not jurisdiction-driven behaviour. It looks like two
+different write paths persisting the field differently, with the older/seeded rows
+on one convention.
+```
 
 ---
 
@@ -1389,6 +1564,26 @@ RecurringBill.list returns 4 active templates, all frequency "monthly",
 all start_date 2026-04-01. Three have repeat_every 1.0 and a next_bill_date of
 2026-08-01 -- a date in the PAST. Those three have each produced one Bill per
 day on 2026-09-20, 2026-09-21 and 2026-09-22 and are still producing them.
+
+PROOF THIS IS A RUNNING SCHEDULER, NOT SEED DATA (re-verified 2026-09-22)
+The obvious counter-argument is that a seeder wrote these in one pass with
+back-dated timestamps. It did not. created_at across all 91 Bills:
+
+  2026-09-16 -> 81 bills   <- the seed. Every non-recurring Bill.
+  2026-09-20 ->  4 bills   \
+  2026-09-21 ->  3 bills    >  all 10 carry a recurring_bill_id
+  2026-09-22 ->  3 bills   /
+
+All 158 receivable Invoices are also created_at 2026-09-16. So the company was
+seeded once on 09-16, and **the only records written to it since are these ten
+recurring-generated Bills**. The environment is not being reseeded; a generator
+is running. Each batch is milliseconds wide (e.g. .006996 / .014273 / .019178 on
+09-22), consistent with one loop over the active templates, and every bill's
+document date equals its created_at date.
+
+  Run times: 09-20 13:12:22 | 09-21 13:12:22 | 09-22 04:30:17
+  (the shift on the third run suggests a scheduler restart, not a reseed --
+  a reseed would have rewritten the 81 seed bills' timestamps too)
 
 THE CONTROL GROUP (this is what makes it conclusive)
 The fourth template is identical in every respect except that its next_bill_date
@@ -1519,6 +1714,43 @@ data sitting on Suryodaya. Same class of defect -- seed data landing on the
 wrong-jurisdiction company -- in both directions.
 ```
 
+> 📝 **Re-evaluation, 2026-09-22 — recorded late.** This was written on the
+> `docs/us-instance-bugs` branch before B8 was filed. The branch was not merged in
+> time, so the text above went in unchanged as `5e64a8bc…`. The board took it as
+> **N223** (🔵 Fixed). The re-evaluation is kept because its evidence is sharper
+> than the filed text.
+
+**The currency half held up, and the correlation is exact:**
+
+```
+Bills in the company:                              91
+Bills with currency_code != "USD":                 10
+Of those 10, how many are recurring-generated:     10   (100%)
+Recurring-generated bills that are USD:             0   (0%)
+```
+
+Currency is perfectly predicted by "was this row written by the recurring
+generator". That points at the generator's own currency defaulting, not at the
+seed data. BILL-2026-00088 has `grand_total 12000.0` with no `exchange_rate`, so
+12,000 INR and 12,000 USD are both stored as "12000.0". Only `currency_code` tells
+them apart, and there is no rate to convert by.
+
+**The defect is independent of B7/N6.** It is the same ten rows from the same
+generator. B7 is about how *often* the generator fires; B8 is about *what* it
+writes. A schedule fix does not close the currency defect.
+
+**The GST-field half did not hold up.** `ims_status: "pending"`,
+`itc_eligibility: "input"`, `is_reverse_charge` and the
+`items[].cgst/sgst/igst/utgst/cess_amount` group are on **all 81 non-recurring
+(seed) Bills as well**: `ims_status "pending"` 81/81, `itc_eligibility "input"`
+81/81. `gst_treatment` / `place_of_supply` are null everywhere, including on the
+INR rows. So this is the platform's single cross-jurisdiction Bill schema with its
+defaults showing through. It is not specific to these bills. Arguing it as a defect
+also cuts against `gap_report.md` §2, which lists the unified `Tax`/`TaxGroup`
+taxonomy as an **AgentSwitch advantage**. What remains is a feature request: under
+`tax_regime: "sales_use_tax"` there is no populated purchase-side tax signal
+(`use_tax_accrued` is null on all 91 Bills).
+
 ---
 
 ### B9 · Locale feature flags contradict MCP tool exposure in three places
@@ -1579,21 +1811,78 @@ do not predict tool availability, a locale-driven agent must probe tools/list
 instead, which makes the endpoint advisory rather than authoritative.
 ```
 
+> 📝 **Re-evaluation, 2026-09-22/23 — recorded late.** This was written on the
+> `docs/us-instance-bugs` branch before B9 was filed. The branch was not merged in
+> time, so the text above went in unchanged as `70a47383…`. The board accepted it
+> as **N227** (🔵 Fixed, "US company offered India-only e-way bill tools"). The
+> argument below **turned out more cautious than triage**. It is kept for the
+> evidence.
+
+**Counter-argument at the time.** `initialize.result` states that tools are scoped
+to *"your roles, app entitlements and row scope"* (`../CURRENT_STATUS.md` §4).
+Locale is not in that list. So "GST tools visible on a US company" read as
+documented behaviour. The SalarySlip/Contract/EsignDocument precedent did not
+transfer either, because those are excluded by entitlement, which *is* a documented
+scoping dimension.
+
+**With India access, 2026-09-23: both instances expose an identical 490-tool
+surface.** That is 0 US-only tools, 0 India-only tools and 490 shared, so each
+instance shows "mismatches" for exactly the *other* jurisdiction's features:
+
+| Flag | Suryodaya (IN) | Keystone (US) |
+|---|---|---|
+| `gst_returns` | `true` + 2 tools ✅ | `false` + 2 tools ⚠️ |
+| `eway_bill` | `true` + 6 tools ✅ | `false` + 6 tools ⚠️ |
+| `sales_tax_jurisdictions` | `false` + 2 tools ⚠️ | `true` + 2 tools ✅ |
+| `sales_tax_nexus` | `false` + 2 tools ⚠️ | `true` + 2 tools ✅ |
+| `exemption_certificates` | `false` + 4 tools ⚠️ | `true` + 4 tools ✅ |
+| `einvoicing` | `false` + 0 tools ✅ | `false` + 0 tools ✅ |
+| `form_1099` | `false` + 0 tools ✅ | **`true` + 0 tools** ❌ |
+
+The mirror symmetry shows the tool surface is jurisdiction-agnostic by design.
+**`form_1099: true` on Keystone is the one cell that cannot be explained that
+way**: the flag is `true` with no API anywhere in the 490. No role or entitlement
+could reveal an API that does not exist.
+
+**For our agent:** read `locale.features` as *jurisdiction applicability*, not *API
+availability*, and probe `tools/list` for the latter. The `eway_bill` case is the
+sharpest example. Six write-capable tools for an India-only statutory document are
+callable on a US company. The guard belongs in our agent whether or not the
+platform's N227 fix lands.
+
 ---
 
-### Not fileable — tool-count delta between instances
+### Not fileable — tool-count delta between instances · **RESOLVED 2026-09-23: there is no delta**
 
-`tools/list` returned **436** on Suryodaya (per `../CURRENT_STATUS.md` §4,
-2026-09-20) and **446–447** on Keystone (2026-09-22, count drifted by one within
-the same session). A diff would be interesting — a US company exposing India-only
-tools is exactly what B9 documents.
+Earlier counts suggested a difference: **436** on Suryodaya (`../CURRENT_STATUS.md`
+§4, 2026-09-20) vs **446**, then **447**, on Keystone (2026-09-22, drifting within
+a single session). This was marked unfileable because the Suryodaya login appeared
+to be barred.
 
-**We cannot produce that diff.** The team credentials authenticate against
-Keystone only; the Suryodaya login returns `HTTP 401 Invalid credentials`, and
-`CURRENT_STATUS.md` records the India tool names in prose rather than storing the
-raw `tools/list` response. Two different counts taken on two different days from
-two different companies is not evidence of anything. **Do not file this** —
-B9 already captures the defensible part with direct flag-vs-tool evidence.
+**It was a wrong password, not a lockout.** The two instances take different
+passwords for the same email. With India access, both were dumped and diffed on
+2026-09-23:
+
+```
+INDIA: 490 tools | IN gst INR
+US:    490 tools | US sales_use_tax USD
+
+US-only tools:    0
+India-only tools: 0
+shared:         490
+```
+
+**The tool surface is byte-identical across instances.** Every earlier number —
+436, 446, 447, now 490 — was a snapshot of a surface that is *growing while we
+watch it*: +54 tools on India in three days, +43 on Keystone in one. The platform
+is under active development, which also explains the 446→447 drift inside one
+session.
+
+**Still not fileable, now for a better reason:** there is nothing to file. The
+original instinct to hold it back was right, and it is now proven rather than
+merely unverifiable. Worth recording as a caution: **do not treat any tool count
+in this repo as stable**, including the 436 in `CURRENT_STATUS.md` and the 447
+quoted in B9's evidence block.
 
 ---
 
@@ -1990,8 +2279,13 @@ route around.
 >
 > 1. **Answer the five open questions on N414–N418 (§A.1)** — triage is waiting on us.
 > 2. Post the two §C.1 comments (N220, N128).
-> 3. **B5** — only after reproducing against a concrete `JournalEntry.id`.
-> 4. **Re-check the board** for N14–N16's board ids once triaged.
+> 3. **B10 (`lines[].account` type inconsistency)** — ready now, from either account.
+>    Both instances, 1,338 lines sampled, an exact split, and a UUID that
+>    demonstrably resolves via `Account.get`. It needs no screenshot to defend.
+> 4. **B5** — reproduced 2026-09-23 as a UI rendering bug (data correct on all 1,415
+>    journals). File as UI-only once the SCR-041 journal is identified, or hold and
+>    let B10 take the slot.
+> 5. **Re-check the board** for N14–N16's board ids once triaged.
 >
 > **Do not re-file F18** (board N273) or N14–N16. The list below is the 23 Sep plan,
 > kept for history.
