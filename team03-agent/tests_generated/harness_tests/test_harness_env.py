@@ -148,3 +148,17 @@ def test_works_in_zsh(fake):
     env.update(US_AGENTSWITCH_EMAIL="a@b", US_AGENTSWITCH_PASSWORD=PASSWORD)
     proc, vals, _ = source(env, "keystone", shell="zsh")
     assert vals["RC"] == "0" and vals["TOKEN"] == TOKEN, proc.stderr
+
+
+def test_dotenv_parsing_matches_aptax_load_dotenv(fake):
+    """First occurrence wins, surrounding whitespace and quotes are stripped (aptax/config.py)."""
+    tmp, env = fake
+    dotenv = tmp / "team.env"
+    dotenv.write_text('US_AGENTSWITCH_EMAIL = team03@theschoolofai.in   \n'
+                      'US_AGENTSWITCH_PASSWORD="first"   \n'
+                      'US_AGENTSWITCH_PASSWORD=second\n')
+    env["AGENTSWITCH_ENV_FILE"] = str(dotenv)
+    _, vals, _ = source(env, "keystone")
+    assert vals["RC"] == "0"
+    assert json.loads((tmp / "body.json").read_text()) == {"email": "team03@theschoolofai.in",
+                                                            "password": "first"}
