@@ -9,7 +9,7 @@ run every 3 days.
 The harness runs every live aptax playbook in **dry-run**. Each playbook becomes one task:
 `passed` means it ran with no error and no failed MCP call, and `score` is 1.0 when it
 reproduced its figure in `goldens.yaml` (0.5 when it didn't). Blocked and spec-only
-playbooks for the instance's own regime show up as failed tasks with the router's reason.
+playbooks are not tasks; the `routing_floor` task lists their ids.
 Design: `docs/superpowers/specs/2026-10-12-agentswitch-harness-design.md`.
 
 ## Run it locally (same env vars as the server)

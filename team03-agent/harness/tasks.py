@@ -2,7 +2,9 @@
 
 `passed` says the playbook ran cleanly; `score` says whether it reproduced its verified
 worked example (goldens.yaml). Data drift on the server's fresh instance copy can lower a
-score but never turns a task red. The only I/O here is `load_goldens`.
+score but never turns a task red. Playbooks that cannot run on the instance (blocked,
+spec-only, wrong vertical) are not tasks: they are listed in the routing_floor evidence.
+The only I/O here is `load_goldens`.
 """
 
 import json
@@ -28,14 +30,9 @@ def is_other_regime(manifest, tax_regime) -> bool:
     return "all" not in regimes and tax_regime not in regimes
 
 
-def route_task(instance, route, tax_regime) -> dict | None:
-    """A failed task for our own playbooks that cannot run; None for runnable or other-regime ones."""
-    if route.action == "run" or is_other_regime(route.manifest, tax_regime):
-        return None
-    m = route.manifest
-    task = make_task(instance, m.id, m.title, False, 0.0, f"{route.action}: {route.reason}")
-    task["_golden"] = (False, False)
-    return task
+def own_not_run(routes, tax_regime) -> list:
+    """Routes for this regime's playbooks that will not run here (blocked, spec-only, vertical, feature)."""
+    return [r for r in routes if r.action != "run" and not is_other_regime(r.manifest, tax_regime)]
 
 
 def golden_check(figures, outcome) -> list[tuple[str, bool]]:
@@ -74,11 +71,13 @@ def not_run_task(instance, manifest, reason, has_golden=False) -> dict:
     return task
 
 
-def routing_floor_task(instance, tenant, runnable) -> dict:
+def routing_floor_task(instance, tenant, runnable, not_run_ids=()) -> dict:
     floor = ROUTING_FLOOR[tenant]
+    evidence = f"{runnable} playbooks routed to run (floor {floor})"
+    if not_run_ids:
+        evidence += "; not run here (blocked/spec-only): " + ", ".join(not_run_ids)
     return make_task(instance, "routing_floor", "At least the expected number of playbooks route to run",
-                     runnable >= floor, 1.0 if runnable >= floor else 0.0,
-                     f"{runnable} playbooks routed to run (floor {floor})")
+                     runnable >= floor, 1.0 if runnable >= floor else 0.0, evidence)
 
 
 def load_goldens(path: Path = GOLDENS_PATH) -> dict[str, list[str]]:

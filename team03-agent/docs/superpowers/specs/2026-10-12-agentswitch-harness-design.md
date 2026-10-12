@@ -27,7 +27,7 @@ Server contract (instructor, Release 8.1; example repo
 | What to test | Deterministic playbooks (`aptax run`, dry-run), no LLM | Reliability; the platform model is unknown |
 | Pass vs. score | **Hybrid**: `passed` = playbook ran cleanly; `score` = matched its verified worked example | The fresh copy may differ from the live data the goldens came from; drift must not turn tasks red |
 | Golden matching | Substring of the playbook's own `summary` / `context` | No new structured field in 56 playbooks |
-| Blocked / spec-only playbooks | Listed as `passed: false` with the router's reason | Shows the full scope honestly |
+| Blocked / spec-only playbooks | Omitted as tasks; their ids are listed in the `routing_floor` evidence | Changed 2026-10-12 after the first official run (62/74): the server scores every task, so cannot-run playbooks cost score without telling us anything new |
 | Other-regime playbooks | Omitted (US playbooks on Suryodaya and vice versa) | They do not apply to that instance |
 | Instances | `["suryodaya", "keystone"]` | The agent is built for both |
 | Writes | Dry-run (aptax default) | Unchanged safety posture; escalations suppressed |
@@ -93,10 +93,10 @@ timeout_minutes = 20
      try/except, and take the snapshot again. Record the error (or the exception's repr),
      the failed-call delta and the elapsed time.
 5. **Routing tasks** (a route is "other-regime" when `ctx.tax_regime` is not in `manifest.tax_regimes`; those are omitted):
-   - Each route for the instance's own regime that does not run (blocked, spec-only,
-     missing tools, vertical mismatch) becomes `passed: false`, with the router's reason as evidence.
+   - Routes for the instance's own regime that do not run (blocked, spec-only, missing
+     tools, vertical mismatch) are not tasks.
    - `routing_floor`: passes when the number of `run` routes is at least the floor
-     (`in`: 36, `us`: 18).
+     (`in`: 36, `us`: 18). Its evidence lists the ids of the own-regime routes that do not run.
 6. Write `results.json` in a `finally` block. If anything above raised an exception, the
    file holds whatever tasks were collected plus `harness_crashed` (traceback trimmed).
    Exit 0 whenever the file was written.
@@ -116,7 +116,6 @@ The runner's SQLite store is the existing default under `runs/`.
     - Otherwise 0.5.
   - `evidence`: summary, finding count, and golden result
     (e.g. `golden 5,72,073.68: found`).
-- **Route task** (did not run): `passed: false, score: 0.0`, evidence is the route reason.
 - **Normalisation**:
   - Evidence is trimmed to 500 characters.
   - Duplicate ids get a `#2` suffix.

@@ -116,11 +116,8 @@ def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out,
                            1.0 if got == regime else 0.0, f"tax_regime={got} (expected {regime})"))
     routes = session.runner.routes()
     runnable = [r for r in routes if r.action == "run"]
-    for r in routes:
-        task = T.route_task(instance, r, got)
-        if task:
-            out.append(task)
-    out.append(T.routing_floor_task(instance, tenant, len(runnable)))
+    not_run_ids = [r.manifest.id for r in T.own_not_run(routes, got)]
+    out.append(T.routing_floor_task(instance, tenant, len(runnable), not_run_ids))
     checkpoint()
 
     status = "completed"
