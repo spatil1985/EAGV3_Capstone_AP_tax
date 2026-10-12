@@ -92,7 +92,10 @@ users: import `postman/AgentSwitch.postman_collection.json` plus a filled-in cop
   $7,919.93 — all exact). Routing: Suryodaya runs 36 (UC-07/14 need a school/clinic
   tenant), Keystone runs the 18 live US playbooks. The 10 blocked/spec-only manifests
   answer through `explain_use_case`. Index: [`playbooks/README.md`](playbooks/README.md).
-- **Not built yet:** event polling (watcher), cron, the LLM gateway behind `APTAX_LLM`.
+- **Not built yet:** event polling (watcher), cron.
+- **LLM gateway:** `aptax/llm/glc.py` adapts the contract to a running glc_v5
+  (`APTAX_LLM=aptax.llm.glc:factory`, `GLC_BASE_URL` default `http://127.0.0.1:8111`).
+  A glc 402 surfaces as `BudgetRefused`.
 
 ### 4.3 Bug bounty — tallied with the class bug board
 The board is a Claude artifact (`claude.ai/artifact/6LvLawFFUXGoRHUQKbPg9h`). Its rows
