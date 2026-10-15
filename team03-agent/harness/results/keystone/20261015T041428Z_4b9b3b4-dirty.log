@@ -1,0 +1,26 @@
+instance=keystone user=team03@theschoolofai.in token=<redacted>
+note: AGENTSWITCH_* in this shell now target keystone; use a fresh shell for other aptax commands
+[PASS] keystone:mcp_tools_list: 502 tools
+[PASS] keystone:whoami: user=team03@theschoolofai.in
+[PASS] keystone:locale_matches_instance: tax_regime=sales_use_tax (expected sales_use_tax)
+[PASS] keystone:routing_floor: 18 playbooks routed to run (floor 18); not run here (blocked/spec-only): us-10, us-12, us-13, us-22
+[PASS] keystone:us-01: golden 226,488.27: found · findings=6 · 2026-01-01 … 2026-10-15: sales tax liability $226,488.27 across 4 jurisdiction(s), matching the platform's liability report to the cent; count gaps on Stark Cou
+[PASS] keystone:us-02: findings=2 · $588,555.24 of this year's purchases carried no sales tax and no use tax was accrued. Use tax due on clearly taxable lines: $20.15. Another $132,725.00 needs classification (up to $8,627.
+[PASS] keystone:us-03: findings=0 · No unregistered state is near an economic-nexus threshold; all sales this year are in MI, OH, PA, where we are registered. Platform counters agree with invoices.
+[PASS] keystone:us-04: findings=1 · All 31 exempt sale(s) ($570,195.62) are covered by a valid certificate. 1 certificate(s) have no file attached.
+[PASS] keystone:us-05: golden 7,919.93: found · findings=36 · 0 arithmetic, rate or state-sourcing error(s). 36 invoice(s) to customers outside the county were charged that county's destination-sourced tax ($7,919.93): eith
+[PASS] keystone:us-06: findings=1 · 2 vendor(s) will receive a 2026 Form 1099 ($26,250.00). No W-9 on file for Canton Industrial Consulting — request one now. No backup withholding is required: every reportable vendor has a
+[PASS] keystone:us-07: findings=0 · No candidate duplicates. Tier-1 coverage: 0/86 bills carry a supplier bill number.
+[PASS] keystone:us-08: findings=29 · Self-approvals: 0. Levels skipped: 0. Resolved late: 4. Open and breached (check_sla): 25. Platform is_overdue disagrees on 0 request(s). Resolved on time: {'Invoice': '2/5 on time', 'Pu
+[PASS] keystone:us-09: findings=0 · All 81 PO-linked bills match within tolerance. Recorded match status agrees with the live match on every bill (N2 looks fixed).
+[PASS] keystone:us-11: findings=0 · No vendor charged sales tax on an exempt purchase (0 vendor-taxed line(s) in total). The opposite problem — untaxed purchases that are taxable — is US-02.
+[PASS] keystone:us-14: findings=8 · 2 return(s) due within 7 days. Next returns: MI 2026-07…2026-09 due 2026-10-20; PA 2026-07…2026-09 due 2026-10-20; OH 2026-09…2026-09 due 2026-10-23. AgentSwitch holds no record of filed 
+[PASS] keystone:us-15: findings=32 · 139 invoice(s) carrying $210,830.32 of tax were entered after their month's return was due: if those returns were filed on time, they need amending. 219 other document(s) were back-dated
+[PASS] keystone:us-16: findings=8 · Of 8 vendors in use, 7 have a W-9 and 0 bank details. 1 lack a W-9; 1 have a doubtful 1099 box; 0 have a 1099 flag that contradicts their classification; 8 have no bank details, so paymen
+[PASS] keystone:us-17: findings=0 · No vendor we owe has an open credit. Another $0.00 of credits sits with vendors we don't currently owe.
+[PASS] keystone:us-18: findings=14 · Pay $48,295.06 across 6 bill(s) this week, starting with BILL-2026-00020; open 14 bills, overdue 14 bills, 115392.56. Hold $67,097.50; withhold $0.00 (backup withholding). Many overdue b
+[PASS] keystone:us-19: findings=4 · Over 2026-06-30 … 2026-08-31: $45,825.00 of AP payments (6) never appear in the bank.
+[PASS] keystone:us-20: findings=1 · No vendor's bills or POs look split to stay under the approval limit (limit assumed — policy unreadable).
+[PASS] keystone:us-21: findings=0 · No unclaimed property to report: 6 payment(s) ($45,825.00) never cleared, but none is near dormancy (oldest payment 2026-01-18, dormancy ≥ 3 years). 58 payment(s) fall outside the bank fe
+keystone: 22/22 passed · goldens 2/2 exact
+results.json: OK (22 tasks)

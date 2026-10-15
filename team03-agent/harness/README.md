@@ -22,3 +22,12 @@ cd team03-agent && python -m harness && python -m harness.validate results.json
 
 Use a fresh shell afterwards for other `aptax` commands: the script points `AGENTSWITCH_*`
 at the instance you chose.
+
+To keep a versioned copy of each run, use the wrapper instead. It logs in, runs, validates,
+and saves `results/<instance>/<UTC>_<sha>.json` and `.log`, with one row added to
+[`results/HISTORY.md`](results/HISTORY.md). The token is redacted in the log, and
+nothing is committed for you:
+
+```bash
+team03-agent/scripts/run_harness_local.sh suryodaya      # or keystone, or both
+```
