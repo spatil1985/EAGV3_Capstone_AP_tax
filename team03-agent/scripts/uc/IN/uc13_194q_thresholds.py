@@ -115,8 +115,8 @@ class SellSide(Rule):
             expected = ((base - threshold) * rate).quantize(CENTS)
             receipts = [r for r in data.get("receipts", []) if r.get("customer_id") == customer
                         and (day(r.get("date")) or start) >= start]
-            recorded = sum((money(r.get("withholding_tax_amount")) or abs(money(r.get("tax_deducted")))
-                            for r in receipts), Decimal("0"))
+            # tax_deducted is a bool flag (schema); the amount is only in withholding_tax_amount.
+            recorded = sum((money(r.get("withholding_tax_amount")) for r in receipts), Decimal("0"))
             if recorded >= expected:
                 continue
             name = _name(invoices, "_party_id_display")

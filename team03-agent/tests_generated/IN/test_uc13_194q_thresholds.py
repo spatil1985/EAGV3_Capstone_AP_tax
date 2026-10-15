@@ -43,3 +43,13 @@ def test_customer_past_the_line_without_tds_on_receipts(make_ctx, ds):
                                                          "withholding_tax_amount": 0}])
     assert [f.rule for f in found] == ["194q_customer_not_deducting"]
     assert found[0].details["expected_tds"] == "2000.00"
+
+
+def test_tax_deducted_is_a_flag_not_an_amount(make_ctx, ds):
+    # Live PaymentReceived rows (schema: tax_deducted "bool"); the amount is withholding_tax_amount.
+    inv = doc("i1", "2026-07-01", 7000000, party_id="c", direction="receivable")
+    receipts = [{"customer_id": "c", "date": "2026-08-01", "tax_deducted": False, "withholding_tax_amount": None},
+                {"customer_id": "c", "date": "2026-08-15", "tax_deducted": True, "withholding_tax_amount": 500}]
+    found = run(make_ctx, ds, invoices=[inv], receipts=receipts)
+    assert [f.rule for f in found] == ["194q_customer_not_deducting"]
+    assert found[0].details["recorded_tds"] == "500.00"
