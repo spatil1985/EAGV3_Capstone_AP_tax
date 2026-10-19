@@ -22,6 +22,27 @@ repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel) || { echo "not i
 history="$repo_root/team03-agent/harness/results/HISTORY.md"
 instances=(suryodaya keystone)
 
+# What the server's run depends on. Docs and saved results are left out, so committing them
+# doesn't invalidate a local run.
+code_paths=(team03-agent/harness team03-agent/aptax team03-agent/scripts team03-agent/playbooks
+            team03-agent/requirements.txt ':(exclude)*.md' ':(exclude)team03-agent/harness/results'
+            # Local-only helpers: the server never runs these.
+            ':(exclude)team03-agent/scripts/harness_remote.sh' ':(exclude)team03-agent/scripts/harness_env.sh'
+            ':(exclude)team03-agent/scripts/run_harness_local.sh')
+
+newest_matching_run() {  # newest_matching_run INSTANCE MAIN_SHA -> HISTORY.md row or nothing
+  local row sha
+  grep -E "^\| [0-9TZ]+ \| $1 \| \`[0-9a-f]+(-dirty)?\` " "$history" | awk '{ r[NR] = $0 } END { for (i = NR; i > 0; i--) print r[i] }' \
+    | while IFS= read -r row; do
+        sha=$(printf '%s' "$row" | sed -nE 's/^[^`]*`([0-9a-f]+)(-dirty)?`.*/\1/p')
+        if git -C "$repo_root" cat-file -e "$sha^{commit}" 2>/dev/null \
+           && git -C "$repo_root" diff --quiet "$sha" "$2" -- "${code_paths[@]}" 2>/dev/null; then
+          printf '%s\n' "$row"
+          break
+        fi
+      done
+}
+
 preflight() {
   local ok=0 head main i row
   git -C "$repo_root" fetch -q origin main || { echo "✗ could not fetch origin/main" >&2; return 1; }
@@ -36,19 +57,18 @@ preflight() {
     ok=1
   fi
 
-  if ! git -C "$repo_root" diff --quiet origin/main -- team03-agent/harness team03-agent/aptax \
-       team03-agent/playbooks team03-agent/requirements.txt \
-       ':(exclude)*.md' ':(exclude)team03-agent/harness/results' 2>/dev/null; then
+  if ! git -C "$repo_root" diff --quiet origin/main -- "${code_paths[@]}" 2>/dev/null; then
     echo "✗ harness/agent code in your working tree differs from origin/main — merge it first, or it won't be in the run"
     ok=1
   fi
 
   [ -f "$history" ] || { echo "✗ no $history — run scripts/run_harness_local.sh both first"; return 1; }
   for i in "${instances[@]}"; do
-    # Newest row for this instance on the commit the server will run (clean or -dirty).
-    row=$(grep -E "^\| [0-9TZ]+ \| $i \| \`$main(-dirty)?\` " "$history" | tail -n 1)
+    # Newest run for this instance whose commit has the same code as origin/main. Committing
+    # results moves HEAD without touching code, so the run's own sha rarely equals main.
+    row=$(newest_matching_run "$i" "$main")
     if [ -z "$row" ]; then
-      echo "✗ $i: no local run on $main — run scripts/run_harness_local.sh $i"
+      echo "✗ $i: no local run on code identical to $main — run scripts/run_harness_local.sh $i"
       ok=1
     elif ! printf '%s' "$row" | grep -q '| valid |'; then
       echo "✗ $i: last local run on $main failed the results.json contract"
@@ -65,7 +85,10 @@ preflight() {
         echo "✗ $summary"
         ok=1
       fi
-      case "$row" in *"$main-dirty"*)
+      local run_sha
+      run_sha=$(printf '%s' "$row" | sed -nE 's/^[^`]*`([0-9a-f]+)(-dirty)?`.*/\1/p')
+      [ "$run_sha" = "$main" ] || echo "  ran on $run_sha: differs from $main only outside the code"
+      case "$row" in *"$run_sha-dirty"*)
         echo "  note: that run had uncommitted changes; fine if they were outside the harness/agent code" ;;
       esac
     fi
