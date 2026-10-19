@@ -1,0 +1,285 @@
+{
+  "tasks": [
+    {
+      "id": "suryodaya:mcp_tools_list",
+      "title": "MCP tools/list works with the seat token",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "499 tools"
+    },
+    {
+      "id": "suryodaya:whoami",
+      "title": "The seat token resolves to a user",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "user=team03@theschoolofai.in"
+    },
+    {
+      "id": "suryodaya:locale_matches_instance",
+      "title": "The tenant's locale matches the instance",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "tax_regime=gst (expected gst)"
+    },
+    {
+      "id": "suryodaya:routing_floor",
+      "title": "At least the expected number of playbooks route to run",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "36 playbooks routed to run (floor 36); not run here (blocked/spec-only): uc-07, uc-08, uc-14, uc-15, uc-17, uc-31, uc-34, uc-36"
+    },
+    {
+      "id": "suryodaya:uc-01",
+      "title": "Rule 37 180-day ITC reversal",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No unpaid ITC-eligible bill has crossed 180 days."
+    },
+    {
+      "id": "suryodaya:uc-02",
+      "title": "Blocked credit audit (s.17(5))",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=13 · No ITC claimed on a blocked category among classifiable lines. 9 ineligible bill(s) look like ordinary inputs (credit possibly under-claimed). 4 line(s) have no HSN/SAC and could not be checked."
+    },
+    {
+      "id": "suryodaya:uc-03",
+      "title": "Reverse-charge self-invoicing on notified services",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=14 · No undeclared reverse-charge liability on notified services. 7 bill(s) are flagged reverse charge where it can't apply. 7 bill(s) from unregistered suppliers need a s.9(4) check."
+    },
+    {
+      "id": "suryodaya:uc-04",
+      "title": "MSME 45-day payment exposure",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=48 · 38 MSME bill(s) are past the 45-day limit: ₹30,916.30 penal interest and ₹62,16,415.63 at risk of s.43B(h) disallowance. 2 more fall due within 7 days."
+    },
+    {
+      "id": "suryodaya:uc-05",
+      "title": "Duplicate vendor payment",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=11 · 11 candidate duplicate(s) (1 over billed, 10 suspicious strong); ₹16,83,217.54 could still be stopped before payment. Tier-1 coverage: 18/143 bills carry a supplier bill number; 98 recurring pairs suppressed."
+    },
+    {
+      "id": "suryodaya:uc-06",
+      "title": "Approval SLA and segregation of duties",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=41 · Self-approvals: 0. Levels skipped: 0. Resolved late: 0. Open and breached (check_sla): 38. Platform is_overdue disagrees on 2 request(s). Resolved on time: {'Expense': '1/1 on time', 'PurchaseOrder': '2/2 on time', 'Invoice': '3/3 on time', 'Bill': '1/1 on time', 'LeaveApplication': '3/3 on time', 'Quotation': '1/1 on time', 'SalesOrder': '2/2 on time'}."
+    },
+    {
+      "id": "suryodaya:uc-09",
+      "title": "Vendor TDS verification",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=69 · 35 open or draft bill(s) carry TDS; 35 wrong (₹3,851.50 stored); 1 with TDS above the bill; 34 possibly missing TDS. 133 void bills also carry TDS and were not checked."
+    },
+    {
+      "id": "suryodaya:uc-10",
+      "title": "Job work return deadline (s.143, ITC-04)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · 19 job-work challan(s): 0 delivered, 19 draft. Nothing is out past or near its return deadline."
+    },
+    {
+      "id": "suryodaya:uc-11",
+      "title": "Three-way match (PO, receipt, bill)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Party.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-12",
+      "title": "E-way bill coverage and expiry audit",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: EWayBill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-13",
+      "title": "194Q goods-purchase TDS thresholds (buy and sell side)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-16",
+      "title": "Stock expiry and blocked credit on write-off",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Item.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-18",
+      "title": "HSN rate consistency",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-19",
+      "title": "Credit-note s.34(2) time limit",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: CreditNote.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-20",
+      "title": "Export / SEZ zero-rating and LUT cover",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-21",
+      "title": "Import of services under reverse charge",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-22",
+      "title": "GST on advances received",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: RetainerInvoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-23",
+      "title": "Period GST liability (GSTR-3B)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-24",
+      "title": "Unclaimed and at-risk input credit (IMS, GSTR-2B)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-25",
+      "title": "Inward credit notes and the credit they reduce",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: VendorCredit.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-26",
+      "title": "GSTR-1 readiness",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-27",
+      "title": "GST return filing timeliness",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: GSTReturn.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-28",
+      "title": "Late-entered documents in filed or closed periods",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: GSTReturn.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-29",
+      "title": "Turnover-based GST obligations",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/accounting/locale (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-30",
+      "title": "Multiple registrations, branch transfers and ISD",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Location.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-32",
+      "title": "ITC refund on zero-rated supplies and inverted duty (Rule 89)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-33",
+      "title": "GST credit on expense claims",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Expense.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-35",
+      "title": "Recharged costs and the pure-agent test (Rule 33)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Expense.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-37",
+      "title": "Payments to non-residents (s.195 TDS, Form 15CA/CB)",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-38",
+      "title": "Cash payments above the s.40A(3) limit",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: PaymentMade.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-39",
+      "title": "TDS deductor setup and section coverage",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: OrgProfile.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-40",
+      "title": "Vendor master audit",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Party.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-41",
+      "title": "Unapplied vendor credits and advances",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: VendorCredit.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-42",
+      "title": "Payment-run prioritisation",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-43",
+      "title": "Bank-to-payables reconciliation",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: BankTransaction.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "id": "suryodaya:uc-44",
+      "title": "Approval-threshold splitting",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(\"HTTPSConnection(host='agentswitch.theschoolofai.in', port=443): Failed to resolve 'agentswitch.theschoolofai.in' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    }
+  ],
+  "summary": "suryodaya: 12/40 passed · goldens 0/3 exact"
+}

@@ -1,0 +1,44 @@
+instance=suryodaya user=team03@theschoolofai.in token=<redacted>
+note: AGENTSWITCH_* in this shell now target suryodaya; use a fresh shell for other aptax commands
+[PASS] suryodaya:mcp_tools_list: 499 tools
+[PASS] suryodaya:whoami: user=team03@theschoolofai.in
+[PASS] suryodaya:locale_matches_instance: tax_regime=gst (expected gst)
+[PASS] suryodaya:routing_floor: 36 playbooks routed to run (floor 36); not run here (blocked/spec-only): uc-07, uc-08, uc-14, uc-15, uc-17, uc-31, uc-34, uc-36
+[PASS] suryodaya:uc-01: findings=0 · No unpaid ITC-eligible bill has crossed 180 days.
+[PASS] suryodaya:uc-02: findings=13 · No ITC claimed on a blocked category among classifiable lines. 9 ineligible bill(s) look like ordinary inputs (credit possibly under-claimed). 4 line(s) have no HSN/SAC and could not be 
+[PASS] suryodaya:uc-03: findings=14 · No undeclared reverse-charge liability on notified services. 7 bill(s) are flagged reverse charge where it can't apply. 7 bill(s) from unregistered suppliers need a s.9(4) check.
+[PASS] suryodaya:uc-04: findings=48 · 38 MSME bill(s) are past the 45-day limit: ₹30,916.30 penal interest and ₹62,16,415.63 at risk of s.43B(h) disallowance. 2 more fall due within 7 days.
+[PASS] suryodaya:uc-05: findings=11 · 11 candidate duplicate(s) (1 over billed, 10 suspicious strong); ₹16,83,217.54 could still be stopped before payment. Tier-1 coverage: 18/143 bills carry a supplier bill number; 98 recur
+[PASS] suryodaya:uc-06: findings=41 · Self-approvals: 0. Levels skipped: 0. Resolved late: 0. Open and breached (check_sla): 38. Platform is_overdue disagrees on 2 request(s). Resolved on time: {'Expense': '1/1 on time', 'Pu
+[PASS] suryodaya:uc-09: findings=69 · 35 open or draft bill(s) carry TDS; 35 wrong (₹3,851.50 stored); 1 with TDS above the bill; 34 possibly missing TDS. 133 void bills also carry TDS and were not checked.
+[PASS] suryodaya:uc-10: findings=0 · 19 job-work challan(s): 0 delivered, 19 draft. Nothing is out past or near its return deadline.
+[FAIL] suryodaya:uc-11: error: FetchError: Party.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("H
+[FAIL] suryodaya:uc-12: error: FetchError: EWayBill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError
+[FAIL] suryodaya:uc-13: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-16: error: FetchError: Item.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-18: error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-19: error: FetchError: CreditNote.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionErr
+[FAIL] suryodaya:uc-20: error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-21: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-22: error: FetchError: RetainerInvoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResoluti
+[FAIL] suryodaya:uc-23: error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-24: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-25: error: FetchError: VendorCredit.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionE
+[FAIL] suryodaya:uc-26: error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-27: error: FetchError: GSTReturn.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionErro
+[FAIL] suryodaya:uc-28: error: FetchError: GSTReturn.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionErro
+[FAIL] suryodaya:uc-29: error: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/accounting/locale (Caused by NameResolutionError("HTTPSConnection(host='
+[FAIL] suryodaya:uc-30: error: FetchError: Location.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError
+[FAIL] suryodaya:uc-32: error: FetchError: Invoice.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-33: error: FetchError: Expense.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-35: error: FetchError: Expense.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError(
+[FAIL] suryodaya:uc-37: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-38: error: FetchError: PaymentMade.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionEr
+[FAIL] suryodaya:uc-39: error: FetchError: OrgProfile.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionErr
+[FAIL] suryodaya:uc-40: error: FetchError: Party.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("H
+[FAIL] suryodaya:uc-41: error: FetchError: VendorCredit.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionE
+[FAIL] suryodaya:uc-42: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+[FAIL] suryodaya:uc-43: error: FetchError: BankTransaction.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResoluti
+[FAIL] suryodaya:uc-44: error: FetchError: Bill.list: transport: ConnectionError: HTTPSConnectionPool(host='agentswitch.theschoolofai.in', port=443): Max retries exceeded with url: /api/mcp (Caused by NameResolutionError("HT
+suryodaya: 12/40 passed · goldens 0/3 exact
+results.json: OK (40 tasks)
