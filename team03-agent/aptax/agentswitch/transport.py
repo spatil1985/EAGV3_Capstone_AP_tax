@@ -3,6 +3,9 @@
 Ported from harness/access/transport.py (agent_design.md §2a) and extended:
 - **Retry with backoff** on timeouts, connection errors and HTTP 5xx/429: up to 4
   attempts, 0.5·2ⁿ s capped at 4 s (the S17 `gateway.py` schedule).
+- **A spent token budget is final.** The platform answers HTTP 429 `budget_exhausted`
+  (not 401) once a run's budget is gone. That is never retried: it raises
+  `BudgetExhausted`, and every later call raises it too without touching the network.
 - **A concurrency semaphore** (default 4), because the agent loop runs up to four
   tool calls at once and the platform is shared with other teams.
 - `tools_list()`, so the registry can hide capabilities whose tools don't exist.
@@ -23,6 +26,20 @@ from typing import Any, Protocol
 import requests
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
+BUDGET_MARKER = "budget_exhausted"
+
+
+class BudgetExhausted(RuntimeError):
+    """The platform's token budget for this run is spent (HTTP 429 budget_exhausted)."""
+
+
+def _budget_detail(exc: requests.HTTPError) -> str | None:
+    """'HTTP 429 budget_exhausted: …' when this error is a spent budget, else None."""
+    resp = exc.response
+    if resp is None or resp.status_code != 429:
+        return None
+    body = (resp.text or "")[:300]
+    return f"HTTP 429 {body}".strip() if BUDGET_MARKER in body.lower() else None
 
 
 @dataclass
@@ -45,6 +62,9 @@ def _with_retry(operation, attempts: int = 4):
         try:
             return operation()
         except requests.HTTPError as exc:
+            spent = _budget_detail(exc)
+            if spent:
+                raise BudgetExhausted(spent) from exc
             status = exc.response.status_code if exc.response is not None else None
             if status not in RETRY_STATUS or attempt == attempts - 1:
                 raise
@@ -62,11 +82,22 @@ class LiveTransport:
         self._init_lock = threading.Lock()
         self._slots = threading.Semaphore(max_concurrency)
         self._tools: list[dict] | None = None
+        self.budget_exhausted: str | None = None     # set once; the harness stops on it
+
+    def _call(self, operation):
+        """_with_retry, but a spent budget is remembered and short-circuits later calls."""
+        if self.budget_exhausted:
+            raise BudgetExhausted(self.budget_exhausted)
+        try:
+            return _with_retry(operation)
+        except BudgetExhausted as exc:
+            self.budget_exhausted = str(exc)
+            raise
 
     def _ensure_session(self) -> None:
         with self._init_lock:
             if not self._initialized:
-                _with_retry(lambda: self._client.mcp_initialize(client_name="team03-aptax"))
+                self._call(lambda: self._client.mcp_initialize(client_name="team03-aptax"))
                 self._client.mcp_notify_initialized()
                 self._initialized = True
 
@@ -74,7 +105,7 @@ class LiveTransport:
         self._ensure_session()
         with self._slots:
             try:
-                rpc = _with_retry(lambda: self._client.mcp_rpc(
+                rpc = self._call(lambda: self._client.mcp_rpc(
                     "tools/call", {"name": name, "arguments": arguments}))
             except requests.RequestException as exc:
                 return ToolResult(False, error=f"transport: {type(exc).__name__}: {exc}")
@@ -94,15 +125,15 @@ class LiveTransport:
     def rest(self, method: str, path: str, params: dict | None = None, body: dict | None = None) -> Any:
         with self._slots:
             if method == "GET":
-                return _with_retry(lambda: self._client.rest_get(path, params))
+                return self._call(lambda: self._client.rest_get(path, params))
             if method == "POST":
-                return _with_retry(lambda: self._client.rest_post(path, body))
+                return self._call(lambda: self._client.rest_post(path, body))
         raise ValueError(f"unsupported method {method}")
 
     def tools_list(self) -> list[dict]:
         if self._tools is None:
             self._ensure_session()
-            self._tools = _with_retry(self._client.mcp_tools_list)
+            self._tools = self._call(self._client.mcp_tools_list)
         return self._tools
 
 

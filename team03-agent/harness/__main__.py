@@ -123,6 +123,12 @@ def _run_playbooks(instance, tenant, regime, transport, store, deps, start, out,
     status = "completed"
     for r in runnable:
         figures = deps.goldens.get(r.manifest.id, [])
+        spent = getattr(transport, "budget_exhausted", None)   # 429 budget_exhausted: final, not a 401
+        if spent:
+            out.append(T.not_run_task(instance, r.manifest, f"not run: platform token budget exhausted ({spent})",
+                                      bool(figures)))
+            status = "failed"
+            continue
         if deps.clock() - start > deps.deadline_s:
             out.append(T.not_run_task(instance, r.manifest, "not run: harness time budget exhausted", bool(figures)))
             status = "failed"

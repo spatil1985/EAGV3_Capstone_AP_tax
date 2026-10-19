@@ -104,6 +104,21 @@ def test_deadline_marks_remaining_playbooks_not_run(tmp_path):
     assert session.runner.ran == ["us-01"]
 
 
+def test_spent_budget_marks_remaining_playbooks_not_run(tmp_path):
+    transport = FakeTransport()
+
+    def spends_the_budget(gw, m):
+        transport.budget_exhausted = "HTTP 429 budget_exhausted"
+        return FakeRun(FakeRoute(m), None, "BudgetExhausted: HTTP 429 budget_exhausted")
+
+    _, by_id, session, store, *_ = harness(tmp_path, [FakeRoute(US01), FakeRoute(US02)],
+                                           {"us-01": spends_the_budget, "us-02": ok("b")}, transport=transport)
+    assert by_id["keystone:us-01"]["passed"] is False
+    assert by_id["keystone:us-02"]["evidence"] == "not run: platform token budget exhausted (HTTP 429 budget_exhausted)"
+    assert session.runner.ran == ["us-01"]
+    assert store.finished == [("run-1", "failed")]
+
+
 def test_missing_env_gives_one_failed_task(tmp_path):
     doc, by_id, *_ = harness(tmp_path, [], {}, env={"AGENTSWITCH_INSTANCE": "keystone"})
     assert list(by_id) == ["keystone:environment"]
