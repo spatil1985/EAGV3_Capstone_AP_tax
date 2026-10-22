@@ -1,0 +1,159 @@
+{
+  "tasks": [
+    {
+      "id": "keystone:mcp_tools_list",
+      "title": "MCP tools/list works with the seat token",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "478 tools"
+    },
+    {
+      "id": "keystone:whoami",
+      "title": "The seat token resolves to a user",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "user=team03@theschoolofai.in"
+    },
+    {
+      "id": "keystone:locale_matches_instance",
+      "title": "The tenant's locale matches the instance",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "tax_regime=sales_use_tax (expected sales_use_tax)"
+    },
+    {
+      "id": "keystone:routing_floor",
+      "title": "At least the expected number of playbooks route to run",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "18 playbooks routed to run (floor 18); not run here (blocked/spec-only): us-10, us-12, us-13, us-22"
+    },
+    {
+      "id": "keystone:us-01",
+      "title": "Period sales and use tax liability",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "golden 226,488.27: found · findings=5 · 2026-01-01 … 2026-10-22: sales tax liability $226,488.27 across 4 jurisdiction(s), matching the platform's liability report to the cent. Use tax accrued: $0.00."
+    },
+    {
+      "id": "keystone:us-02",
+      "title": "Consumer use tax on purchases",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=2 · $588,555.24 of this year's purchases carried no sales tax and no use tax was accrued. Use tax due on clearly taxable lines: $20.15. Another $132,725.00 needs classification (up to $8,627.12)."
+    },
+    {
+      "id": "keystone:us-03",
+      "title": "Economic nexus monitoring",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No unregistered state is near an economic-nexus threshold; all sales this year are in MI, OH, PA, where we are registered. Platform counters agree with invoices."
+    },
+    {
+      "id": "keystone:us-04",
+      "title": "Exemption certificate coverage",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=1 · All 31 exempt sale(s) ($570,195.62) are covered by a valid certificate. 1 certificate(s) have no file attached."
+    },
+    {
+      "id": "keystone:us-05",
+      "title": "Sourcing and rate correctness",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "golden 7,919.93: found · findings=36 · 0 arithmetic, rate or state-sourcing error(s). 36 invoice(s) to customers outside the county were charged that county's destination-sourced tax ($7,919.93): either the sourcing setting is wrong, or these customers were charged the wrong county's rate."
+    },
+    {
+      "id": "keystone:us-06",
+      "title": "Form 1099 readiness and backup withholding",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=1 · 2 vendor(s) will receive a 2026 Form 1099 ($26,250.00). No W-9 on file for Canton Industrial Consulting — request one now. No backup withholding is required: every reportable vendor has a TIN on file."
+    },
+    {
+      "id": "keystone:us-07",
+      "title": "Duplicate vendor payment (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No candidate duplicates. Tier-1 coverage: 0/86 bills carry a supplier bill number."
+    },
+    {
+      "id": "keystone:us-08",
+      "title": "Approval SLA and segregation of duties (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=29 · Self-approvals: 0. Levels skipped: 0. Resolved late: 4. Open and breached (check_sla): 25. Platform is_overdue disagrees on 0 request(s). Resolved on time: {'Invoice': '2/5 on time', 'PurchaseOrder': '36/37 on time', 'Bill': '40/40 on time'}."
+    },
+    {
+      "id": "keystone:us-09",
+      "title": "Three-way match (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · All 81 PO-linked bills match within tolerance. Recorded match status agrees with the live match on every bill (N2 looks fixed)."
+    },
+    {
+      "id": "keystone:us-11",
+      "title": "Sales tax paid on exempt purchases",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No vendor charged sales tax on an exempt purchase (0 vendor-taxed line(s) in total). The opposite problem — untaxed purchases that are taxable — is US-02."
+    },
+    {
+      "id": "keystone:us-14",
+      "title": "State sales-tax filing calendar",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=7 · 1 return(s) due within 7 days. Next returns: MI 2026-10…2026-12 due 2027-01-20; PA 2026-10…2026-12 due 2027-01-20; OH 2026-09…2026-09 due 2026-10-23. AgentSwitch holds no record of filed returns for MI, PA, OH: confirm past filings."
+    },
+    {
+      "id": "keystone:us-15",
+      "title": "Late-entered documents (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=32 · 139 invoice(s) carrying $210,830.32 of tax were entered after their month's return was due: if those returns were filed on time, they need amending. 219 other document(s) were back-dated more than 30 days. No period is locked or closed (0 closed, 0 locks), so nothing stopped it."
+    },
+    {
+      "id": "keystone:us-16",
+      "title": "Vendor master audit (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=8 · Of 8 vendors in use, 7 have a W-9 and 0 bank details. 1 lack a W-9; 1 have a doubtful 1099 box; 0 have a 1099 flag that contradicts their classification; 8 have no bank details, so payment destinations can't be checked."
+    },
+    {
+      "id": "keystone:us-17",
+      "title": "Unapplied vendor credits (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No vendor we owe has an open credit. Another $0.00 of credits sits with vendors we don't currently owe."
+    },
+    {
+      "id": "keystone:us-18",
+      "title": "Payment-run prioritisation (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=14 · Pay $48,295.06 across 6 bill(s) this week, starting with BILL-2026-00020; open 14 bills, overdue 14 bills, 115392.56. Hold $67,097.50; withhold $0.00 (backup withholding). Many overdue bills may be disputed — there is no dispute flag, so confirm before ranking them as urgent."
+    },
+    {
+      "id": "keystone:us-19",
+      "title": "Bank-to-payables reconciliation (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=4 · Over 2026-06-30 … 2026-08-31: $45,825.00 of AP payments (6) never appear in the bank."
+    },
+    {
+      "id": "keystone:us-20",
+      "title": "Approval-threshold splitting (US)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=1 · No vendor's bills or POs look split to stay under the approval limit (limit assumed — policy unreadable)."
+    },
+    {
+      "id": "keystone:us-21",
+      "title": "Unclaimed property (escheat)",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "findings=0 · No unclaimed property to report: 6 payment(s) ($45,825.00) never cleared, but none is near dormancy (oldest payment 2026-01-18, dormancy ≥ 3 years). 58 payment(s) fall outside the bank feed, so their clearing is unknown."
+    }
+  ],
+  "summary": "keystone: 22/22 passed · goldens 2/2 exact"
+}

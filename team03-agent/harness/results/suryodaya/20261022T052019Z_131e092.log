@@ -1,0 +1,44 @@
+instance=suryodaya user=team03@theschoolofai.in token=<redacted>
+note: AGENTSWITCH_* in this shell now target suryodaya; use a fresh shell for other aptax commands
+[PASS] suryodaya:mcp_tools_list: 486 tools
+[PASS] suryodaya:whoami: user=team03@theschoolofai.in
+[PASS] suryodaya:locale_matches_instance: tax_regime=gst (expected gst)
+[PASS] suryodaya:routing_floor: 36 playbooks routed to run (floor 36); not run here (blocked/spec-only): uc-07, uc-08, uc-14, uc-15, uc-17, uc-31, uc-34, uc-36
+[PASS] suryodaya:uc-01: findings=0 · No unpaid ITC-eligible bill has crossed 180 days.
+[PASS] suryodaya:uc-02: findings=13 · No ITC claimed on a blocked category among classifiable lines. 9 ineligible bill(s) look like ordinary inputs (credit possibly under-claimed). 4 line(s) have no HSN/SAC and could not be 
+[PASS] suryodaya:uc-03: findings=14 · No undeclared reverse-charge liability on notified services. 7 bill(s) are flagged reverse charge where it can't apply. 7 bill(s) from unregistered suppliers need a s.9(4) check.
+[PASS] suryodaya:uc-04: findings=63 · 39 MSME bill(s) are past the 45-day limit: ₹41,929.04 penal interest and ₹63,29,223.63 at risk of s.43B(h) disallowance. 16 more fall due within 7 days.
+[PASS] suryodaya:uc-05: findings=11 · 11 candidate duplicate(s) (1 over billed, 10 suspicious strong); ₹16,83,217.54 could still be stopped before payment. Tier-1 coverage: 18/155 bills carry a supplier bill number; 134 recu
+[PASS] suryodaya:uc-06: findings=42 · Self-approvals: 0. Levels skipped: 0. Resolved late: 0. Open and breached (check_sla): 39. Platform is_overdue disagrees on 2 request(s). Resolved on time: {'Expense': '1/1 on time', 'Pu
+[PASS] suryodaya:uc-09: findings=81 · 47 open or draft bill(s) carry TDS; 47 wrong (₹3,905.50 stored); 1 with TDS above the bill; 34 possibly missing TDS. 133 void bills also carry TDS and were not checked.
+[PASS] suryodaya:uc-10: findings=0 · 19 job-work challan(s): 0 delivered, 19 draft. Nothing is out past or near its return deadline.
+[PASS] suryodaya:uc-11: findings=9 · 8 bill(s) billed against POs with nothing received (₹20,48,112.00 open, 7 from MSME vendors); 1 other mismatch(es).
+[PASS] suryodaya:uc-12: findings=184 · 167 goods movement(s) above the threshold have no e-way bill, and 10 e-way bill(s) are not valid documentation; ₹12,56,89,462.26 of consignments affected (each document counted once).
+[PASS] suryodaya:uc-13: findings=3 · Buy side: 0 bill(s) past the ₹50 lakh line without TDS, 0 vendor(s) approaching it. Sell side: 3 customer(s) past the line with no matching TDS on their payments (26AS check).
+[PASS] suryodaya:uc-16: findings=46 · 7 lot(s) expired or expiring within 30 days (5 already expired); ₹0.00 ITC to reverse if they are written off (7 lot(s) on bills whose tax can't be sourced). 39 item(s) can't be dated or
+[PASS] suryodaya:uc-18: findings=8 · 0 HSN(s) are charged at more than one rate; 4 line(s) use a rate that is not a GST slab; 4 line(s) differ from the item master. This is a consistency check: the platform has no authoritat
+[PASS] suryodaya:uc-19: findings=9 · 39 days left to issue tax-effective credit notes against 125 FY 2025-26 invoice(s) (₹7,86,54,074.00); the window closes on 2026-11-30. 0 credit note(s) issued after their window; 8 credit
+[PASS] suryodaya:uc-20: findings=2 · 8 FY 2025-26 zero-rated invoice(s) (Vardhman Aerospace SEZ Unit, ₹26,84,684.00) rely on an LUT. An LUT record exists, but the platform stores no validity period, FY or ARN, so cover can't
+[PASS] suryodaya:uc-21: findings=11 · No genuine import of services found. 11 bill(s) tagged overseas were rejected: only the tag says so (of 12 tagged).
+[PASS] suryodaya:uc-22: findings=4 · 4 advance(s) held unadjusted (₹42,04,478.72). GST exposure: ₹683.19 on the supply types the invoices suggest (3 look like goods, which carry no GST on advances), up to ₹6,41,361.15 if all
+[PASS] suryodaya:uc-23: findings=40 · 2026-09: ₹0.00 payable in cash; Rule 86B not triggered; the GSTR-3B row does not exist yet. 38 document(s) excluded: tax can't be sourced.
+[PASS] suryodaya:uc-24: findings=12 · ₹41,226.79 of credit sits on 10 IMS-rejected bill(s) still marked eligible: do not claim it. Nothing is pending IMS action before the next GSTR-2B. 69 credit-bearing bill(s) have no supp
+[PASS] suryodaya:uc-25: findings=151 · ₹92,296.34 of input credit must be reduced for 37 supplier credit note(s); 13 reverse-charge credit(s) reduce RCM by ₹18,665.67. 24 credit note(s) carry GST (₹42,230.61) from suppliers 
+[PASS] suryodaya:uc-26: golden 45,152.62: found · findings=12 · 12 invoice(s) charged the wrong kind of GST for their place of supply (₹45,152.62); 0 B2B sale(s) lack a GSTIN; 0 line(s) have missing or short HSN. Tables: {'4
+[PASS] suryodaya:uc-27: findings=5 · 2 return(s) overdue: GSTR-3B 08-2026 (32 days), GSTR-1 08-2026 (41 days); ₹3,650.00 late fee and ₹9,027.79 interest so far, growing daily.
+[PASS] suryodaya:uc-28: findings=0 · No document has been entered into a filed, locked or closed period. Control gap: GSTR-3B 07-2026 filed 2026-08-08, locked/closed only on 2026-09-12 (35 days open).
+[PASS] suryodaya:uc-29: findings=2 · FY 2025-26 turnover is at least ₹6,70,65,518.43. E-invoicing is mandatory: 108 invoice(s) this FY carry no IRN. Obligations: {'e-invoicing (IRN)': 'applies (line 50000000.00)', '6-digit H
+[PASS] suryodaya:uc-30: findings=8 · 5 location GSTIN(s) don't belong to the company's PAN; primary GSTIN mismatch: 1; 2 invalid state code(s); 0 GSTIN/state mismatch(es). 70 sale(s) go to states with a branch GSTIN ({'24': 
+[PASS] suryodaya:uc-32: findings=2 · About ₹38,209.49 of FY 2026-27 credit is refundable on zero-rated supplies under LUT (Rule 89(4): ₹13,05,145.88 × ₹18,87,443.90 ÷ ₹6,44,70,617.02), once the LUT is confirmed valid. No inv
+[PASS] suryodaya:uc-33: findings=83 · 18 personal expense claim(s) carry ₹41,625.41 of GST credit that s.17(5)(g) blocks (excluding implausible tax). 24 carry GST on non-supplies; 13 claim credit with no supplier GSTIN; 56 e
+[PASS] suryodaya:uc-35: findings=4 · 2 invoiced recharge(s) can't be traced to an invoice (no invoice carries an expense_id), so their GST can't be checked; 0 under-taxed (₹0.00); 0 pure-agent cost(s) with credit claimed; 1 
+[PASS] suryodaya:uc-37: findings=11 · 0 payment(s) to genuine non-residents lack s.195 TDS; 0 use a treaty rate without documents; 0 vendor(s) lack Form 15CA/CB. 11 bill(s) tagged overseas are from Indian, INR vendors and we
+[PASS] suryodaya:uc-38: findings=17 · 12 cash payment(s) above the limit (₹7,43,295.44) will be disallowed for income tax. 4 open bill(s) (₹2,67,380.70) are set to be paid in cash: pay them by bank transfer.
+[PASS] suryodaya:uc-39: findings=53 · TDS is switched on but the company has no TAN. 47 bill(s) carry TDS under a non-statutory section code. 5 payee(s) are above a 194A/194H/194R threshold with no TDS (₹35,063.10 due).
+[PASS] suryodaya:uc-40: findings=75 · Of 75 vendors in use, 0 have a GSTIN, 0 a PAN and 0 bank details. 16 registered vendor(s) lack a GSTIN; 18 lack a PAN (20% TDS); 63 are typed as customers or not at all; 0 look duplicate
+[PASS] suryodaya:uc-41: golden 4,91,099.27: found · findings=7 · Apply ₹4,91,099.27 of open vendor credits before paying 7 vendor(s) (Jindal Steel Depot ₹3,17,137.59). Another ₹34,92,403.35 of credits sits with vendors we do
+[PASS] suryodaya:uc-42: findings=96 · Pay ₹77,26,420.27 across 50 bill(s) this week, starting with BILL-2026-00056: that avoids ₹33,968.09 of cost for each week of delay. Hold ₹50,67,684.50; net off ₹4,91,099.27 of vendor cr
+[PASS] suryodaya:uc-43: golden 56,20,600: found · findings=23 · Over 2026-03-18 … 2026-09-11: ₹56,20,600.00 left the bank to 20 vendor payee(s) with no payment in AP (those bills may be paid again), and ₹1,36,47,550.08 of AP
+[PASS] suryodaya:uc-44: findings=4 · 3 group(s) look split to stay under the approval limit (Bosch Rexroth India 2026-09-12, Suvarna Electricals 2026-09-12, Chakan Transport Lines 2026-09-12); every document is under the lim
+suryodaya: 40/40 passed · goldens 3/3 exact
+results.json: OK (40 tasks)
